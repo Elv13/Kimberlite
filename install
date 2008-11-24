@@ -1,0 +1,6 @@
+To install Kimberlite, open a terminal and write:
+cmake ./ -DCMAKE_INSTALL_PREFIX=$KDEDIR -DCMAKE_BUILD_TYPE=debugfull
+make 
+sudo make install
+
+*Be sure to have Qt 4.4+, cmake 2.4+  and basic developper tools like gcc and binutils.

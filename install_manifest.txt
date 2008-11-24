@@ -1,0 +1,6 @@
+/home/kde-devel/kde/bin/kimberlite
+/home/kde-devel/kde/share/apps/kimberlite/kimberliteui.rc
+/home/kde-devel/kde/share/apps/kimberlite/tips
+/home/kde-devel/kde/share/apps/kimberlite/kimberlite.db
+/home/kde-devel/kde/share/apps/kimberlite/data/tips
+/home/kde-devel/kde/share/apps/kimberlite/data/kimberlite.db

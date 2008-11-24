@@ -1,0 +1,15 @@
+<tip category="Kimberlite|app">
+<html>
+<p><b>Welcome to Kimberlite 0.1-pre-alpha0</b><br><br>The <i>parse</i> button in the tools tab can be used to parse and clean your HTML code anytime. Indentation is compatible HTML 4.01. Indentation and parsing rules are stored in AboutDB.txt. Just run the script to generate the new database.<br><br><h1>Remember, this is a PRE ALPHA</h1><br>Do not trust the saving system, it is nor complete yet, use copy and paste.<br><br>Emmanuel Lepage Vallee</p>
+</html>
+</tip>
+<tip category="Kimberlite|part">
+<html>
+<p><b>Welcome to Kimberlite 0.1-pre-alpha0</b><br><br>The <i>templaterise</i> button read your HTML file, parse it, find every string and ask you if you want to replace them. The old value is stored in a comment at the end of the HTML document. The current supported  format is ###marker_name### = \"old value\".<br><br><h1>Remember, this is a PRE ALPHA</h1><br>Do not trust the saving system, it is nor complete yet, use copy and paste.<br><br>Emmanuel Lepage Vallee</p>
+</html>
+</tip>
+<tip category="Kimberlite|part">
+<html>
+<p><b>Welcome to Kimberlite 0.1-pre-alpha0</b><br><br>The <i>translate</i> button will parse your file and replace every string with a new one. It does not (currently) support marker.<br><br><h1>Remember, this is a PRE ALPHA</h1><br>Do not trust the saving system, it is nor complete yet, use copy and paste.<br><br>Emmanuel Lepage Vallee</p>
+</html>
+</tip>
