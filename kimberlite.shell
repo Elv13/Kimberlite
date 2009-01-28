@@ -1,4 +1,4 @@
 #!/bin/sh
 # created by cmake, don't edit, changes will be lost
 
-LD_LIBRARY_PATH=/home/lepagee/dev/kimberlite2/lib/./:/home/kde-devel/kde/lib:/home/kde-devel/kde/lib:/usr/local/Trolltech/Qt-4.4.3/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} "/home/lepagee/dev/kimberlite2/kimberlite" "$@"
+LD_LIBRARY_PATH=/home/lepagee/dev/myproject/kimberlite/lib/./:/home/kde-devel/kde/lib:/home/kde-devel/kde/lib:/usr/local/Trolltech/Qt-4.4.3/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} "/home/lepagee/dev/myproject/kimberlite/kimberlite" "$@"

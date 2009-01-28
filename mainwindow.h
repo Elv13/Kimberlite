@@ -89,7 +89,7 @@ public:
     void fillCSSAdvMode();
     ProjectManager* aProject;
     QWidget *centralwidget;
-    QVBoxLayout *verticalLayout;
+    //QVBoxLayout *verticalLayout;
     KTabWidget *tabWMenu;
     QWidget *menufile;
     QWidget *menuEdit;
@@ -204,7 +204,9 @@ public:
     QWidget *tabValidator;
     QVBoxLayout *verticalLayout_16;
     QWebView *webValidator;
+    QTreeWidgetItem* styleSheetName;
     QStatusBar *statusbar;
+    QTextEdit* txtOtherTags;
     KToolBar* fileTB;
     KToolBar* editTB;
     KToolBar* viewTB;
@@ -252,6 +254,9 @@ public:
     QString setClass(QString className, QString content);
     QString clearCssBeg();
     void disableWidget(bool value);
+    void splitSubClass(QString name, QTreeWidgetItem* parent);
+    KIcon getRightIcon(QString text);
+    int previousCssMode;
 
 
   private slots:
@@ -268,6 +273,8 @@ public:
     void loadCSSClass(QTreeWidgetItem* anItem);
     void loadPage(QTableWidgetItem* anItem);
     void setModified();
+    void changeCssMode(int mode);
+    void updateClassTree();
     
     void showPageList(bool);
     void showCSS(bool);

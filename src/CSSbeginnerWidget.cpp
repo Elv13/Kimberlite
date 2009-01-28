@@ -39,9 +39,11 @@ CSSBeginnerWidget::CSSBeginnerWidget(QWidget* parent, QString tagName) : QWidget
     sizePolicy1.setHorizontalStretch(0);
     sizePolicy1.setVerticalStretch(0);
     //sizePolicy1.setHeightForWidth(cbbFontSize->sizePolicy().hasHeightForWidth());
-
+    //setStyleSheet("border:0px;margin:0px;spacing:0px;padding:0px;");
+    
     hlCbbTag = new QHBoxLayout(this);
     hlCbbTag->setObjectName(QString::fromUtf8("hlCbbTag"));
+    hlCbbTag->setContentsMargins(0,0,0,0);
     ckbName = new QCheckBox(this);
     ckbName->setObjectName(QString::fromUtf8("ckbName"));
     QSizePolicy sizePolicy4(QSizePolicy::Minimum, QSizePolicy::Fixed);

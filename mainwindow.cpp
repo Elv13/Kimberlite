@@ -81,9 +81,9 @@ cout << "This: " <<   KStandardDirs::locate( "appdata", "kimberlite.db" ).toStdS
     centralwidget = new QWidget(this);
     centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
     centralwidget->setGeometry(QRect(0, 0, 1008, 696));
-    verticalLayout = new QVBoxLayout(centralwidget);
-    verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-    tabWMenu = new KTabWidget(centralwidget);
+    //verticalLayout = new QVBoxLayout(0);
+    //verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+    tabWMenu = new KTabWidget(this);
     tabWMenu->setObjectName(QString::fromUtf8("tabWMenu"));
     QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     sizePolicy.setHorizontalStretch(0);
@@ -869,9 +869,10 @@ cout << "This: " <<   KStandardDirs::locate( "appdata", "kimberlite.db" ).toStdS
     this, SLOT(quit()));
     helpTB->addAction(reportBugAction);
 
-    verticalLayout->addWidget(tabWMenu);
-
-    mainLayout = new QHBoxLayout();
+    //verticalLayout->addWidget(tabWMenu);
+    setMenuWidget(tabWMenu);
+    
+    mainLayout = new QHBoxLayout(this);
     mainLayout->setObjectName(QString::fromUtf8("mainLayout"));
 
 
@@ -889,6 +890,7 @@ cout << "This: " <<   KStandardDirs::locate( "appdata", "kimberlite.db" ).toStdS
     tableView->setObjectName(QString::fromUtf8("tableView"));
     if (tableView->columnCount() < 2)
        tableView->setColumnCount(2);
+    addDockWidget(Qt::LeftDockWidgetArea, tableDock);
     connect(tableView, SIGNAL(itemClicked(QTableWidgetItem*)),
     this, SLOT(loadPage(QTableWidgetItem*)));
     
@@ -914,11 +916,11 @@ cout << "This: " <<   KStandardDirs::locate( "appdata", "kimberlite.db" ).toStdS
 
     tableDock->setWidget(tableDockCentral);
 
-    mainLayout->addWidget(tableDock);
+    //mainLayout->addWidget(tableDock);
 
-    treeDock = new QDockWidget(centralwidget);
+    treeDock = new QDockWidget(this);
     treeDock->setObjectName(QString::fromUtf8("treeDock"));
-    treeDock->setHidden(true);
+    //treeDock->setHidden(true);
     treeDockCentral = new QWidget();
     treeDockCentral->setObjectName(QString::fromUtf8("treeDockCentral"));
     treeDockCentral->setGeometry(QRect(4, 22, 166, 556));
@@ -927,6 +929,8 @@ cout << "This: " <<   KStandardDirs::locate( "appdata", "kimberlite.db" ).toStdS
     verticalLayout_5->setObjectName(QString::fromUtf8("verticalLayout_5"));
     treeWidget = new QTreeWidget(treeDockCentral);
     treeWidget->setObjectName(QString::fromUtf8("treeWidget"));
+    treeWidget->setIconSize(QSize(32,32));
+    addDockWidget(Qt::LeftDockWidgetArea,treeDock );
     connect(treeWidget, SIGNAL(itemClicked(QTreeWidgetItem* , int)),
     this, SLOT(loadCSSClass(QTreeWidgetItem*)));
 
@@ -949,13 +953,14 @@ cout << "This: " <<   KStandardDirs::locate( "appdata", "kimberlite.db" ).toStdS
 
     treeDock->setWidget(treeDockCentral);
 
-    mainLayout->addWidget(treeDock);
+    //mainLayout->addWidget(treeDock);
 
     centralWidget2 = new QWidget(centralwidget);
     centralWidget2->setObjectName(QString::fromUtf8("centralWidget2"));
     verticalLayout_2 = new QVBoxLayout(centralWidget2);
     verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
-    tabWEditor = new QTabWidget(centralWidget2);
+    tabWEditor = new QTabWidget(this);
+    setCentralWidget(tabWEditor);
     tabWEditor->setObjectName(QString::fromUtf8("tabWEditor"));
     tabWEditor->setStyleSheet(QString::fromUtf8("QTabWidget::pane {\n"
 "	margin-top:0px;\n"
@@ -970,7 +975,7 @@ cout << "This: " <<   KStandardDirs::locate( "appdata", "kimberlite.db" ).toStdS
     horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
     webPreview = new QWebView(tabPreview);
     webPreview->setObjectName(QString::fromUtf8("webPreview"));
-    webPreview->setUrl(QUrl("http://www.google.ca/"));
+    webPreview->setUrl(QUrl("about:blank"));
 
     horizontalLayout_2->addWidget(webPreview);
 
@@ -1045,6 +1050,8 @@ cout << "This: " <<   KStandardDirs::locate( "appdata", "kimberlite.db" ).toStdS
     verticalLayout_6 = new QVBoxLayout(tabCSS);
     verticalLayout_6->setObjectName(QString::fromUtf8("verticalLayout_6"));
     tabWCSSLevel = new QTabWidget(tabCSS);
+    connect(tabWCSSLevel, SIGNAL(currentChanged(int)),
+    this, SLOT(changeCssMode(int)));
     tabWCSSLevel->setObjectName(QString::fromUtf8("tabWCSSLevel"));
     tabWCSSLevel->setStyleSheet(QString::fromUtf8("QTabWidget::tab-bar {\n"
 "	border-radius: 5px;\n"
@@ -1227,6 +1234,10 @@ cout << "This: " <<   KStandardDirs::locate( "appdata", "kimberlite.db" ).toStdS
     verticalLayout_15->addWidget(cssList_style);
     cssCursor = new CSSBeginnerWidget(tabBeginner,"cursor");
     verticalLayout_15->addWidget(cssCursor);
+    txtOtherTags = new QTextEdit();
+    txtOtherTags->setMaximumSize(9999,125);
+    txtOtherTags->setMinimumSize(9999,125);
+    verticalLayout_15->addWidget(txtOtherTags);
 
     verticalLayout_10->addWidget(grbOther);
 
@@ -1241,6 +1252,7 @@ cout << "This: " <<   KStandardDirs::locate( "appdata", "kimberlite.db" ).toStdS
     verticalLayout_18 = new QVBoxLayout(tabAdvanced);
     verticalLayout_18->setObjectName(QString::fromUtf8("verticalLayout_18"));
     tblCSSPage = new QTableWidget(tabAdvanced);
+    
     if (tblCSSPage->columnCount() < 5)
         tblCSSPage->setColumnCount(5);
     QTableWidgetItem *__colItem = new QTableWidgetItem();
@@ -1327,22 +1339,22 @@ cout << "This: " <<   KStandardDirs::locate( "appdata", "kimberlite.db" ).toStdS
 
     tabWEditor->addTab(tabValidator, QString());
 
-    verticalLayout_2->addWidget(tabWEditor);
+    //verticalLayout_2->addWidget(tabWEditor);
 
 
     mainLayout->addWidget(centralWidget2);
 
+centralwidget->setLayout(mainLayout);
+    //verticalLayout->addLayout(mainLayout);
 
-    verticalLayout->addLayout(mainLayout);
-
-    this->setCentralWidget(centralwidget);
+    //this->setCentralWidget(centralwidget);
     statusbar = new QStatusBar(this);
     statusbar->setObjectName(QString::fromUtf8("statusbar"));
     statusbar->setGeometry(QRect(0, 696, 1008, 21));
     this->setStatusBar(statusbar);
 
     retranslateUi();
-    disableWidget(false);
+    //disableWidget(false);
 //rtfCSSEditor->setText(readCSSFile("/home"));
 /*readCSSFile("/home");
 rtfCSSEditor->setText(parseCSS());
@@ -1469,6 +1481,7 @@ void MainWindow::retranslateUi()
     tabWEditor->setTabText(tabWEditor->indexOf(tabCSS), QApplication::translate("this", "CSS", 0, QApplication::UnicodeUTF8));
     tabWEditor->setTabText(tabWEditor->indexOf(tabValidator), QApplication::translate("this", "Validator", 0, QApplication::UnicodeUTF8));
     Q_UNUSED(this);
+    tabWEditor->setCurrentIndex(3);
     } // retranslateUi
 
 QString MainWindow::readCSSFile(QString path) {
@@ -1478,13 +1491,11 @@ QString MainWindow::readCSSFile(QString path) {
     //if(KIO::NetAccess::download(inputFileName, tmpFile, this)) {
       QString line;
       bool inComment = false;
-      //ScriptMonitor* aNewExecutionMonitor = new ScriptMonitor(mainwindow->tabGestion,"echo salut1\nsleep 2 \n echo salut2", tvScriptList->currentItem()->text(0).toStdString() );
-      //mainwindow->horizontalLayout_4->addWidget( aNewExecutionMonitor);
       QFile file(path);
       file.open(QIODevice::ReadOnly);
       while (!file.atEnd()) {
-	  line = file.readLine();
-	  //printf("%s",line.toStdString().c_str());
+	  line = QString(file.readLine()).toAscii();
+	  printf("%s",line.toStdString().c_str());
 	  if (line.indexOf("/*") != -1) {
 	    inComment = true;
 	  }
@@ -1494,7 +1505,7 @@ QString MainWindow::readCSSFile(QString path) {
 
 	  if (inComment == false) {
 	    //printf("\n This is what you are looking for: %d,%d",line.right(2).left(1).toStdString().c_str(),line.right(1).toStdString().c_str());
-	    line = line.remove(line.count() -2,2); //Remove UNICODE linefeed
+	    //line = line.remove(line.count() -2,2); //Remove UNICODE linefeed
 	  }
 
 	  cssFile += line;
@@ -1512,13 +1523,14 @@ QString MainWindow::readCSSFile(QString path) {
     while (cssFile.indexOf("\n") != -1) {
       cssFile.remove(cssFile.indexOf("\n"),1);
     }
-//printf("%s",cssFile.toStdString().c_str());
+  printf("%s",cssFile.toStdString().c_str());
   return cssFile;
 }
 
 QString MainWindow::parseCSS() {
   QString parsedCSS;
   QString tmpCSS = cssFile.trimmed();
+  printf("\nThis is the complete text: %s \n\n", tmpCSS.toStdString().c_str());
   if (tmpCSS.isEmpty() == false) {
     while (tmpCSS.count() != 0) {
       if ((tmpCSS.indexOf("/*") != -1) && ((tmpCSS.indexOf("/*") < (tmpCSS.indexOf("{"))))) {
@@ -1526,18 +1538,19 @@ QString MainWindow::parseCSS() {
 	tmpCSS.remove(0,tmpCSS.indexOf("*/")+1);
       }
       else {
-	parsedCSS += tmpCSS.left(tmpCSS.indexOf("{")) + " {\n";
+	parsedCSS += tmpCSS.left(tmpCSS.indexOf("{")).trimmed() + " {\n";
 	tmpCSS.remove(0,tmpCSS.indexOf("{")+1);
-	while (((tmpCSS.indexOf(";") < (tmpCSS.indexOf("}")))) && (tmpCSS.indexOf(";") != -1)) {
+	while ((tmpCSS.indexOf(";") < tmpCSS.indexOf("}")) && (tmpCSS.indexOf(";") != -1) && (tmpCSS.indexOf("}") != -1)) {
 	    parsedCSS += "	" +tmpCSS.left(tmpCSS.indexOf(";")+1).trimmed() + "\n";
 	    tmpCSS.remove(0,tmpCSS.indexOf(";")+1);
 	}
       }
 	parsedCSS += "}\n\n";
 	tmpCSS.remove(0,tmpCSS.indexOf("}")+1);
+        tmpCSS = tmpCSS.trimmed();
     }
   }
-  printf("%s",parsedCSS.toStdString().c_str());
+  printf("\nThis is the file:\n %s \n\n\n\n\n\n\n\n",parsedCSS.toStdString().c_str());
   return parsedCSS;
 }
 
@@ -1700,24 +1713,25 @@ void MainWindow::fillCSSBegMode(QString className) {
 }
 
 QString MainWindow::setClass(QString className, QString content) {
-      bool found = false;
       QStringList classList = getClassList();
       QString newCSSStyle;
-      int i=0;
-      while ((found = false) && (i < classList.count())) {
+      for (int i =0; i < classList.count();i++) {
 	    if (classList[i] != className) {
 		  QStringList classPropriety =  getClass(classList[i]);
-		  QString classText = className + " {";
+                  printf("Class = %s, nbpropr = %d, classNb = %d \n", (classList[i]).toStdString().c_str(), classPropriety.count(), classList.count());
+		  QString classText = classList[i] + " {";
 		  for (int j =0; j < classPropriety.count();j++) {
 			classText += classPropriety[j];
 		  }
-		  classText =+ "}";
+		  classText += "}";
 		  newCSSStyle += classText;
 	    }
 	    else {
-		  newCSSStyle += content;
+		  newCSSStyle += classList[i] + " {\n" + content + "}";
 	    }
       }
+      
+      printf("This is the new file: \n%s\n\n\n\n\n",newCSSStyle.toStdString().c_str());
       return newCSSStyle;
 }
 
@@ -2017,23 +2031,26 @@ void MainWindow::openProject() {
             pageName = aProject->htmlPage[0];
             rtfHTMLEditor->setPlainText(QString::fromStdString(aParser->htmlParser(aFile,true, false)));
             //cout << aProject->cssPage.toStdString(); exit(33);
-            //readCSSFile("StyleSheet.css");
-            readCSSFile(aProject->cssPage);
+            readCSSFile("/home/lepagee/dev/myproject/kimberlite/StyleSheet.css");
+            //readCSSFile(aProject->cssPage);
             rtfCSSEditor->setText(parseCSS());
-            QTreeWidgetItem* styleSheetName = new  QTreeWidgetItem(treeWidget);
+            styleSheetName = new  QTreeWidgetItem(treeWidget);
             styleSheetName->setText(0,aProject->cssPage);
             //treeWidget->append(new QTreeWidgetItem((QTreeWidget*)0, append(new QTreeWidgetItem((QTreeWidget*)0, QStringList(QString("item: %1"))));));
             fillCSSAdvMode();
             QStringList classList = getClassList();
+            
+            updateClassTree();
 	    if (classList.count() > 0) {
-	      currentClassName = classList[0];
+	      //currentClassName = classList[0];
 	      getClass(classList[0]);
 	      fillCSSBegMode(classList[0]);
 	    }
-            for (int j = 0; j < classList.count(); j++) {
+            /*for (int j = 0; j < classList.count(); j++) {
               QTreeWidgetItem* aTreeViewWidgetItem = new  QTreeWidgetItem(styleSheetName);
               aTreeViewWidgetItem->setText(0,classList[j]);
-            }
+            }*/
+            
 	disableWidget(true);
       }
       else {
@@ -2078,12 +2095,23 @@ void MainWindow::setupToolTip() {
 }
 
 void MainWindow::loadCSSClass(QTreeWidgetItem* anItem) {
-  cout << anItem->text(0).toStdString() << endl;
+  
   QString newStyle = setClass(currentClassName, clearCssBeg());
-  currentClassName = anItem->text(0);
+  QString className;
+  QTreeWidgetItem* currentLevel = anItem;
+  while (currentLevel != styleSheetName) {
+    if (currentLevel->text(0)[0] != ':')
+      className.insert(0, " ");
+    className.insert(0, currentLevel->text(0));
+    currentLevel = currentLevel->parent();
+  }
+  cout << className.toStdString() << endl;
+  currentClassName = className;
   fillCSSBegMode(currentClassName);
   cout << newStyle.toStdString() <<endl;
+  cssFile = newStyle;
   saveProjectAs(aProject->cssPage , newStyle);
+  rtfCSSEditor->setText(parseCSS());
 }
 
 void MainWindow::loadPage(QTableWidgetItem* anItem) {
@@ -2124,7 +2152,7 @@ QString MainWindow::clearCssBeg() {
     }*/
 
     if (cssHeight->cbbValue->isEnabled()) {
-     currentClass += cssHeight->ckbName->text()+" "+ cssHeight->cbbValue->currentText();
+     currentClass += "	height: "+ cssHeight->cbbValue->currentText();
      if (cssHeight->isEnabled()) {
 	    currentClass += cssHeight->cbbUnit->currentText();
      }
@@ -2132,15 +2160,15 @@ QString MainWindow::clearCssBeg() {
     }
     cssHeight->clear();
     if (cssWidth->cbbValue->isEnabled()) {
-     currentClass += cssWidth->ckbName->text()+" "+ cssWidth->cbbValue->currentText();
+     currentClass += "	width: "+ cssWidth->cbbValue->currentText().toAscii();
      if (cssWidth->cbbUnit->isEnabled()) {
-	    currentClass += cssWidth->cbbUnit->currentText();
+	    currentClass += cssWidth->cbbUnit->currentText().toAscii();
      }
      currentClass += ";\n";
     }
     cssWidth->clear();
     if (cssText_align->cbbValue->isEnabled()) {
-     currentClass += cssText_align->ckbName->text()+" "+ cssText_align->cbbValue->currentText();
+     currentClass += "	text-align: "+ cssText_align->cbbValue->currentText();
      if (cssText_align->cbbUnit->isEnabled()) {
 	    currentClass += cssText_align->cbbUnit->currentText();
      }
@@ -2148,7 +2176,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssText_align->clear();
     if (cssText_transform->cbbValue->isEnabled()) {
-     currentClass += cssText_transform->ckbName->text()+" "+ cssText_transform->cbbValue->currentText();
+     currentClass += "	text-transform: "+ cssText_transform->cbbValue->currentText();
      if (cssText_transform->cbbUnit->isEnabled()) {
 	    currentClass += cssText_transform->cbbUnit->currentText();
      }
@@ -2156,7 +2184,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssText_transform->clear();
     if (cssColor->cbbValue->isEnabled()) {
-     currentClass += cssColor->ckbName->text()+" "+ cssColor->cbbValue->currentText();
+     currentClass += "	color: "+ cssColor->cbbValue->currentText();
      if (cssColor->cbbUnit->isEnabled()) {
 	    currentClass += cssColor->cbbUnit->currentText();
      }
@@ -2164,7 +2192,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssColor->clear();
     if (cssFont_family->cbbValue->isEnabled()) {
-     currentClass += cssFont_family->ckbName->text()+" "+ cssFont_family->cbbValue->currentText();
+     currentClass += "	font-family: "+ cssFont_family->cbbValue->currentText();
      if (cssFont_family->cbbUnit->isEnabled()) {
 	    currentClass += cssFont_family->cbbUnit->currentText();
      }
@@ -2172,7 +2200,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssFont_family->clear();
     if (cssFont_size->cbbValue->isEnabled()) {
-     currentClass += cssFont_size->ckbName->text()+" "+ cssFont_size->cbbValue->currentText();
+     currentClass += "	font-size: "+ cssFont_size->cbbValue->currentText();
      if (cssFont_size->cbbUnit->isEnabled()) {
 	    currentClass += cssFont_size->cbbUnit->currentText();
      }
@@ -2180,7 +2208,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssFont_size->clear();
     if (cssFont_style->cbbValue->isEnabled()) {
-     currentClass += cssFont_style->ckbName->text()+" "+ cssFont_style->cbbValue->currentText();
+     currentClass += "	font-style: "+ cssFont_style->cbbValue->currentText();
      if (cssFont_style->cbbUnit->isEnabled()) {
 	    currentClass += cssFont_style->cbbUnit->currentText();
      }
@@ -2188,7 +2216,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssFont_style->clear();
     if (cssFont_weight->cbbValue->isEnabled()) {
-     currentClass += cssFont_weight->ckbName->text()+" "+ cssFont_weight->cbbValue->currentText();
+     currentClass += "	font-weight: "+ cssFont_weight->cbbValue->currentText();
      if (cssFont_weight->cbbUnit->isEnabled()) {
 	    currentClass += cssFont_weight->cbbUnit->currentText();
      }
@@ -2196,7 +2224,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssFont_weight->clear();
     if (cssBackground_image->cbbValue->isEnabled()) {
-     currentClass += cssBackground_image->ckbName->text()+" "+ cssBackground_image->cbbValue->currentText();
+     currentClass += "	background-image: "+ cssBackground_image->cbbValue->currentText();
      if (cssBackground_image->cbbUnit->isEnabled()) {
 	    currentClass += cssBackground_image->cbbUnit->currentText();
      }
@@ -2204,7 +2232,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssBackground_image->clear();
     if (cssBackground_color->cbbValue->isEnabled()) {
-     currentClass += cssBackground_color->ckbName->text()+" "+ cssBackground_color->cbbValue->currentText();
+     currentClass += "	background-color: "+ cssBackground_color->cbbValue->currentText();
      if (cssBackground_color->cbbUnit->isEnabled()) {
 	    currentClass += cssBackground_color->cbbUnit->currentText();
      }
@@ -2212,7 +2240,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssBackground_color->clear();
     if (cssBackground_repeat->cbbValue->isEnabled()) {
-     currentClass += cssBackground_repeat->ckbName->text()+" "+ cssBackground_repeat->cbbValue->currentText();
+     currentClass += "	background-repeat: "+ cssBackground_repeat->cbbValue->currentText();
      if (cssBackground_repeat->cbbUnit->isEnabled()) {
 	    currentClass += cssBackground_repeat->cbbUnit->currentText();
      }
@@ -2220,7 +2248,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssBackground_repeat->clear();
     if (cssBorder_width->cbbValue->isEnabled()) {
-     currentClass += cssBorder_width->ckbName->text()+" "+ cssBorder_width->cbbValue->currentText();
+     currentClass += "	border-width: "+ cssBorder_width->cbbValue->currentText();
      if (cssBorder_width->cbbUnit->isEnabled()) {
 	    currentClass += cssBorder_width->cbbUnit->currentText();
      }
@@ -2228,7 +2256,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssBorder_width->clear();
     if (cssBorder_color->cbbValue->isEnabled()) {
-     currentClass += cssBorder_color->ckbName->text()+" "+ cssBorder_color->cbbValue->currentText();
+     currentClass += "	border-color: "+ cssBorder_color->cbbValue->currentText();
      if (cssBorder_color->cbbUnit->isEnabled()) {
 	    currentClass += cssBorder_color->cbbUnit->currentText();
      }
@@ -2236,7 +2264,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssBorder_color->clear();
     if (cssBorder_style->cbbValue->isEnabled()) {
-     currentClass += cssBorder_style->ckbName->text()+" "+ cssBorder_style->cbbValue->currentText();
+     currentClass += "	border-style: "+ cssBorder_style->cbbValue->currentText();
      if (cssBorder_style->cbbUnit->isEnabled()) {
 	    currentClass += cssBorder_style->cbbUnit->currentText();
      }
@@ -2244,7 +2272,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssBorder_style->clear();
     if (cssFloat->cbbValue->isEnabled()) {
-     currentClass += cssFloat->ckbName->text()+" "+ cssFloat->cbbValue->currentText();
+     currentClass += "	float: "+ cssFloat->cbbValue->currentText();
      if (cssFloat->cbbUnit->isEnabled()) {
 	    currentClass += cssFloat->cbbUnit->currentText();
      }
@@ -2252,7 +2280,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssFloat->clear();
     if (cssPosition->cbbValue->isEnabled()) {
-     currentClass += cssPosition->ckbName->text()+" "+ cssPosition->cbbValue->currentText();
+     currentClass += "	position: "+ cssPosition->cbbValue->currentText();
      if (cssPosition->cbbUnit->isEnabled()) {
 	    currentClass += cssPosition->cbbUnit->currentText();
      }
@@ -2260,7 +2288,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssPosition->clear();
     if (cssZ_index->cbbValue->isEnabled()) {
-     currentClass += cssZ_index->ckbName->text()+" "+ cssZ_index->cbbValue->currentText();
+     currentClass += "	z-index: "+ cssZ_index->cbbValue->currentText();
      if (cssZ_index->cbbUnit->isEnabled()) {
 	    currentClass += cssZ_index->cbbUnit->currentText();
      }
@@ -2268,7 +2296,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssZ_index->clear();
     if (cssMargin_top->cbbValue->isEnabled()) {
-     currentClass += cssMargin_top->ckbName->text()+" "+ cssMargin_top->cbbValue->currentText();
+     currentClass += "	margin-top: "+ cssMargin_top->cbbValue->currentText();
      if (cssMargin_top->cbbUnit->isEnabled()) {
 	    currentClass += cssMargin_top->cbbUnit->currentText();
      }
@@ -2276,7 +2304,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssMargin_top->clear();
     if (cssMargin_bottom->cbbValue->isEnabled()) {
-     currentClass += cssMargin_bottom->ckbName->text()+" "+ cssMargin_bottom->cbbValue->currentText();
+     currentClass += "	margin-bottom: "+ cssMargin_bottom->cbbValue->currentText();
      if (cssMargin_bottom->cbbUnit->isEnabled()) {
 	    currentClass += cssMargin_bottom->cbbUnit->currentText();
      }
@@ -2284,7 +2312,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssMargin_bottom->clear();
     if (cssMargin_left->cbbValue->isEnabled()) {
-     currentClass += cssMargin_left->ckbName->text()+" "+ cssMargin_left->cbbValue->currentText();
+     currentClass += "	margin-left: "+ cssMargin_left->cbbValue->currentText();
      if (cssMargin_left->cbbUnit->isEnabled()) {
 	    currentClass += cssMargin_left->cbbUnit->currentText();
      }
@@ -2292,7 +2320,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssMargin_left->clear();
     if (cssMargin_right->cbbValue->isEnabled()) {
-     currentClass += cssMargin_right->ckbName->text()+" "+ cssMargin_right->cbbValue->currentText();
+     currentClass += "	margin-right: "+ cssMargin_right->cbbValue->currentText();
      if (cssMargin_right->cbbUnit->isEnabled()) {
 	    currentClass += cssMargin_right->cbbUnit->currentText();
      }
@@ -2300,7 +2328,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssMargin_right->clear();
     if (cssPadding_top->cbbValue->isEnabled()) {
-     currentClass += cssPadding_top->ckbName->text()+" "+ cssPadding_top->cbbValue->currentText();
+     currentClass += "	padding-top: "+ cssPadding_top->cbbValue->currentText();
      if (cssPadding_top->cbbUnit->isEnabled()) {
 	    currentClass += cssPadding_top->cbbUnit->currentText();
      }
@@ -2308,7 +2336,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssPadding_top->clear();
     if (cssPadding_bottom->cbbValue->isEnabled()) {
-     currentClass += cssPadding_bottom->ckbName->text()+" "+ cssPadding_bottom->cbbValue->currentText();
+     currentClass += "	padding-bottom: "+ cssPadding_bottom->cbbValue->currentText();
      if (cssPadding_bottom->cbbUnit->isEnabled()) {
 	    currentClass += cssPadding_bottom->cbbUnit->currentText();
      }
@@ -2316,7 +2344,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssPadding_bottom->clear();
     if (cssPadding_left->cbbValue->isEnabled()) {
-     currentClass += cssPadding_left->ckbName->text()+" "+ cssPadding_left->cbbValue->currentText();
+     currentClass += "	padding-left: "+ cssPadding_left->cbbValue->currentText();
      if (cssPadding_left->cbbUnit->isEnabled()) {
 	    currentClass += cssPadding_left->cbbUnit->currentText();
      }
@@ -2324,7 +2352,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssPadding_left->clear();
     if (cssPadding_right->cbbValue->isEnabled()) {
-     currentClass += cssPadding_right->ckbName->text()+" "+ cssPadding_right->cbbValue->currentText();
+     currentClass += "	padding-right: "+ cssPadding_right->cbbValue->currentText();
      if (cssPadding_right->cbbUnit->isEnabled()) {
 	    currentClass += cssPadding_right->cbbUnit->currentText();
      }
@@ -2332,7 +2360,7 @@ QString MainWindow::clearCssBeg() {
     }
     cssPadding_right->clear();
     if (cssList_style->cbbValue->isEnabled()) {
-     currentClass += cssList_style->ckbName->text()+" "+ cssList_style->cbbValue->currentText();
+     currentClass += "	list-style: "+ cssList_style->cbbValue->currentText();
      if (cssList_style->cbbUnit->isEnabled()) {
 	    currentClass += cssList_style->cbbUnit->currentText();
      }
@@ -2340,14 +2368,15 @@ QString MainWindow::clearCssBeg() {
     }
     cssList_style->clear();
     if (cssCursor->cbbValue->isEnabled()) {
-     currentClass += cssCursor->ckbName->text()+" "+ cssCursor->cbbValue->currentText();
+     currentClass += "	cursor: "+ cssCursor->cbbValue->currentText();
      if (cssCursor->cbbUnit->isEnabled()) {
 	    currentClass += cssCursor->cbbUnit->currentText();
      }
      currentClass += ";\n";
     }
     cssCursor->clear();
-    cout << currentClass.toStdString() << endl;
+    
+    printf("Previous Class : %s \n",currentClass.toStdString().c_str());
     return currentClass;
 }
 
@@ -2359,4 +2388,101 @@ void MainWindow::disableWidget(bool value) {
     toolsTB->setEnabled(value);
     optionsTB->setEnabled(value);
     helpTB->setEnabled(value);
+}
+
+void MainWindow::changeCssMode(int mode) {
+  if ((previousCssMode == 0) && (mode ==2)) {
+    loadCSSClass(treeWidget->currentItem());
+  }
+  else if (mode == 1) {
+    
+  }
+}
+
+void MainWindow::updateClassTree() {
+  QStringList classList = getClassList();
+  if (classList.count() > 0) {
+    currentClassName = classList[0];
+    getClass(classList[0]);
+    fillCSSBegMode(classList[0]);
+  }
+  for (int j = 0; j < classList.count(); j++) {
+    /*QTreeWidgetItem* aTreeViewWidgetItem = new  QTreeWidgetItem(styleSheetName);
+    aTreeViewWidgetItem->setText(0,classList[j]);*/
+    splitSubClass(classList[j], styleSheetName);
+  }
+  treeWidget->expandAll();
+}
+
+void MainWindow::splitSubClass(QString name, QTreeWidgetItem* parent) {
+  if (((name.indexOf(":") != -1) && (name.indexOf(" ") == -1)) /*|| (((name.indexOf(":") < (name.indexOf(" ")) && ((name.indexOf(" ") != -1)))))*/ && ((name.indexOf(":") != 0))) {
+    bool found = false;
+    for (int i =0; i < parent->childCount(); i++) {
+      if (parent->child(i)->text(0) ==  name.left(name.indexOf(":"))) {
+        splitSubClass(":" + name.right(name.count() - name.indexOf(":") -1), parent->child(i));
+        found = true;
+      }
+    }
+    
+    if (found == false) {
+      QTreeWidgetItem* aTreeViewWidgetItem = new  QTreeWidgetItem(parent);
+      aTreeViewWidgetItem->setText(0,name.left(name.indexOf(":")));
+      aTreeViewWidgetItem->setIcon(0,getRightIcon(name.left(name.indexOf(":"))));
+      splitSubClass( ":" + name.right(name.count() - name.indexOf(":") -1), aTreeViewWidgetItem);
+    }
+  }
+  else if (name.indexOf(":") == 0) { //BUG
+    QTreeWidgetItem* aTreeViewWidgetItem = new  QTreeWidgetItem(parent);
+    aTreeViewWidgetItem->setText(0,name);
+    aTreeViewWidgetItem->setIcon(0,getRightIcon(name));
+  }
+  else if ((name.indexOf(" ") != -1) && (name[name.indexOf(" ")-1] != ',')) {
+    bool found = false;
+    for (int i =0; i < parent->childCount(); i++) {
+      if (parent->child(i)->text(0) ==  name.left(name.indexOf(" "))) {
+        splitSubClass(name.right(name.count() - name.indexOf(" ") -1), parent->child(i));
+        found = true;
+      }
+    }
+    
+    if (found == false) {
+      QTreeWidgetItem* aTreeViewWidgetItem = new  QTreeWidgetItem(parent);
+      aTreeViewWidgetItem->setText(0,name.left(name.indexOf(" ")));
+      aTreeViewWidgetItem->setIcon(0,getRightIcon(name.left(name.indexOf(" "))));
+      splitSubClass(name.right(name.count() - name.indexOf(" ") -1), aTreeViewWidgetItem);
+    }
+    
+  }
+  else {
+    QTreeWidgetItem* aTreeViewWidgetItem = new  QTreeWidgetItem(parent);
+    aTreeViewWidgetItem->setIcon(0,getRightIcon(name));
+    aTreeViewWidgetItem->setText(0,name);
+  }
+  /*else if (":") {
+    
+  }
+  else if (",") {
+    
+  }*/
+}
+
+KIcon MainWindow::getRightIcon(QString text) {
+  KIcon* anIcon = 0;
+  if (text[0] == ' ') {
+    anIcon = new KIcon("/home/lepagee/dev/myproject/kimberlite/pixmap/tag.png");
+  }
+  else if (text[0] == ':') {
+    anIcon = new KIcon("/home/lepagee/dev/myproject/kimberlite/pixmap/state.png");
+  }
+  else if (text[0] == '#') {
+    anIcon = new KIcon("/home/lepagee/dev/myproject/kimberlite/pixmap/id.png");
+  }
+  else if (text[0] == '.') {
+    anIcon = new KIcon("/home/lepagee/dev/myproject/kimberlite/pixmap/class.png");
+  }
+  else {
+    anIcon = new KIcon("/home/lepagee/dev/myproject/kimberlite/pixmap/tag.png");
+  }
+  anIcon->setPixmap(anIcon->pixmap(QSize(16,32)));
+  return *anIcon;
 }
