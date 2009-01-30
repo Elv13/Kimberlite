@@ -138,7 +138,7 @@ vector<string> HtmlParser::listTag(string inputFile) {
   return tagList;
 }
 
-string HtmlParser::htmlParser(string inputFile, bool debug, bool toTemplate) {
+string HtmlParser::htmlParser(string inputFile, bool debug, bool toTemplate, bool mode = true /*true = indet, false = tree*/, QTreeWidget* aTree = NULL) {
       vector<string> tagList = listTag(inputFile);
       vector<int> levelList;
       string tag;
@@ -170,56 +170,99 @@ string HtmlParser::htmlParser(string inputFile, bool debug, bool toTemplate) {
 
 	    if (debug == true) {
 	      if ((orphelinTags.indexOf(QString::fromStdString(tag)) != -1) && (tagList[i][1] == '/')) {
-		cout << "warning \"" << tag << "\" don't need to be closed" << endl;
-		//exit(33);
+                debugItem* anItem = new debugItem;
+                anItem->message = "Warning  tag \"" + QString::fromStdString(tag) + "\" don't need to be closed (HTML 4.01)";
+                anItem->icon = 0;
+                anItem->line = i;
+                debugVector << *anItem;
 	      }
 	    }
       }
+    if (mode == false) 
+      updateTree(toTemplate, tagList, levelList, aTree);
+    else
+      return indentHtml(toTemplate, tagList, levelList);
+}
 
-      //bool toTemplate = true;
-      string markerDefinition;
-      if (toTemplate == true) {
-	    tagList = ConvertToTemplate(tagList, markerDefinition);
-      }
+string HtmlParser::indentHtml(bool toTemplate, vector<string> tagList, vector<int> levelList) {
+  //bool toTemplate = true;
+  string markerDefinition;
+  if (toTemplate == true) {
+        tagList = ConvertToTemplate(tagList, markerDefinition);
+  }
 
-      string tab, parsedHTML, tag2, previousTag;
-      for (int j=0; j < tagList.size();j++) {
-	tag2 = getTag(tagList[j]);
-        std::transform(tag2.begin(), tag2.end(), tag2.begin(), (int(*)(int)) std::toupper);
-        tab = "";
-        if ((noNewLineTags.indexOf(QString::fromStdString(tag2)) != -1) || (tagList[j][0] != '<')) {
-	    if ((tagList[j][0] == '<') && (needNewLineOnOpen.indexOf(QString::fromStdString(tag2)) != -1) && (parsedHTML[parsedHTML.size()-1] != '\n') && (tagList[j].substr(0,2) != "</")) {
-		  parsedHTML += "\n";
-		  for (int k =0; k < levelList[j]; k++) 
-			tab += "   ";
-		  parsedHTML += tab;
-	    }
-	    if (parsedHTML[parsedHTML.size()-1] == '\n') {
-		  for (int k =0; k < levelList[j]; k++) 
-			tab += "   ";
-		  parsedHTML += tab + tagList[j];
-	    }
-	    else {
-		  parsedHTML +=tagList[j];
-	    }
-	    if ((tagList[j].substr(0,2) == "</") && (needNewLineOnClose.indexOf(QString::fromStdString(tag2)) != -1)) {
-		  parsedHTML += "\n";
-	    }
+  string tab, parsedHTML, tag2, previousTag;
+  for (int j=0; j < tagList.size();j++) {
+    tag2 = getTag(tagList[j]);
+    std::transform(tag2.begin(), tag2.end(), tag2.begin(), (int(*)(int)) std::toupper);
+    tab = "";
+    if ((noNewLineTags.indexOf(QString::fromStdString(tag2)) != -1) || (tagList[j][0] != '<')) {
+        if ((tagList[j][0] == '<') && (needNewLineOnOpen.indexOf(QString::fromStdString(tag2)) != -1) && (parsedHTML[parsedHTML.size()-1] != '\n') && (tagList[j].substr(0,2) != "</")) {
+              parsedHTML += "\n";
+              for (int k =0; k < levelList[j]; k++) 
+                    tab += "   ";
+              parsedHTML += tab;
+        }
+        if (parsedHTML[parsedHTML.size()-1] == '\n') {
+              for (int k =0; k < levelList[j]; k++) 
+                    tab += "   ";
+              parsedHTML += tab + tagList[j];
         }
         else {
-	    if ((parsedHTML[parsedHTML.size()-1] != '\n') && (parsedHTML != "")) {
-		  parsedHTML += "\n";
-	    }
-	    for (int k =0; k < levelList[j]; k++) 
-		  tab += "   ";
-	    parsedHTML += tab + tagList[j] + "\n";
+              parsedHTML +=tagList[j];
         }
-      }
-      if (toTemplate == true) {
-	    parsedHTML += "<!-- \n" + markerDefinition + " \n-->";
-      }
+        if ((tagList[j].substr(0,2) == "</") && (needNewLineOnClose.indexOf(QString::fromStdString(tag2)) != -1)) {
+              parsedHTML += "\n";
+        }
+    }
+    else {
+        if ((parsedHTML[parsedHTML.size()-1] != '\n') && (parsedHTML != "")) {
+              parsedHTML += "\n";
+        }
+        for (int k =0; k < levelList[j]; k++) 
+              tab += "   ";
+        parsedHTML += tab + tagList[j] + "\n";
+    }
+  }
+  if (toTemplate == true) {
+        parsedHTML += "<!-- \n" + markerDefinition + " \n-->";
+  }
 
-      return parsedHTML;
+  return parsedHTML;
+}
+
+
+QTreeWidgetItem* HtmlParser::updateTree(bool toTemplate, vector<string> tagList, vector<int> levelList, QTreeWidget* aTree) {
+  /*QTreeWidgetItem* topNode = new QTreeWidgetItem;
+  topNode->setText(0,QString::fromStdString(tagList[0]));*/
+  QTreeWidgetItem* previousNode = NULL;
+  aTree->clear();
+  
+  for (int j=0; j < tagList.size();j++) {
+    if (levelList[j] == 0) {
+      QTreeWidgetItem* topNode = new QTreeWidgetItem;
+      topNode->setText(0,QString::fromStdString(tagList[j]));
+      previousNode = topNode;
+      aTree->addTopLevelItem(topNode);
+    }
+    else if (levelList[j] > levelList[j-1]) {
+      QTreeWidgetItem* aNode = new QTreeWidgetItem(previousNode);
+      aNode->setText(0,QString::fromStdString(tagList[j]));
+      previousNode = aNode;
+    }
+    else if (levelList[j] == levelList[j-1]) {
+      QTreeWidgetItem* aNode = new QTreeWidgetItem(previousNode->parent());
+      aNode->setText(0,QString::fromStdString(tagList[j]));
+      previousNode = aNode;
+    }
+    else {
+      QTreeWidgetItem* aNode = new QTreeWidgetItem(previousNode->parent()->parent());
+      aNode->setText(0,QString::fromStdString(tagList[j]));
+      previousNode = aNode;
+    }
+  }
+  aTree->expandAll();
+  return NULL;
 }
 
 

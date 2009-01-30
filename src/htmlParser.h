@@ -28,8 +28,18 @@
 #include <vector>
 #include <QThread>
 #include <QSyntaxHighlighter>
+#include <QTreeWidgetItem>
+#include <QVector>
 
 using namespace std;
+
+struct debugItem {
+  int line;
+  int icon; /*0 = warning, 1 = error, 3 = information*/
+  int character;
+  QString message;
+};
+
 class HtmlParser{
     //Q_OBJECT
   public:
@@ -37,9 +47,10 @@ class HtmlParser{
     std::string compressFile(std::string path);
     std::string compressString(std::string file);
     std::string getTag(std::string aTag);
-    std::string htmlParser(std::string inputFile, bool debug, bool toTemplate);
+    std::string htmlParser(std::string inputFile, bool debug, bool toTemplate, bool mode, QTreeWidget* aTree);
     vector<string> listTag(string inputFile);
-
+    QVector<debugItem> debugVector;
+    
   private:
     QStringList orphelinTags;
     QStringList noNewLineTags;
@@ -48,6 +59,10 @@ class HtmlParser{
     QStringList markerList;
     vector<string> ConvertToTemplate(vector<string> tagList, string &markerDefinition);
     vector<string> translate(vector<string> tagList, string markerDefinition);
+    
+    string indentHtml(bool toTemplate, vector<string> tagList, vector<int> levelList);
+    QTreeWidgetItem*  updateTree(bool toTemplate, vector<string> tagList, vector<int> levelList, QTreeWidget* aTree);
+    
 };
 
 /*class ParserThread : public QThread {

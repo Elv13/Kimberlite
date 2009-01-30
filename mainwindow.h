@@ -66,6 +66,7 @@
 #include <QSqlDatabase>
 #include <QSyntaxHighlighter>
 #include <QtSql>
+#include <QListWidget>
 
 #include "src/CSSbeginnerWidget.h"
 #include "src/ProjectManager.h"
@@ -164,7 +165,7 @@ public:
     KTextEdit *rtfHTMLEditor;
     QPushButton *btnParse;
     QDockWidget *dockDebug;
-    QTableWidget* tblDebug;
+    QListWidget* lstDebug;
     QVBoxLayout *verticalLayout_99;
     QWidget *dockDebugContents;
     QWidget *tabScripts;
@@ -207,6 +208,8 @@ public:
     QTreeWidgetItem* styleSheetName;
     QStatusBar *statusbar;
     QTextEdit* txtOtherTags;
+    QDockWidget* dockHtmlTree;
+    QTreeWidget* treeHtml;
     KToolBar* fileTB;
     KToolBar* editTB;
     KToolBar* viewTB;

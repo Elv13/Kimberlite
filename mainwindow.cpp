@@ -47,6 +47,7 @@
 #include <QColor>
 #include <QBrush>
 #include <QPalette>
+#include <QListWidgetItem>
 #include "src/CSSbeginnerWidget.h"
 #include "src/addProprietyWidget.h"
 #include "src/stringToTemplate.h"
@@ -875,7 +876,11 @@ cout << "This: " <<   KStandardDirs::locate( "appdata", "kimberlite.db" ).toStdS
     mainLayout = new QHBoxLayout(this);
     mainLayout->setObjectName(QString::fromUtf8("mainLayout"));
 
-
+    dockHtmlTree = new QDockWidget(this);
+    treeHtml = new QTreeWidget(this);
+    dockHtmlTree->setWidget(treeHtml);
+    addDockWidget(Qt::LeftDockWidgetArea, dockHtmlTree);
+ 
     tableDock = new QDockWidget(this);
     tableDock->setObjectName(QString::fromUtf8("tableDock"));
     tableDock->setHidden(true);
@@ -1024,10 +1029,8 @@ cout << "This: " <<   KStandardDirs::locate( "appdata", "kimberlite.db" ).toStdS
     dockDebug->setWidget(dockDebugContents);
     verticalLayout_99 = new QVBoxLayout(dockDebugContents);
     verticalLayout_99->setObjectName(QString::fromUtf8("verticalLayout_99"));
-    tblDebug = new QTableWidget(dockDebugContents);
-    tblDebug->setColumnCount(2);
-    tblDebug->setRowCount(5);
-    verticalLayout_99->addWidget(tblDebug);
+    lstDebug = new QListWidget(dockDebugContents);
+    verticalLayout_99->addWidget(lstDebug);
 
 
     verticalLayout_3->addWidget(dockDebug);
@@ -1951,21 +1954,28 @@ void MainWindow::fillCSSAdvMode() {
 void MainWindow::reParse() {
     //aParser = new HtmlParser();
     std::string aFile = aParser->compressString(rtfHTMLEditor->toPlainText().toStdString());
-    rtfHTMLEditor->setPlainText(QString::fromStdString(aParser->htmlParser(aFile,true,false)));
+    aParser->htmlParser(aFile,true,false,false,treeHtml);
+    rtfHTMLEditor->setPlainText(QString::fromStdString(aParser->htmlParser(aFile,true,false,true, NULL)));
+    lstDebug->clear();
+    for (int i =0; i < aParser->debugVector.size(); i++) {
+      QListWidgetItem* anItem = new QListWidgetItem("["+QString::number(aParser->debugVector[i].line)+"] "+aParser->debugVector[i].message);
+      anItem->setIcon(KIcon("dialog-warning"));
+      lstDebug->addItem(anItem);
+    }
 }
 
 void MainWindow::templaterize(bool check) {
     if (check == true) {
     //aParser = new HtmlParser();
       std::string aFile = aParser->compressString(rtfHTMLEditor->toPlainText().toStdString());
-      rtfHTMLEditor->setPlainText(QString::fromStdString(aParser->htmlParser(aFile,true,true)));
+      rtfHTMLEditor->setPlainText(QString::fromStdString(aParser->htmlParser(aFile,true,true,true,NULL)));
     }
 }
 
 void MainWindow::translate() {
     //aParser = new HtmlParser();
     std::string aFile = aParser->compressString(rtfHTMLEditor->toPlainText().toStdString());
-    rtfHTMLEditor->setPlainText(QString::fromStdString(aParser->htmlParser(aFile,true,true)));
+    rtfHTMLEditor->setPlainText(QString::fromStdString(aParser->htmlParser(aFile,true,true,true,NULL)));
 }
 
 void MainWindow::newProject(){
@@ -2029,7 +2039,7 @@ void MainWindow::openProject() {
             }
             std::string aFile = aParser->compressFile(aProject->htmlPage[0].toStdString());
             pageName = aProject->htmlPage[0];
-            rtfHTMLEditor->setPlainText(QString::fromStdString(aParser->htmlParser(aFile,true, false)));
+            rtfHTMLEditor->setPlainText(QString::fromStdString(aParser->htmlParser(aFile,true, false,true,NULL)));
             //cout << aProject->cssPage.toStdString(); exit(33);
             readCSSFile("/home/lepagee/dev/myproject/kimberlite/StyleSheet.css");
             //readCSSFile(aProject->cssPage);
@@ -2121,7 +2131,7 @@ void MainWindow::loadPage(QTableWidgetItem* anItem) {
   pageName = anItem->text();
   isModified = false;
   std::string aFile = aParser->compressFile(pageName.toStdString());
-  rtfHTMLEditor->setPlainText(QString::fromStdString(aParser->htmlParser(aFile,true, false)));
+  rtfHTMLEditor->setPlainText(QString::fromStdString(aParser->htmlParser(aFile,true, false,true,NULL)));
 }
 
 void MainWindow::setModified() {
@@ -2483,6 +2493,6 @@ KIcon MainWindow::getRightIcon(QString text) {
   else {
     anIcon = new KIcon("/home/lepagee/dev/myproject/kimberlite/pixmap/tag.png");
   }
-  anIcon->setPixmap(anIcon->pixmap(QSize(16,32)));
+  //anIcon->setPixmap(anIcon->pixmap(QSize(16,32)));
   return *anIcon;
 }
