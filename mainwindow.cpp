@@ -1959,7 +1959,12 @@ void MainWindow::reParse() {
     lstDebug->clear();
     for (int i =0; i < aParser->debugVector.size(); i++) {
       QListWidgetItem* anItem = new QListWidgetItem("["+QString::number(aParser->debugVector[i].line)+"] "+aParser->debugVector[i].message);
-      anItem->setIcon(KIcon("dialog-warning"));
+      if (aParser->debugVector[i].icon == 0)
+        anItem->setIcon(KIcon("dialog-warning"));
+      else if (aParser->debugVector[i].icon == 1)
+        anItem->setIcon(KIcon("dialog-error"));
+      else
+        anItem->setIcon(KIcon("dialog-information"));
       lstDebug->addItem(anItem);
     }
 }

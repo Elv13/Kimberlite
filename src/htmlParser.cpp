@@ -138,7 +138,7 @@ vector<string> HtmlParser::listTag(string inputFile) {
   return tagList;
 }
 
-string HtmlParser::htmlParser(string inputFile, bool debug, bool toTemplate, bool mode = true /*true = indet, false = tree*/, QTreeWidget* aTree = NULL) {
+string HtmlParser::htmlParser(string inputFile, bool debug, bool toTemplate, bool mode = true /*true = indent, false = tree*/, QTreeWidget* aTree = NULL) {
       vector<string> tagList = listTag(inputFile);
       vector<int> levelList;
       string tag;
@@ -171,15 +171,28 @@ string HtmlParser::htmlParser(string inputFile, bool debug, bool toTemplate, boo
 	    if (debug == true) {
 	      if ((orphelinTags.indexOf(QString::fromStdString(tag)) != -1) && (tagList[i][1] == '/')) {
                 debugItem* anItem = new debugItem;
-                anItem->message = "Warning  tag \"" + QString::fromStdString(tag) + "\" don't need to be closed (HTML 4.01)";
+                anItem->message = "Warning:  tag \"" + QString::fromStdString(tag) + "\" don't need to be closed (HTML 4.01)";
                 anItem->icon = 0;
                 anItem->line = i;
                 debugVector << *anItem;
 	      }
 	    }
       }
-    if (mode == false) 
+      
+      if ((debug == true) && (levelList.size() != 0)) {
+        if (levelList[levelList.size() -1] != 0) {
+          debugItem* anItem = new debugItem;
+          anItem->message = "Error:  Parsing failed, one or more tag may be missing";
+          anItem->icon = 1;
+          anItem->line = levelList.size();
+          debugVector << *anItem;
+        }
+      }
+      
+    if (mode == false)  {
       updateTree(toTemplate, tagList, levelList, aTree);
+      return string("salut");
+    }
     else
       return indentHtml(toTemplate, tagList, levelList);
 }
@@ -221,7 +234,7 @@ string HtmlParser::indentHtml(bool toTemplate, vector<string> tagList, vector<in
         }
         for (int k =0; k < levelList[j]; k++) 
               tab += "   ";
-        parsedHTML += tab + tagList[j] + "\n";
+        parsedHTML += tab + QString::fromStdString(tagList[j]).trimmed().toStdString() + "\n";
     }
   }
   if (toTemplate == true) {
@@ -232,7 +245,7 @@ string HtmlParser::indentHtml(bool toTemplate, vector<string> tagList, vector<in
 }
 
 
-QTreeWidgetItem* HtmlParser::updateTree(bool toTemplate, vector<string> tagList, vector<int> levelList, QTreeWidget* aTree) {
+void HtmlParser::updateTree(bool toTemplate, vector<string> tagList, vector<int> levelList, QTreeWidget* aTree) {
   /*QTreeWidgetItem* topNode = new QTreeWidgetItem;
   topNode->setText(0,QString::fromStdString(tagList[0]));*/
   QTreeWidgetItem* previousNode = NULL;
@@ -262,7 +275,6 @@ QTreeWidgetItem* HtmlParser::updateTree(bool toTemplate, vector<string> tagList,
     }
   }
   aTree->expandAll();
-  return NULL;
 }
 
 

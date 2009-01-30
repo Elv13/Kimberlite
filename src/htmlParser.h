@@ -61,7 +61,7 @@ class HtmlParser{
     vector<string> translate(vector<string> tagList, string markerDefinition);
     
     string indentHtml(bool toTemplate, vector<string> tagList, vector<int> levelList);
-    QTreeWidgetItem*  updateTree(bool toTemplate, vector<string> tagList, vector<int> levelList, QTreeWidget* aTree);
+    void updateTree(bool toTemplate, vector<string> tagList, vector<int> levelList, QTreeWidget* aTree);
     
 };
 
