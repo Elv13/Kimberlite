@@ -1,22 +1,22 @@
 /**     @file htmlParser.cpp
 
-	This file is part of the Kimberlite project
-	Copyright (C) 2008 Emmanuel Lepage Vallee <elv1313@gmail.com>
-	
-	This software is free software; you can redistribute it and/or
-	modify it under the terms of the GNU Library General Public
-	License as published by the Free Software Foundation; either
-	version 2 or 3 of the License, or (at your option) any later version.
+        This file is part of the Kimberlite project
+        Copyright (C) 2008 Emmanuel Lepage Vallee <elv1313@gmail.com>
+        
+        This software is free software; you can redistribute it and/or
+        modify it under the terms of the GNU Library General Public
+        License as published by the Free Software Foundation; either
+        version 2 or 3 of the License, or (at your option) any later version.
 
-	This software is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-	Library General Public License for more details.
+        This software is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+        Library General Public License for more details.
 
-	You should have received a copy of the GNU Library General Public License
-	along with this library; see the file COPYING.LIB.  If not, write to
-	the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-	Boston, MA 02111-1307, USA.
+        You should have received a copy of the GNU Library General Public License
+        along with this library; see the file COPYING.LIB.  If not, write to
+        the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+        Boston, MA 02111-1307, USA.
 
 
         @author Emmanuel Lepage Vallée
@@ -67,7 +67,7 @@ string HtmlParser::compressFile(string path) {
       file.open(QIODevice::ReadOnly);
       QString output;
       while (!file.atEnd())
-	    output += file.readLine();
+            output += file.readLine();
       return output.toStdString();
 }
 
@@ -85,15 +85,15 @@ string HtmlParser::getTag(string aTag) {
     else {
       tag = aTag.erase(0,1);
       while (tag[0] == ' ') 
-	    tag = tag.substr(1, tag.size() -1);
+            tag = tag.substr(1, tag.size() -1);
       if (tag.find(" ") != -1) 
-	    tag = tag.substr(0, tag.find(" "));
+            tag = tag.substr(0, tag.find(" "));
       else 
-	    tag  = tag.substr(0, tag.size() -1);
+            tag  = tag.substr(0, tag.size() -1);
       if (tag[0] == '/') 
-	    tag = aTag.erase(0,1);
+            tag = aTag.erase(0,1);
       if (tag[tag.size()-1] == '>') 
-	    tag = aTag.erase(tag.size()-1,1);
+            tag = aTag.erase(tag.size()-1,1);
       std::transform(tag.begin(), tag.end(), tag.begin(), (int(*)(int)) std::toupper);
     }
   }
@@ -103,37 +103,37 @@ string HtmlParser::getTag(string aTag) {
 vector<string> HtmlParser::listTag(string inputFile) {
       vector<string> tagList;
       while (inputFile != "") {
-	    while ((inputFile[0] == ' ') || (inputFile[0] == '	') || (inputFile[0] == 0x0A))
-	      inputFile = inputFile.erase(0,1);
-	    if (inputFile.find("<") < inputFile.find_last_of("<",inputFile.find(">"))) {
-		  tagList.push_back(inputFile.substr(0,inputFile.find_last_of("<",inputFile.find(">")-1)));
-		  inputFile = inputFile.erase(0,inputFile.find_last_of("<",inputFile.find(">")-1));
-	    }
-	    else if (inputFile.substr(0,9) == "<!DOCTYPE") {
-		  tagList.push_back(inputFile.substr(0,inputFile.find(">")+1));
-		  inputFile = inputFile.erase(0,inputFile.find(">")+1);
-	    }
-	    else if (inputFile.substr(0,4) == "<!--") {
-		  tagList.push_back(inputFile.substr(0,inputFile.find("->")+2));
-		  inputFile = inputFile.erase(0,inputFile.find("->")+2);
-	    }
-	    else if ((inputFile.substr(0,7) == "<script")) { //TODO add SCRIPT too
-		  tagList.push_back(inputFile.substr(0,inputFile.find(">")+1));
-		  inputFile = inputFile.erase(0,inputFile.find(">")+1);
+            while ((inputFile[0] == ' ') || (inputFile[0] == '  ') || (inputFile[0] == 0x0A))
+              inputFile = inputFile.erase(0,1);
+            if (inputFile.find("<") < inputFile.find_last_of("<",inputFile.find(">"))) {
+                  tagList.push_back(inputFile.substr(0,inputFile.find_last_of("<",inputFile.find(">")-1)));
+                  inputFile = inputFile.erase(0,inputFile.find_last_of("<",inputFile.find(">")-1));
+            }
+            else if (inputFile.substr(0,9) == "<!DOCTYPE") {
+                  tagList.push_back(inputFile.substr(0,inputFile.find(">")+1));
+                  inputFile = inputFile.erase(0,inputFile.find(">")+1);
+            }
+            else if (inputFile.substr(0,4) == "<!--") {
+                  tagList.push_back(inputFile.substr(0,inputFile.find("->")+2));
+                  inputFile = inputFile.erase(0,inputFile.find("->")+2);
+            }
+            else if ((inputFile.substr(0,7) == "<script")) { //TODO add SCRIPT too
+                  tagList.push_back(inputFile.substr(0,inputFile.find(">")+1));
+                  inputFile = inputFile.erase(0,inputFile.find(">")+1);
 
-		  if (inputFile.find("</script>") != 0) {
-		    tagList.push_back(inputFile.substr(0,inputFile.find("</script>")-1));
-		    inputFile = inputFile.erase(0,inputFile.find("</script>")-1);
-		  }
-	    }
-	    else if (inputFile.find("<") == 0) {
-		  tagList.push_back(inputFile.substr(0,inputFile.find(">")+1));
-		  inputFile = inputFile.erase(0,inputFile.find(">")+1);
-	    }
-	    else if (inputFile != "") {
-		  tagList.push_back(inputFile.substr(0,inputFile.find("<")));
-		  inputFile = inputFile.erase(0,inputFile.find("<"));
-	    }
+                  if (inputFile.find("</script>") != 0) {
+                    tagList.push_back(inputFile.substr(0,inputFile.find("</script>")-1));
+                    inputFile = inputFile.erase(0,inputFile.find("</script>")-1);
+                  }
+            }
+            else if (inputFile.find("<") == 0) {
+                  tagList.push_back(inputFile.substr(0,inputFile.find(">")+1));
+                  inputFile = inputFile.erase(0,inputFile.find(">")+1);
+            }
+            else if (inputFile != "") {
+                  tagList.push_back(inputFile.substr(0,inputFile.find("<")));
+                  inputFile = inputFile.erase(0,inputFile.find("<"));
+            }
       }
   return tagList;
 }
@@ -142,41 +142,84 @@ string HtmlParser::htmlParser(string inputFile, bool debug, bool toTemplate, boo
       vector<string> tagList = listTag(inputFile);
       vector<int> levelList;
       string tag;
+      bool orphelin = false;
       for (int i=0; i < tagList.size();i++) {
-	    tag = getTag(tagList[i]);
-	    std::transform(tag.begin(), tag.end(), tag.begin(), (int(*)(int)) std::toupper);
-	    cout << i << ": ";
-	    if (i==0)
-		  levelList.push_back(0);
-	    else if ((tagList[i][0] == '<') && (orphelinTags.indexOf(QString::fromStdString(getTag(tagList[i]))) == -1)) {
-		  if (tagList[i][1] == '/') {
-			if ((getTag(tagList[i]) == getTag(tagList[i-1])) && (tagList[i-1][1] != '/'))
-			  levelList.push_back(levelList[i-1]);
-			else 
-			  levelList.push_back(levelList[i-1]-1);
-		  }
-		  else if ((tagList[i-1][0]  == '<') && ((tagList[i-1][1]  != '/')) && (orphelinTags.indexOf(QString::fromStdString(getTag(tagList[i-1]))) == -1)) 
-			levelList.push_back(levelList[i-1]+1);
-		  else 
-			levelList.push_back(levelList[i-1]);
-	    }
-	    else {
-		  if ((tagList[i-1][0]  == '<') && ((tagList[i-1][1]  != '/')) && (orphelinTags.indexOf(QString::fromStdString(getTag(tagList[i-1]))) == -1)) 
-			levelList.push_back(levelList[i-1]+1);
-		  else 
-			levelList.push_back(levelList[i-1]);
-	    }
-	    cout << levelList[i] << " " << tagList[i] << endl;
+        tag = getTag(tagList[i]);
+        std::transform(tag.begin(), tag.end(), tag.begin(), (int(*)(int)) std::toupper);
+        cout << i << ": ";
+        if (i==0)
+              levelList.push_back(0);
+        else if ((tagList[i][0] == '<') && (orphelinTags.indexOf(QString::fromStdString(getTag(tagList[i]))) == -1)) {
+              if (tagList[i][1] == '/') {
+                    if ((getTag(tagList[i]) == getTag(tagList[i-1])) && (tagList[i-1][1] != '/'))
+                      levelList.push_back(levelList[i-1]);
+                    else 
+                      levelList.push_back(levelList[i-1]-1);
+              }
+              else if ((tagList[i-1][0]  == '<') && ((tagList[i-1][1]  != '/')) && (orphelinTags.indexOf(QString::fromStdString(getTag(tagList[i-1]))) == -1)) 
+                    levelList.push_back(levelList[i-1]+1);
+              else 
+                    levelList.push_back(levelList[i-1]);
+        }
+        else {
+              if ((tagList[i][0] == '<') && (orphelinTags.indexOf(QString::fromStdString(tag)) != -1))
+                orphelin = true;
+              if ((tagList[i-1][0]  == '<') && ((tagList[i-1][1]  != '/')) && (orphelinTags.indexOf(QString::fromStdString(getTag(tagList[i-1]))) == -1)) 
+                    levelList.push_back(levelList[i-1]+1);
+              else 
+                    levelList.push_back(levelList[i-1]);
+        }
+        cout << levelList[i] << " " << tagList[i] << endl;
 
-	    if (debug == true) {
-	      if ((orphelinTags.indexOf(QString::fromStdString(tag)) != -1) && (tagList[i][1] == '/')) {
-                debugItem* anItem = new debugItem;
-                anItem->message = "Warning:  tag \"" + QString::fromStdString(tag) + "\" don't need to be closed (HTML 4.01)";
-                anItem->icon = 0;
-                anItem->line = i;
-                debugVector << *anItem;
-	      }
-	    }
+        if (debug == true) {
+          if ((orphelinTags.indexOf(QString::fromStdString(tag)) != -1) && (tagList[i][1] == '/')) {
+            debugItem* anItem = new debugItem;
+            anItem->message = "Warning:  tag \"" + QString::fromStdString(tag) + "\" don't need to be closed (HTML 4.01)";
+            anItem->icon = 0;
+            anItem->line = i;
+            debugVector << *anItem;
+          }
+          else if ((orphelinTags.indexOf(QString::fromStdString(tag)) == -1) && (tagList[i][0] == '<') && (tagList[i][1] == '/')) { //TODO remove all duplicated if crap
+            int k =i-1;
+            bool found = false;
+            while ((k >=0) && (found == false)) {
+              if (levelList[i] == levelList[k])
+                found = true;
+              else
+                k--;
+            }
+            if ((found == true) && (getTag(tagList[i]) != getTag(tagList[k]))) {
+              debugItem* anItem = new debugItem;
+              anItem->message = "Error:  tag \"" + QString::fromStdString(getTag(tagList[k])) + "\" does not close at the right place";
+              anItem->icon = 1;
+              anItem->line = k;
+              debugVector << *anItem;
+            }
+          }
+          else if ((orphelinTags.indexOf(QString::fromStdString(tag)) != -1) && (tagList[i][tagList[i].size() -2] != '/') && (tagList[i].find(" ") != -1) && (tagList[i][1] != '!')) { //TODO recheck if it need "else"
+            debugItem* anItem = new debugItem;
+            anItem->message = "Warning:  Missing \"/\" at the end of tag \"" + QString::fromStdString(getTag(tagList[i])) + "\" add it to comply with xHTML standard";
+            anItem->icon = 0;
+            anItem->line = i;
+            debugVector << *anItem;
+          }
+          
+          /*Other exeptions*/
+          if ((tag == "SCRIPT") && (getTag(tagList[i+1]) != "SCRIPT")) { //BUG array overflow possible
+            debugItem* anItem = new debugItem;
+            anItem->message = "Information: Using javascript or css code directly in HTML file is not a good practice, use separate file";
+            anItem->icon = 3;
+            anItem->line = i;
+            debugVector << *anItem;
+          }
+          else if ((tag == "STYLE") && (getTag(tagList[i+1]) != "STYLE")) { //BUG array overflow possible
+            debugItem* anItem = new debugItem;
+            anItem->message = "Information: Using javascript or css code directly in HTML file is not a good practice, use separate file";
+            anItem->icon = 3;
+            anItem->line = i;
+            debugVector << *anItem;
+          }
+        }
       }
       
       if ((debug == true) && (levelList.size() != 0)) {
@@ -246,8 +289,6 @@ string HtmlParser::indentHtml(bool toTemplate, vector<string> tagList, vector<in
 
 
 void HtmlParser::updateTree(bool toTemplate, vector<string> tagList, vector<int> levelList, QTreeWidget* aTree) {
-  /*QTreeWidgetItem* topNode = new QTreeWidgetItem;
-  topNode->setText(0,QString::fromStdString(tagList[0]));*/
   QTreeWidgetItem* previousNode = NULL;
   aTree->clear();
   
@@ -281,13 +322,13 @@ void HtmlParser::updateTree(bool toTemplate, vector<string> tagList, vector<int>
 vector<string> HtmlParser::ConvertToTemplate(vector<string> tagList, string &markerDefinition) {
       markerList.clear();
       for (int k=0; k < tagList.size();k++) {
-	    if (tagList[k][0] != '<') {
-		  StringToMarker aPopup(&tagList,k,&markerDefinition, 0,&markerList);
-		  aPopup.exec();
-		  /*if (tagList[k].substr(0,3) == "###") {
-			
-		  }*/
-	    }
+            if (tagList[k][0] != '<') {
+                  StringToMarker aPopup(&tagList,k,&markerDefinition, 0,&markerList);
+                  aPopup.exec();
+                  /*if (tagList[k].substr(0,3) == "###") {
+                        
+                  }*/
+            }
       }
       return tagList;
 }
@@ -295,13 +336,13 @@ vector<string> HtmlParser::ConvertToTemplate(vector<string> tagList, string &mar
 vector<string> HtmlParser::translate(vector<string> tagList, string markerDefinition) {
       markerList.clear();
       for (int k=0; k < tagList.size();k++) {
-	    if (tagList[k][0] != '<') {
-		  StringToMarker aPopup(&tagList,k,&markerDefinition, 0,&markerList);
-		  aPopup.exec();
-		  /*if (tagList[k].substr(0,3) == "###") {
-			
-		  }*/
-	    }
+            if (tagList[k][0] != '<') {
+                  StringToMarker aPopup(&tagList,k,&markerDefinition, 0,&markerList);
+                  aPopup.exec();
+                  /*if (tagList[k].substr(0,3) == "###") {
+                        
+                  }*/
+            }
       }
       return tagList;
 }

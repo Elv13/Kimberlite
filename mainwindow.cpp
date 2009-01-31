@@ -1952,11 +1952,12 @@ void MainWindow::fillCSSAdvMode() {
 }
 
 void MainWindow::reParse() {
-    //aParser = new HtmlParser();
+    aParser->debugVector.clear();
     std::string aFile = aParser->compressString(rtfHTMLEditor->toPlainText().toStdString());
     aParser->htmlParser(aFile,true,false,false,treeHtml);
     rtfHTMLEditor->setPlainText(QString::fromStdString(aParser->htmlParser(aFile,true,false,true, NULL)));
     lstDebug->clear();
+    
     for (int i =0; i < aParser->debugVector.size(); i++) {
       QListWidgetItem* anItem = new QListWidgetItem("["+QString::number(aParser->debugVector[i].line)+"] "+aParser->debugVector[i].message);
       if (aParser->debugVector[i].icon == 0)
