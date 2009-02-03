@@ -25,7 +25,7 @@
 */
 #include "stringToTemplate.h"
 
-StringToMarker::StringToMarker(vector<string> *tagList2, int index2, string* comment2, QWidget* parent, QStringList* markerList2) : QDialog( parent )
+StringToMarker::StringToMarker(QVector<QString> *tagList2, int index2, QString* comment2, QWidget* parent, QStringList* markerList2) : QDialog( parent )
     {
     tagList = tagList2;
     markerList;
@@ -51,7 +51,7 @@ StringToMarker::StringToMarker(vector<string> *tagList2, int index2, string* com
 
     lblText = new QLabel(this);
     lblText->setObjectName(QString::fromUtf8("lblText"));
-    lblText->setText("<b>" + QString::fromStdString(tagList->at(index)) + "</b>");
+    lblText->setText("<b>" + tagList->at(index) + "</b>");
 
     verticalLayout->addWidget(lblText);
 
@@ -87,10 +87,10 @@ void StringToMarker::replaceString() {
       //}
    }
    else {
-      string thisString = tagList->at(index);
-      cout << tagList->at(index) << endl;
-      *comment += "\n###" + txtNewText->text().toStdString() + "### = " + thisString;
-      tagList->at(index) = "###" + txtNewText->text().toStdString() + "###";
+      QString thisString = tagList->at(index);
+      //cout << tagList->at(index) << endl;
+      *comment += "\n###" + txtNewText->text() + "### = " + thisString;
+      (*tagList)[index] = "###" + txtNewText->text() + "###";
       markerList->append(txtNewText->text());
       accept();
    }

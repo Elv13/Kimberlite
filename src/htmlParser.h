@@ -23,32 +23,37 @@
         @date 13 August 2008
         @version 0.1-pre-alpah0
 */
-#include <iostream>
 #include <QStringList>
-#include <vector>
 #include <QThread>
 #include <QSyntaxHighlighter>
 #include <QTreeWidgetItem>
 #include <QVector>
+#include <QString>
+#include <QFile>
+#include <QtSql>
+#include "stringToTemplate.h"
 
 using namespace std;
 
-struct debugItem {
-  int line;
-  int icon; /*0 = warning, 1 = error, 3 = information*/
-  int character;
-  QString message;
+class debugItem {
+  public:
+    debugItem(int _line, int _icon, QString _message) : line(_line), icon(_icon), message(_message) {}
+    debugItem() {};
+    int line;
+    int icon; /*0 = warning, 1 = error, 3 = information*/
+    int character;
+    QString message;
 };
 
 class HtmlParser{
     //Q_OBJECT
   public:
     HtmlParser();
-    std::string compressFile(std::string path);
-    std::string compressString(std::string file);
-    std::string getTag(std::string aTag);
-    std::string htmlParser(std::string inputFile, bool debug, bool toTemplate, bool mode, QTreeWidget* aTree);
-    vector<string> listTag(string inputFile);
+    QString compressFile(QString path);
+    QString compressString(QString file);
+    QString getTag(QString aTag);
+    QString htmlParser(QString inputFile, bool debug, bool toTemplate, bool mode, QTreeWidget* aTree);
+    QVector<QString> listTag(QString inputFile);
     QVector<debugItem> debugVector;
     
   private:
@@ -57,11 +62,11 @@ class HtmlParser{
     QStringList needNewLineOnClose;
     QStringList needNewLineOnOpen;
     QStringList markerList;
-    vector<string> ConvertToTemplate(vector<string> tagList, string &markerDefinition);
-    vector<string> translate(vector<string> tagList, string markerDefinition);
+    QVector<QString> ConvertToTemplate(QVector<QString> tagList, QString &markerDefinition);
+    QVector<QString> translate(QVector<QString> tagList, QString markerDefinition);
     
-    string indentHtml(bool toTemplate, vector<string> tagList, vector<int> levelList);
-    void updateTree(bool toTemplate, vector<string> tagList, vector<int> levelList, QTreeWidget* aTree);
+    QString indentHtml(bool toTemplate, QVector<QString> tagList, QVector<int> levelList);
+    void updateTree(bool toTemplate, QVector<QString> tagList, QVector<int> levelList, QTreeWidget* aTree);
     
 };
 

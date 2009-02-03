@@ -51,22 +51,23 @@
 #include "src/CSSbeginnerWidget.h"
 #include "src/addProprietyWidget.h"
 #include "src/stringToTemplate.h"
+#include "src/ProjectManager_v2.h"
 #include <ktip.h>
 
-MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent) {
+MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage(NULL) {
   isModified = false;
-//test code
-aProject = new ProjectManager("test.wkp");
-cout << aProject->projectName.toStdString() << endl;
-setWindowTitle(QApplication::translate("this", "Kimberlite - ", 0, QApplication::UnicodeUTF8) + aProject->projectName);
-for (int i =0;i<aProject->htmlPage.count();i++) {
-  cout << aProject->htmlPage[i].toStdString() << endl;
-}
-//exit(33);
-//end of test code
+  //test code
+  aProject = new ProjectManager("test.wkp");
+  cout << aProject->projectName.toStdString() << endl;
+  setWindowTitle(QApplication::translate("this", "Kimberlite - ", 0, QApplication::UnicodeUTF8) + aProject->projectName);
+  for (int i =0;i<aProject->htmlPage.count();i++) {
+    cout << aProject->htmlPage[i].toStdString() << endl;
+  }
+  //exit(33);
+  //end of test code
 
-setupToolTip(); 
-cout << "This: " <<   KStandardDirs::locate( "appdata", "kimberlite.db" ).toStdString() << endl;
+  setupToolTip(); 
+  cout << "This: " <<   KStandardDirs::locate( "appdata", "kimberlite.db" ).toStdString() << endl;
     db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE"));
     db->setDatabaseName( KStandardDirs::locate( "appdata", "kimberlite.db" ));
     if ( db->open()) {
@@ -1339,15 +1340,29 @@ cout << "This: " <<   KStandardDirs::locate( "appdata", "kimberlite.db" ).toStdS
     webValidator->setUrl(QUrl("about:blank"));
 
     verticalLayout_16->addWidget(webValidator);
+    
+    aProjectManager = new ProjectManager2(tabValidator);
+     connect(aProjectManager, SIGNAL(htmlPageChanged(QTreeWidgetItem*, QString)), this, SLOT(loadPage(QTreeWidgetItem*, QString)));
+    QString fileName = "/home/lepagee/dev/myproject/kimberlite/test2.wkp";
+    QFile file(fileName);
+    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+        QMessageBox::warning(this, tr("SAX Bookmarks"),
+                             tr("Cannot read file %1:\n%2.")
+                             .arg(fileName)
+                             .arg(file.errorString()));
+    }
+    aProjectManager->read(&file);
+    verticalLayout_16->addWidget(aProjectManager);
 
     tabWEditor->addTab(tabValidator, QString());
+    
 
     //verticalLayout_2->addWidget(tabWEditor);
 
 
     mainLayout->addWidget(centralWidget2);
 
-centralwidget->setLayout(mainLayout);
+    centralwidget->setLayout(mainLayout);
     //verticalLayout->addLayout(mainLayout);
 
     //this->setCentralWidget(centralwidget);
@@ -1356,6 +1371,8 @@ centralwidget->setLayout(mainLayout);
     statusbar->setGeometry(QRect(0, 696, 1008, 21));
     this->setStatusBar(statusbar);
 
+    
+    
     retranslateUi();
     //disableWidget(false);
 //rtfCSSEditor->setText(readCSSFile("/home"));
@@ -1953,9 +1970,9 @@ void MainWindow::fillCSSAdvMode() {
 
 void MainWindow::reParse() {
     aParser->debugVector.clear();
-    std::string aFile = aParser->compressString(rtfHTMLEditor->toPlainText().toStdString());
+    QString aFile = aParser->compressString(rtfHTMLEditor->toPlainText());
     aParser->htmlParser(aFile,true,false,false,treeHtml);
-    rtfHTMLEditor->setPlainText(QString::fromStdString(aParser->htmlParser(aFile,true,false,true, NULL)));
+    rtfHTMLEditor->setPlainText(aParser->htmlParser(aFile,false,false,true, NULL));
     lstDebug->clear();
     
     for (int i =0; i < aParser->debugVector.size(); i++) {
@@ -1973,15 +1990,15 @@ void MainWindow::reParse() {
 void MainWindow::templaterize(bool check) {
     if (check == true) {
     //aParser = new HtmlParser();
-      std::string aFile = aParser->compressString(rtfHTMLEditor->toPlainText().toStdString());
-      rtfHTMLEditor->setPlainText(QString::fromStdString(aParser->htmlParser(aFile,true,true,true,NULL)));
+      std::string aFile = aParser->compressString(rtfHTMLEditor->toPlainText()).toStdString();
+      rtfHTMLEditor->setPlainText(aParser->htmlParser(QString::fromStdString(aFile),true,true,true,NULL));
     }
 }
 
 void MainWindow::translate() {
     //aParser = new HtmlParser();
-    std::string aFile = aParser->compressString(rtfHTMLEditor->toPlainText().toStdString());
-    rtfHTMLEditor->setPlainText(QString::fromStdString(aParser->htmlParser(aFile,true,true,true,NULL)));
+    QString aFile = aParser->compressString(rtfHTMLEditor->toPlainText());
+    rtfHTMLEditor->setPlainText(aParser->htmlParser(aFile,true,true,true,NULL));
 }
 
 void MainWindow::newProject(){
@@ -2043,9 +2060,9 @@ void MainWindow::openProject() {
               tableView->setItem(i, 0, aTableWidget);
               //tableView->setToolTip(thisJob.c_str());
             }
-            std::string aFile = aParser->compressFile(aProject->htmlPage[0].toStdString());
+            QString aFile = aParser->compressFile(aProject->htmlPage[0]);
             pageName = aProject->htmlPage[0];
-            rtfHTMLEditor->setPlainText(QString::fromStdString(aParser->htmlParser(aFile,true, false,true,NULL)));
+            rtfHTMLEditor->setPlainText(aParser->htmlParser(aFile,true, false,true,NULL));
             //cout << aProject->cssPage.toStdString(); exit(33);
             readCSSFile("/home/lepagee/dev/myproject/kimberlite/StyleSheet.css");
             //readCSSFile(aProject->cssPage);
@@ -2136,8 +2153,18 @@ void MainWindow::loadPage(QTableWidgetItem* anItem) {
     saveFile();
   pageName = anItem->text();
   isModified = false;
-  std::string aFile = aParser->compressFile(pageName.toStdString());
-  rtfHTMLEditor->setPlainText(QString::fromStdString(aParser->htmlParser(aFile,true, false,true,NULL)));
+  QString aFile = aParser->compressFile(pageName);
+  rtfHTMLEditor->setPlainText(aParser->htmlParser(aFile,true, false,true,NULL));
+}
+
+void MainWindow::loadPage(QTreeWidgetItem* item, QString text) {
+  printf("\nI am here \n");
+  /*if ((isModified == true) && (currentHTMLPage != NULL)) {
+    
+  }*/
+  isModified = false;
+  QString aFile = aParser->compressString(text);
+  rtfHTMLEditor->setPlainText(aParser->htmlParser(aFile,true, false,true,NULL));
 }
 
 void MainWindow::setModified() {

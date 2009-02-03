@@ -27,7 +27,6 @@
 #define UI_UNTITLED_H
 
 #include <iostream>
-#include <vector>
 #include <QtCore/QVariant>
 #include <QtGui/QAction>
 #include <QtGui/QApplication>
@@ -38,6 +37,7 @@
 #include <QtGui/QLineEdit>
 #include <QtGui/QVBoxLayout>
 #include <QStringList>
+#include <QVector>
 
 QT_BEGIN_NAMESPACE
 using namespace std;
@@ -52,13 +52,13 @@ public:
     QLineEdit *txtNewText;
     QDialogButtonBox *buttonBox;
 
-    StringToMarker(vector<string> *tagList2, int index2, string* comment2, QWidget* parent, QStringList* markerList2);
+    StringToMarker(QVector<QString> *tagList2, int index2, QString* comment2, QWidget* parent, QStringList* markerList2);
     ~StringToMarker(){};
 
 private:
-    vector<string>* tagList;
+    QVector<QString>* tagList;
     int index;
-    string* comment;
+    QString* comment;
     QStringList* markerList;
 
 private slots:

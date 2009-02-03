@@ -67,14 +67,16 @@
 #include <QSyntaxHighlighter>
 #include <QtSql>
 #include <QListWidget>
+#include <QTreeWidgetItem>
+#include <QString>
 
 #include "src/CSSbeginnerWidget.h"
 #include "src/ProjectManager.h"
+#include "src/ProjectManager_v2.h"
 
 QT_BEGIN_NAMESPACE
 
-class MainWindow  : public KXmlGuiWindow
-{
+class MainWindow  : public KXmlGuiWindow {
    Q_OBJECT
 public:
     MainWindow(QWidget* parent);
@@ -247,6 +249,7 @@ public:
     CSSBeginnerWidget* cssList_style;
     CSSBeginnerWidget* cssCursor;
     QString cssFile;
+    ProjectManager2* aProjectManager;
 
   private:
     HtmlParser* aParser;
@@ -260,6 +263,7 @@ public:
     void splitSubClass(QString name, QTreeWidgetItem* parent);
     KIcon getRightIcon(QString text);
     int previousCssMode;
+    QTreeWidgetItem* currentHTMLPage;
 
 
   private slots:
@@ -283,6 +287,8 @@ public:
     void showCSS(bool);
     void showDebugger(bool);
     void addHtmlPage();
+  public slots:
+    void loadPage(QTreeWidgetItem* item, QString text);
 
 };
 
