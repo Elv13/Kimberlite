@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xbel>
+<xbel version="1.0">
+  <project title="Test2">
+    <html>
+      <page title="My wonderfull web page 1" name="page1.htm">
+        [[@O@]]html[[@C@]][[@O@]]head[[@C@]][[@O@]]/head[[@C@]]test[[@O@]]body[[@C@]][[@O@]]/body[[@C@]][[@O@]]/html[[@C@]]
+      </page>
+      <folder title="main2">
+        <page title="My wonderfull web page 2" name="page2.htm">
+        </page>
+        <page title="My wonderfull web page 3" name="page3.htm">
+        </page>
+      </folder>
+    </html>
+    <style>
+      <file name="StyleSheet.css">
+      </file>
+    </style>
+    <script>
+      <file title="My script 1" name="myscript1.js">
+      </file>
+      <folder title="main2">
+        <file title="My script 3" name="myscript3.js">
+        </file>
+        <file title="My script 3" name="myscript31.js">
+        </file>
+      </folder>
+    </script>
+    <ressources>
+      <image name="test.jpg" />
+      <swf name="test.swf" />
+      <flv name="test.flv" />
+    </ressources>
+  </project>
+</xbel>
