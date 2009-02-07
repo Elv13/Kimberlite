@@ -2,10 +2,12 @@
 #include <QHeaderView>
 #include <QMessageBox>
 #include <QTextStream>
+#include <KIcon>
 
 ProjectManager2::ProjectManager2(QWidget *parent) : QTreeWidget(parent) {
     QStringList labels;
-    labels << tr("Title") << tr("Location");
+    labels << tr("Project");
+    this->setColumnCount(1);
 
     header()->setResizeMode(QHeaderView::Stretch);
     setHeaderLabels(labels);
@@ -146,23 +148,28 @@ void ProjectManager2::parseFolderElement(const QDomElement &element, QTreeWidget
         } 
         else if (child.tagName() == "page") {
           QTreeWidgetItem *item2 = createItem(element, item);
+          item2->setIcon(0,KIcon("application-xhtml+xml"));
           item2->setText(0, child.attribute("name"));
         }
         else if (child.tagName() == "image") {
             QTreeWidgetItem *item2 = createItem(element, item);
             item2->setText(0, child.attribute("name"));
+            item2->setIcon(0,KIcon("image-gif"));
         } 
         else if (child.tagName() == "swf") {
             QTreeWidgetItem *item2 = createItem(element, item);
             item2->setText(0, child.attribute("name"));
+            item2->setIcon(0,KIcon("x-kde-nsplugin-generated"));
         }
         else if (child.tagName() == "flv") {
            QTreeWidgetItem *item2 = createItem(element, item);
            item2->setText(0, child.attribute("name"));
+           item2->setIcon(0,KIcon("video-mpeg"));
         }
         else if (child.tagName() == "file") {
             QTreeWidgetItem *item2 = createItem(element, item);
             item2->setText(0, child.attribute("name"));
+            item2->setIcon(0,KIcon("application-javascript"));
         }
         
         child = child.nextSiblingElement();
@@ -191,6 +198,7 @@ void ProjectManager2::parseHtmlElement(const QDomElement &element, QTreeWidgetIt
         else if (child.tagName() == "page") {
             QTreeWidgetItem* item2 = createItem(element, item);
             item2->setText(0, child.attribute("name"));
+            item2->setIcon(0,KIcon("application-xhtml+xml"));
             if (child.attribute("name") == "page1.htm") {
               emit htmlPageChanged(item2, toHTML(child.text()));
               printf("\nThis is it: %s \n", toHTML(child.text()).toStdString().c_str());
@@ -226,6 +234,7 @@ void ProjectManager2::parseScriptElement(const QDomElement &element, QTreeWidget
         else if (child.tagName() == "file") {
             QTreeWidgetItem *item2 = createItem(element, item);
             item2->setText(0, child.attribute("name"));
+            item2->setIcon(0,KIcon("application-javascript"));
         } 
         child = child.nextSiblingElement();
     }
@@ -253,14 +262,17 @@ void ProjectManager2::parseRessourcesElement(const QDomElement &element, QTreeWi
         else if (child.tagName() == "image") {
             QTreeWidgetItem *item2 = createItem(element, item);
             item2->setText(0, child.attribute("name"));
+            item2->setIcon(0,KIcon("image-gif"));
         } 
         else if (child.tagName() == "swf") {
             QTreeWidgetItem *item2 = createItem(element, item);
             item2->setText(0, child.attribute("name"));
+            item2->setIcon(0,KIcon("x-kde-nsplugin-generated"));
         }
         else if (child.tagName() == "flv") {
            QTreeWidgetItem *item2 = createItem(element, item);
            item2->setText(0, child.attribute("name"));
+           item2->setIcon(0,KIcon("video-mpeg"));
         }
         else if (child.tagName() == "file") {
             QTreeWidgetItem *item2 = createItem(element, item);

@@ -885,6 +885,10 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     tableDock = new QDockWidget(this);
     tableDock->setObjectName(QString::fromUtf8("tableDock"));
     tableDock->setHidden(true);
+    
+    aProjectManager = new ProjectManager2(0);
+    
+    
     tableDockCentral = new QWidget();
     tableDockCentral->setObjectName(QString::fromUtf8("tableDockCentral"));
     tableDockCentral->setGeometry(QRect(4, 22, 166, 556));
@@ -920,7 +924,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
 
     verticalLayout_4->addLayout(hlButton);
 
-    tableDock->setWidget(tableDockCentral);
+    //tableDock->setWidget(tableDockCentral);
 
     //mainLayout->addWidget(tableDock);
 
@@ -1341,7 +1345,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
 
     verticalLayout_16->addWidget(webValidator);
     
-    aProjectManager = new ProjectManager2(tabValidator);
+    tableDock->setWidget(aProjectManager);
      connect(aProjectManager, SIGNAL(htmlPageChanged(QTreeWidgetItem*, QString)), this, SLOT(loadPage(QTreeWidgetItem*, QString)));
     QString fileName = "/home/lepagee/dev/myproject/kimberlite/test2.wkp";
     QFile file(fileName);
@@ -1351,8 +1355,22 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
                              .arg(fileName)
                              .arg(file.errorString()));
     }
-    aProjectManager->read(&file);
-    verticalLayout_16->addWidget(aProjectManager);
+    else 
+      aProjectManager->read(&file);
+    aProjectManager->expandAll();
+    
+//     aProjectManager = new ProjectManager2(tabValidator);
+//      connect(aProjectManager, SIGNAL(htmlPageChanged(QTreeWidgetItem*, QString)), this, SLOT(loadPage(QTreeWidgetItem*, QString)));
+//     QString fileName = "/home/lepagee/dev/myproject/kimberlite/test2.wkp";
+//     QFile file(fileName);
+//     if (!file.open(QFile::ReadOnly | QFile::Text)) {
+//         QMessageBox::warning(this, tr("SAX Bookmarks"),
+//                              tr("Cannot read file %1:\n%2.")
+//                              .arg(fileName)
+//                              .arg(file.errorString()));
+//     }
+//     aProjectManager->read(&file);
+    //verticalLayout_16->addWidget(aProjectManager);
 
     tabWEditor->addTab(tabValidator, QString());
     
