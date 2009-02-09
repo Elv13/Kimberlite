@@ -54,7 +54,7 @@
 #include "src/ProjectManager_v2.h"
 #include <ktip.h>
 
-MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage(NULL) {
+MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage(NULL),currentScript(NULL) {
   isModified = false;
   //test code
   aProject = new ProjectManager("test.wkp");
@@ -80,22 +80,22 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
 /*if (this->objectName().isEmpty())
         this->setObjectName(QString::fromUtf8("this"));
     this->resize(1008, 717);*/
-    centralwidget = new QWidget(this);
+    /*centralwidget = new QWidget(this);
     centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
-    centralwidget->setGeometry(QRect(0, 0, 1008, 696));
+    centralwidget->setGeometry(QRect(0, 0, 1008, 696));*/
     //verticalLayout = new QVBoxLayout(0);
     //verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
     tabWMenu = new KTabWidget(this);
-    tabWMenu->setObjectName(QString::fromUtf8("tabWMenu"));
-    QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    sizePolicy.setHorizontalStretch(0);
+    //tabWMenu->setObjectName(QString::fromUtf8("tabWMenu"));
+    //QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    /*sizePolicy.setHorizontalStretch(0);
     sizePolicy.setVerticalStretch(0);
-    sizePolicy.setHeightForWidth(tabWMenu->sizePolicy().hasHeightForWidth());
-    tabWMenu->setSizePolicy(sizePolicy);
+    sizePolicy.setHeightForWidth(tabWMenu->sizePolicy().hasHeightForWidth());*/
+    //tabWMenu->setSizePolicy(sizePolicy);
     //tabWMenu->tabBar()->setSizePolicy(sizePolicy);
     tabWMenu->setMinimumSize(QSize(0, 87));
     tabWMenu->setMaximumSize(QSize(9999999, 87));
-    tabWMenu->setStyleSheet(QString::fromUtf8("QTabWidget::tab-bar {\n"
+    /*tabWMenu->setStyleSheet(QString::fromUtf8("QTabWidget::tab-bar {\n"
 "	border-radius: 5px;\n"
 "}\n"
 "QTabWidget::pane {\n"
@@ -140,7 +140,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
 "margin-left:5px;\n"
 "margin-right:5px;\n"
 "color:#B4B4B4;\n"
-"}"));
+"}"));*/
     /*menufile = new QWidget();
     menufile->setObjectName(QString::fromUtf8("menufile"));
     menufile->setGeometry(QRect(0, 0, 1000, 81));*/
@@ -226,12 +226,12 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     menuEdit = new QWidget();
     menuEdit->setStyleSheet("margin:0px;spacing:0px;padding:0px;");
     menuEdit->setObjectName(QString::fromUtf8("menuEdit"));
-    menuEdit->setGeometry(QRect(0, 0, 1000, 81));
+    //menuEdit->setGeometry(QRect(0, 0, 1000, 81));
     horizontalLayout_14 = new QHBoxLayout(menuEdit);
     horizontalLayout_14->setObjectName(QString::fromUtf8("horizontalLayout_14"));
     horizontalLayout_14->setContentsMargins(0,0,0,0);
     editTB = new KToolBar(0);
-    editTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;margin-top:-3px;background-color:" + aPalette.window().color().name () +";");
+    editTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
     horizontalLayout_14->addWidget(editTB);
     
     KAction* undoAction = new KAction(this);
@@ -555,7 +555,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     
     menuView = new QWidget();
     menuView->setObjectName(QString::fromUtf8("menuview"));
-    menuView->setGeometry(QRect(0, 0, 1000, 81));
+    //menuView->setGeometry(QRect(0, 0, 1000, 81));
     tabWMenu->addTab(menuView, QString());
 
     viewTB = new KToolBar(menuView);
@@ -596,7 +596,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     menuInsert = new QWidget();
     menuInsert->setStyleSheet("margin:0px;spacing:0px;padding:0px;");
     menuInsert->setObjectName(QString::fromUtf8("menuInsert"));
-    menuInsert->setGeometry(QRect(0, 0, 1000, 81));
+    //menuInsert->setGeometry(QRect(0, 0, 1000, 81));
     tabWMenu->addTab(menuInsert, QString());
     hlInsert = new QHBoxLayout(menuInsert);
     hlInsert->setContentsMargins(0,0,0,0);
@@ -609,7 +609,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     horizontalLayout_14->setContentsMargins(0,0,0,0);
 
     insertTB = new KToolBar(0);
-    insertTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;margin-top:-3px;background-color:" + aPalette.window().color().name () +";");
+    insertTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
     hlInsert->addWidget(insertTB);
 
     KAction* addPageAction = new KAction(this);
@@ -727,7 +727,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
 
     menuTools = new QWidget();
     menuTools->setObjectName(QString::fromUtf8("MenuTools"));
-    menuTools->setGeometry(QRect(0, 0, 1000, 81));
+    //menuTools->setGeometry(QRect(0, 0, 1000, 81));
     tabWMenu->addTab(menuTools, QString());
 
     toolsTB = new KToolBar(menuTools);
@@ -801,7 +801,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
 
     menuOptions = new QWidget();
     menuOptions->setObjectName(QString::fromUtf8("menuOptions"));
-    menuOptions->setGeometry(QRect(0, 0, 1000, 81));
+    //menuOptions->setGeometry(QRect(0, 0, 1000, 81));
     tabWMenu->addTab(menuOptions, QString());
 
     optionsTB = new KToolBar(menuOptions);
@@ -836,7 +836,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
 
     menuHelp = new QWidget();
     menuHelp->setObjectName(QString::fromUtf8("menuHelp"));
-    menuHelp->setGeometry(QRect(0, 0, 1000, 81));
+    //menuHelp->setGeometry(QRect(0, 0, 1000, 81));
     tabWMenu->addTab(menuHelp, QString());
 
     helpTB = new KToolBar(menuHelp);
@@ -874,8 +874,8 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     //verticalLayout->addWidget(tabWMenu);
     setMenuWidget(tabWMenu);
     
-    mainLayout = new QHBoxLayout(this);
-    mainLayout->setObjectName(QString::fromUtf8("mainLayout"));
+    /*mainLayout = new QHBoxLayout(this);
+    mainLayout->setObjectName(QString::fromUtf8("mainLayout"));*/
 
     dockHtmlTree = new QDockWidget(this);
     treeHtml = new QTreeWidget(this);
@@ -884,31 +884,31 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
  
     tableDock = new QDockWidget(this);
     tableDock->setObjectName(QString::fromUtf8("tableDock"));
-    tableDock->setHidden(true);
+    //tableDock->setHidden(true);
     
     aProjectManager = new ProjectManager2(0);
     
     
     tableDockCentral = new QWidget();
     tableDockCentral->setObjectName(QString::fromUtf8("tableDockCentral"));
-    tableDockCentral->setGeometry(QRect(4, 22, 166, 556));
+    //tableDockCentral->setGeometry(QRect(4, 22, 166, 556));
     //tableDockCentral->setMaximumSize(200,9999);
     //tableDock->setMaximumSize(200,9999);
     verticalLayout_4 = new QVBoxLayout(tableDockCentral);
     verticalLayout_4->setObjectName(QString::fromUtf8("verticalLayout_4"));
-    tableView = new QTableWidget(tableDockCentral);
+    /*tableView = new QTableWidget(tableDockCentral);
     tableView->setObjectName(QString::fromUtf8("tableView"));
     if (tableView->columnCount() < 2)
        tableView->setColumnCount(2);
-    addDockWidget(Qt::LeftDockWidgetArea, tableDock);
+   
     connect(tableView, SIGNAL(itemClicked(QTableWidgetItem*)),
     this, SLOT(loadPage(QTableWidgetItem*)));
     
     QTableWidgetItem *__colItem10 = new QTableWidgetItem("column 1");
     tableView->setHorizontalHeaderItem(0, __colItem10);
 
-    verticalLayout_4->addWidget(tableView);
-
+    verticalLayout_4->addWidget(tableView);*/
+    addDockWidget(Qt::LeftDockWidgetArea, tableDock);
     hlButton = new QHBoxLayout();
     hlButton->setObjectName(QString::fromUtf8("hlButton"));
     btnTableAdd = new KPushButton(tableDockCentral);
@@ -933,7 +933,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     //treeDock->setHidden(true);
     treeDockCentral = new QWidget();
     treeDockCentral->setObjectName(QString::fromUtf8("treeDockCentral"));
-    treeDockCentral->setGeometry(QRect(4, 22, 166, 556));
+    //treeDockCentral->setGeometry(QRect(4, 22, 166, 556));
     //treeDock->setMaximumSize(200,9999);
     verticalLayout_5 = new QVBoxLayout(treeDockCentral);
     verticalLayout_5->setObjectName(QString::fromUtf8("verticalLayout_5"));
@@ -941,8 +941,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     treeWidget->setObjectName(QString::fromUtf8("treeWidget"));
     treeWidget->setIconSize(QSize(32,32));
     addDockWidget(Qt::LeftDockWidgetArea,treeDock );
-    connect(treeWidget, SIGNAL(itemClicked(QTreeWidgetItem* , int)),
-    this, SLOT(loadCSSClass(QTreeWidgetItem*)));
+    
 
     verticalLayout_5->addWidget(treeWidget);
 
@@ -965,22 +964,21 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
 
     //mainLayout->addWidget(treeDock);
 
-    centralWidget2 = new QWidget(centralwidget);
+    /*centralWidget2 = new QWidget(centralwidget);
     centralWidget2->setObjectName(QString::fromUtf8("centralWidget2"));
     verticalLayout_2 = new QVBoxLayout(centralWidget2);
-    verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
+    verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));*/
     tabWEditor = new QTabWidget(this);
     setCentralWidget(tabWEditor);
     tabWEditor->setObjectName(QString::fromUtf8("tabWEditor"));
-    tabWEditor->setStyleSheet(QString::fromUtf8("QTabWidget::pane {\n"
+    /*tabWEditor->setStyleSheet(QString::fromUtf8("QTabWidget::pane {\n"
 "	margin-top:0px;\n"
 "	spacing:0px;\n"
 "	padding-top:4px;\n"
-"}"));
+"}"));*/
     tabWEditor->setTabPosition(QTabWidget::South);
     tabPreview = new QWidget();
     tabPreview->setObjectName(QString::fromUtf8("tabPreview"));
-    tabPreview->setGeometry(QRect(0, 0, 589, 549));
     horizontalLayout_2 = new QHBoxLayout(tabPreview);
     horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
     webPreview = new QWebView(tabPreview);
@@ -992,7 +990,6 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     tabWEditor->addTab(tabPreview, QString());
     tabHTML = new QWidget();
     tabHTML->setObjectName(QString::fromUtf8("tabHTML"));
-    tabHTML->setGeometry(QRect(0, 0, 589, 549));
     verticalLayout_3 = new QVBoxLayout(tabHTML);
     verticalLayout_3->setObjectName(QString::fromUtf8("verticalLayout_3"));
     rtfHTMLEditor = new KTextEdit(tabHTML);
@@ -1010,14 +1007,14 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
 
     verticalLayout_3->addWidget(rtfHTMLEditor);
 
-    btnParse = new QPushButton(tabHTML);
+    /*btnParse = new QPushButton(tabHTML);
     btnParse->setObjectName(QString::fromUtf8("btnParse"));
     sizePolicy.setHeightForWidth(btnParse->sizePolicy().hasHeightForWidth());
-    btnParse->setSizePolicy(sizePolicy);
+    //btnParse->setSizePolicy(sizePolicy);
     connect(btnParse, SIGNAL(clicked()), this, SLOT(reParse()));
 
 
-    verticalLayout_3->addWidget(btnParse);
+    verticalLayout_3->addWidget(btnParse);*/
 
     dockDebug = new QDockWidget(tabHTML);
     dockDebug->setObjectName(QString::fromUtf8("dockDebug"));
@@ -1043,7 +1040,6 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     tabWEditor->addTab(tabHTML, QString());
     tabScripts = new QWidget();
     tabScripts->setObjectName(QString::fromUtf8("tabScripts"));
-    tabScripts->setGeometry(QRect(0, 0, 589, 549));
     verticalLayout_7 = new QVBoxLayout(tabScripts);
     verticalLayout_7->setObjectName(QString::fromUtf8("verticalLayout_7"));
     rtfScriptEditor = new KTextEdit(tabScripts);
@@ -1054,7 +1050,6 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     tabWEditor->addTab(tabScripts, QString());
     tabCSS = new QWidget();
     tabCSS->setObjectName(QString::fromUtf8("tabCSS"));
-    tabCSS->setGeometry(QRect(0, 0, 589, 549));
     verticalLayout_6 = new QVBoxLayout(tabCSS);
     verticalLayout_6->setObjectName(QString::fromUtf8("verticalLayout_6"));
     tabWCSSLevel = new QTabWidget(tabCSS);
@@ -1105,7 +1100,6 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     tabWCSSLevel->setTabShape(QTabWidget::Triangular);
     tabBeginner = new QWidget();
     tabBeginner->setObjectName(QString::fromUtf8("tabBeginner"));
-    tabBeginner->setGeometry(QRect(0, 0, 581, 522));
     verticalLayout_8 = new QVBoxLayout(tabBeginner);
     verticalLayout_8->setObjectName(QString::fromUtf8("verticalLayout_8"));
     scrollArea = new QScrollArea(tabBeginner);
@@ -1113,7 +1107,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     scrollArea->setWidgetResizable(true);
     scrollAreaWidgetContents = new QWidget();
     scrollAreaWidgetContents->setObjectName(QString::fromUtf8("scrollAreaWidgetContents"));
-    scrollAreaWidgetContents->setGeometry(QRect(0, 0, 567, 508));
+    //scrollAreaWidgetContents->setGeometry(QRect(0, 0, 567, 508));
     verticalLayout_10 = new QVBoxLayout(scrollAreaWidgetContents);
     verticalLayout_10->setObjectName(QString::fromUtf8("verticalLayout_10"));
     grbSize = new QGroupBox(scrollAreaWidgetContents);
@@ -1244,7 +1238,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     verticalLayout_15->addWidget(cssCursor);
     txtOtherTags = new QTextEdit();
     txtOtherTags->setMaximumSize(9999,125);
-    txtOtherTags->setMinimumSize(9999,125);
+    txtOtherTags->setMinimumSize(0,125);
     verticalLayout_15->addWidget(txtOtherTags);
 
     verticalLayout_10->addWidget(grbOther);
@@ -1256,30 +1250,13 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     tabWCSSLevel->addTab(tabBeginner, QString());
     tabAdvanced = new QWidget();
     tabAdvanced->setObjectName(QString::fromUtf8("tabAdvanced"));
-    tabAdvanced->setGeometry(QRect(0, 0, 581, 522));
     verticalLayout_18 = new QVBoxLayout(tabAdvanced);
     verticalLayout_18->setObjectName(QString::fromUtf8("verticalLayout_18"));
     tblCSSPage = new QTableWidget(tabAdvanced);
     
     if (tblCSSPage->columnCount() < 5)
-        tblCSSPage->setColumnCount(5);
-    QTableWidgetItem *__colItem = new QTableWidgetItem();
-    tblCSSPage->setHorizontalHeaderItem(0, __colItem);
-    tblCSSPage->setColumnWidth(0, 240);
-    QTableWidgetItem *__colItem1 = new QTableWidgetItem();
-    tblCSSPage->setHorizontalHeaderItem(1, __colItem1);
-    tblCSSPage->setColumnWidth(1, 381);
-    QTableWidgetItem *__colItem2 = new QTableWidgetItem();
-    tblCSSPage->setHorizontalHeaderItem(2, __colItem2);
-    tblCSSPage->setColumnWidth(2, 60);
-    QTableWidgetItem *__colItem3 = new QTableWidgetItem();
-    tblCSSPage->setHorizontalHeaderItem(3, __colItem3);
-    tblCSSPage->setColumnWidth(3, 30);
-    QTableWidgetItem *__colItem4 = new QTableWidgetItem();
-    tblCSSPage->setHorizontalHeaderItem(4, __colItem4);
-    tblCSSPage->setColumnWidth(4, 30);
-    if (tblCSSPage->rowCount() < 1)
-        tblCSSPage->setRowCount(1);
+        tblCSSPage->setColumnCount(5);    
+
     QTableWidgetItem *__rowItem = new QTableWidgetItem();
     tblCSSPage->setVerticalHeaderItem(0, __rowItem);
     //QTableWidgetItem *__tableItem = new QTableWidgetItem();
@@ -1320,7 +1297,6 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     tabWCSSLevel->addTab(tabAdvanced, QString());
     tabexpert = new QWidget();
     tabexpert->setObjectName(QString::fromUtf8("tabexpert"));
-    tabexpert->setGeometry(QRect(0, 0, 581, 522));
     verticalLayout_17 = new QVBoxLayout(tabexpert);
     verticalLayout_17->setObjectName(QString::fromUtf8("verticalLayout_17"));
     rtfCSSEditor = new KTextEdit(tabexpert);
@@ -1336,7 +1312,6 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     tabWEditor->addTab(tabCSS, QString());
     tabValidator = new QWidget();
     tabValidator->setObjectName(QString::fromUtf8("tabValidator"));
-    tabValidator->setGeometry(QRect(0, 0, 589, 549));
     verticalLayout_16 = new QVBoxLayout(tabValidator);
     verticalLayout_16->setObjectName(QString::fromUtf8("verticalLayout_16"));
     webValidator = new QWebView(tabValidator);
@@ -1347,6 +1322,9 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     
     tableDock->setWidget(aProjectManager);
      connect(aProjectManager, SIGNAL(htmlPageChanged(QTreeWidgetItem*, QString)), this, SLOT(loadPage(QTreeWidgetItem*, QString)));
+    connect(aProjectManager, SIGNAL(javaScriptChanged(QTreeWidgetItem*, QString)), this, SLOT(loadScript(QTreeWidgetItem*, QString)));
+    connect(aProjectManager, SIGNAL(loadCss(QString)), this, SLOT(loadCss(QString)));
+    connect(treeWidget, SIGNAL(itemClicked(QTreeWidgetItem* , int)), this, SLOT(loadCSSClass(QTreeWidgetItem*)));
     QString fileName = "/home/lepagee/dev/myproject/kimberlite/test2.wkp";
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
@@ -1374,21 +1352,24 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
 
     tabWEditor->addTab(tabValidator, QString());
     
+    setCentralWidget(tabWEditor);
 
     //verticalLayout_2->addWidget(tabWEditor);
 
 
-    mainLayout->addWidget(centralWidget2);
+    //mainLayout->addWidget(centralWidget2);
 
-    centralwidget->setLayout(mainLayout);
+    //centralwidget->setLayout(mainLayout);
     //verticalLayout->addLayout(mainLayout);
 
     //this->setCentralWidget(centralwidget);
     statusbar = new QStatusBar(this);
     statusbar->setObjectName(QString::fromUtf8("statusbar"));
-    statusbar->setGeometry(QRect(0, 696, 1008, 21));
+    //statusbar->setGeometry(QRect(0, 696, 1008, 21));
     this->setStatusBar(statusbar);
-
+    //this->setStandardToolBarMenuEnabled(false);
+    //this->toolBarArea()->setHidden(true);
+//toolBars()[0]->setHidden(true);
     
     
     retranslateUi();
@@ -1415,68 +1396,68 @@ void MainWindow::retranslateUi()
     //setWindowTitle(QApplication::translate("this", "Kimberlite", 0, QApplication::UnicodeUTF8));
     tabWMenu->setTabText(tabWMenu->indexOf(menufile), QApplication::translate("this", "File", 0, QApplication::UnicodeUTF8));
     lblTextColor->setText(QApplication::translate("this", "icn", 0, QApplication::UnicodeUTF8));
-    kcbbTextColor->insertItems(0, QStringList()
-     << QApplication::translate("this", "Custom...", 0, QApplication::UnicodeUTF8)
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-    );
+//     kcbbTextColor->insertItems(0, QStringList()
+//      << QApplication::translate("this", "Custom...", 0, QApplication::UnicodeUTF8)
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//     );
     lblHighlightColor->setText(QApplication::translate("this", "icn", 0, QApplication::UnicodeUTF8));
-    cbbHighlightColor->insertItems(0, QStringList()
-     << QApplication::translate("this", "Custom...", 0, QApplication::UnicodeUTF8)
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-    );
+//     cbbHighlightColor->insertItems(0, QStringList()
+//      << QApplication::translate("this", "Custom...", 0, QApplication::UnicodeUTF8)
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//     );
     lblBackgroundColor->setText(QApplication::translate("this", "icn", 0, QApplication::UnicodeUTF8));
-    cbbBackgroundColor->insertItems(0, QStringList()
-     << QApplication::translate("this", "Custom...", 0, QApplication::UnicodeUTF8)
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-     << QString()
-    );
+//     cbbBackgroundColor->insertItems(0, QStringList()
+//      << QApplication::translate("this", "Custom...", 0, QApplication::UnicodeUTF8)
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//      << QString()
+//     );
     tabWMenu->setTabText(tabWMenu->indexOf(menuEdit), QApplication::translate("this", "Edit", 0, QApplication::UnicodeUTF8));
     tabWMenu->setTabText(tabWMenu->indexOf(menuView), QApplication::translate("this", "View", 0, QApplication::UnicodeUTF8));
     tabWMenu->setTabText(tabWMenu->indexOf(menuInsert), QApplication::translate("this", "Insert", 0, QApplication::UnicodeUTF8));
@@ -1489,7 +1470,7 @@ void MainWindow::retranslateUi()
     btnTreeAdd->setText(QApplication::translate("this", "Add", 0, QApplication::UnicodeUTF8));
     btnTreeRemove->setText(QApplication::translate("this", "Remove", 0, QApplication::UnicodeUTF8));
     tabWEditor->setTabText(tabWEditor->indexOf(tabPreview), QApplication::translate("this", "Preview", 0, QApplication::UnicodeUTF8));
-    btnParse->setText(QApplication::translate("this", "PushButton", 0, QApplication::UnicodeUTF8));
+    //btnParse->setText(QApplication::translate("this", "PushButton", 0, QApplication::UnicodeUTF8));
     tabWEditor->setTabText(tabWEditor->indexOf(tabHTML), QApplication::translate("this", "HTML", 0, QApplication::UnicodeUTF8));
     tabWEditor->setTabText(tabWEditor->indexOf(tabScripts), QApplication::translate("this", "Scripts", 0, QApplication::UnicodeUTF8));
     grbSize->setTitle(QApplication::translate("this", "Size", 0, QApplication::UnicodeUTF8));
@@ -1499,12 +1480,12 @@ void MainWindow::retranslateUi()
     grbLayout->setTitle(QApplication::translate("this", "Layout", 0, QApplication::UnicodeUTF8));
     grbOther->setTitle(QApplication::translate("this", "Other", 0, QApplication::UnicodeUTF8));
     tabWCSSLevel->setTabText(tabWCSSLevel->indexOf(tabBeginner), QApplication::translate("this", "Beginner", 0, QApplication::UnicodeUTF8));
-    tblCSSPage->horizontalHeaderItem(0)->setText(QApplication::translate("this", "name", 0, QApplication::UnicodeUTF8));
+    /*tblCSSPage->horizontalHeaderItem(0)->setText(QApplication::translate("this", "name", 0, QApplication::UnicodeUTF8));
     tblCSSPage->horizontalHeaderItem(1)->setText(QApplication::translate("this", "content", 0, QApplication::UnicodeUTF8));
     tblCSSPage->horizontalHeaderItem(2)->setText(QApplication::translate("this", "unit", 0, QApplication::UnicodeUTF8));
     tblCSSPage->horizontalHeaderItem(3)->setText(QApplication::translate("this", "comment", 0, QApplication::UnicodeUTF8));
     tblCSSPage->horizontalHeaderItem(4)->setText(QApplication::translate("this", "remove", 0, QApplication::UnicodeUTF8));
-    tblCSSPage->verticalHeaderItem(0)->setText(QApplication::translate("this", "New Row", 0, QApplication::UnicodeUTF8));
+    tblCSSPage->verticalHeaderItem(0)->setText(QApplication::translate("this", "New Row", 0, QApplication::UnicodeUTF8));*/
 
     const bool __sortingEnabled = tblCSSPage->isSortingEnabled();
     tblCSSPage->setSortingEnabled(false);
@@ -1599,16 +1580,20 @@ QStringList MainWindow::getClass(QString className) {
   parsedCSS.remove(parsedCSS.indexOf("\n}"), parsedCSS.count() - (parsedCSS.indexOf("\n}")-2)).trimmed();
   printf("La class : %s",parsedCSS.trimmed().toStdString().c_str());
   while (parsedCSS.count() != 0) {
+    printf("file: %s[/] \n",parsedCSS.toStdString().c_str());
     if ((parsedCSS.indexOf("/*") != -1) && ((parsedCSS.indexOf("/*") < (parsedCSS.indexOf(";"))))) {
       aClass.push_back(parsedCSS.left(parsedCSS.indexOf("*/")+2).trimmed());
       printf("A Line: %s \n",parsedCSS.left(parsedCSS.indexOf("*/")+2).trimmed().toStdString().c_str());
       parsedCSS.remove(0,parsedCSS.indexOf("*/")+2);
     }
+    else if (parsedCSS.indexOf(";") == -1)
+      parsedCSS.clear();
     else {
       aClass.push_back(parsedCSS.left(parsedCSS.indexOf(";")+1).trimmed());
       printf("\nA Line: %s",parsedCSS.left(parsedCSS.indexOf(";")+1).trimmed().toStdString().c_str());
       parsedCSS.remove(0,parsedCSS.indexOf(";")+1);
     }
+    parsedCSS = parsedCSS.trimmed();
   }
   //*printf("\nSA          :%d",aClass.count());
   return aClass;
@@ -2146,7 +2131,6 @@ void MainWindow::setupToolTip() {
 }
 
 void MainWindow::loadCSSClass(QTreeWidgetItem* anItem) {
-  
   QString newStyle = setClass(currentClassName, clearCssBeg());
   QString className;
   QTreeWidgetItem* currentLevel = anItem;
@@ -2156,7 +2140,8 @@ void MainWindow::loadCSSClass(QTreeWidgetItem* anItem) {
     className.insert(0, currentLevel->text(0));
     currentLevel = currentLevel->parent();
   }
-  cout << className.toStdString() << endl;
+  cout << "/" << className.toStdString() << "/" << endl;
+  className = className.trimmed();
   currentClassName = className;
   fillCSSBegMode(currentClassName);
   cout << newStyle.toStdString() <<endl;
@@ -2176,13 +2161,14 @@ void MainWindow::loadPage(QTableWidgetItem* anItem) {
 }
 
 void MainWindow::loadPage(QTreeWidgetItem* item, QString text) {
-  printf("\nI am here \n");
+  printf("\nI am in mainwindow::loadPage text:%s \n",text.toStdString().c_str());
   /*if ((isModified == true) && (currentHTMLPage != NULL)) {
     
   }*/
   isModified = false;
-  QString aFile = aParser->compressString(text);
+  QString aFile = aParser->compressString(text.trimmed());
   rtfHTMLEditor->setPlainText(aParser->htmlParser(aFile,true, false,true,NULL));
+  aParser->htmlParser(aFile,true,false,false,treeHtml);
 }
 
 void MainWindow::setModified() {
@@ -2452,7 +2438,7 @@ void MainWindow::disableWidget(bool value) {
 }
 
 void MainWindow::changeCssMode(int mode) {
-  if ((previousCssMode == 0) && (mode ==2)) {
+  if ((previousCssMode == 0) && (mode ==2) && (treeWidget->currentItem() != NULL)) {
     loadCSSClass(treeWidget->currentItem());
   }
   else if (mode == 1) {
@@ -2546,4 +2532,32 @@ KIcon MainWindow::getRightIcon(QString text) {
   }
   //anIcon->setPixmap(anIcon->pixmap(QSize(16,32)));
   return *anIcon;
+}
+
+void MainWindow::loadScript(QTreeWidgetItem* anItem, QString text) {
+  printf("Load script\n");
+  if ((currentScript != NULL) && (anItem != currentScript)) {
+    //aProjectManager->getDomElement(anItem).firstChildElement().setText(rtfScriptEditor->text());
+    QDomText newTitleText = aProjectManager->getDomDocument()->createTextNode(rtfScriptEditor->toPlainText());
+    //aProjectManager->getDomElement(anItem).dropFirstChildElement();
+    aProjectManager->getDomElement(anItem).firstChildElement().text().clear();
+    aProjectManager->getDomElement(anItem).firstChildElement().clear();
+    //aProjectManager->getDomElement(anItem).removeChildElements();
+    aProjectManager->getDomElement(anItem).firstChildElement().appendChild(newTitleText);
+    rtfScriptEditor->setPlainText(text.trimmed());
+  }
+  currentScript = anItem;
+  /*rtfScriptEditor->setPlainText(text.trimmed());
+  currentScript = anItem;*/
+}
+
+void MainWindow::loadCss(QString text) {
+  printf("Load css\n");
+  cssFile = text;
+  rtfCSSEditor->setPlainText(parseCSS());
+  //fillCSSAdvMode();
+  styleSheetName = new  QTreeWidgetItem(treeWidget);
+  styleSheetName->setText(0,"Style");
+  updateClassTree();
+  //fillCSSAdvMode();
 }

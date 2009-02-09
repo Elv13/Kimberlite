@@ -18,6 +18,7 @@ ProjectManager2::ProjectManager2(QWidget *parent) : QTreeWidget(parent) {
                          QIcon::Normal, QIcon::On);
     bookmarkIcon.addPixmap(style()->standardPixmap(QStyle::SP_FileIcon));
     connect(this, SIGNAL(htmlPageChanged(QTreeWidgetItem*, QString)), this, SLOT(test(QTreeWidgetItem*, QString)));
+    connect(this, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this, SLOT(loadPage(QTreeWidgetItem *, int)));
 }
 
 bool ProjectManager2::read(QIODevice *device) {
@@ -116,6 +117,7 @@ void ProjectManager2::parseProjectElement(const QDomElement &element, QTreeWidge
         }  
         else if (child.tagName() == "style") {
             styleSheethName = child.firstChildElement("file").attribute("name");
+	    emit loadCss(child.firstChildElement("file").text().trimmed());
         }  
         else if (child.tagName() == "script") {
             parseScriptElement(child, item);
@@ -197,6 +199,7 @@ void ProjectManager2::parseHtmlElement(const QDomElement &element, QTreeWidgetIt
         } 
         else if (child.tagName() == "page") {
             QTreeWidgetItem* item2 = createItem(element, item);
+	    //connect (item2, SIGNAL(clicked(QTreeWidgetItem *)), this, SLOT(loadPage(QTreeWidgetItem *)));
             item2->setText(0, child.attribute("name"));
             item2->setIcon(0,KIcon("application-xhtml+xml"));
             if (child.attribute("name") == "page1.htm") {
@@ -208,9 +211,9 @@ void ProjectManager2::parseHtmlElement(const QDomElement &element, QTreeWidgetIt
     }
 }
 
-void ProjectManager2::test(QTreeWidgetItem* item, QString text) {
+/*void ProjectManager2::test(QTreeWidgetItem* item, QString text) {
   printf("\nWork %s\n",text.toStdString().c_str());
-}
+}*/
 
 void ProjectManager2::parseScriptElement(const QDomElement &element, QTreeWidgetItem *parentItem) {
     QTreeWidgetItem *item = createItem(element, parentItem);
@@ -311,4 +314,20 @@ QString ProjectManager2::fromHTML(QString input) {
     input = input.replace(input.indexOf(">"),1,"[[@C@]]");
   }
   return input;
+}
+
+void ProjectManager2::loadPage(QTreeWidgetItem* anItem, int useless) {
+  printf("I am here !!! Name:%s\n",domElementForItem.value(anItem).firstChildElement().attribute("name").toStdString().c_str());
+  if (domElementForItem.value(anItem).firstChildElement().attribute("name").indexOf(".htm") != -1)
+    emit htmlPageChanged(anItem, toHTML(domElementForItem.value(anItem).firstChildElement().text()));
+  else if (domElementForItem.value(anItem).firstChildElement().attribute("name").indexOf(".js") != -1)
+    emit javaScriptChanged(anItem, domElementForItem.value(anItem).firstChildElement().text());
+}
+
+QDomElement ProjectManager2::getDomElement(QTreeWidgetItem* anItem) {
+  return domElementForItem.value(anItem);
+}
+
+QDomDocument* ProjectManager2::getDomDocument() {
+  return &domDocument;
 }

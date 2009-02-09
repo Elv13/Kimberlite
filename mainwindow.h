@@ -53,6 +53,7 @@
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QWidget>
 #include <QtWebKit/QWebView>
+#include <QDomDocument>
 #include "kcolorcombo.h"
 #include "kcombobox.h"
 #include "knuminput.h"
@@ -250,6 +251,7 @@ public:
     CSSBeginnerWidget* cssCursor;
     QString cssFile;
     ProjectManager2* aProjectManager;
+    QTreeWidgetItem* currentScript;
 
   private:
     HtmlParser* aParser;
@@ -289,6 +291,8 @@ public:
     void addHtmlPage();
   public slots:
     void loadPage(QTreeWidgetItem* item, QString text);
+    void loadScript(QTreeWidgetItem* anItem, QString text);
+    void loadCss(QString text);
 
 };
 

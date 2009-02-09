@@ -6,10 +6,15 @@
       <page title="My wonderfull web page 1" name="page1.htm">
         [[@O@]]html[[@C@]][[@O@]]head[[@C@]][[@O@]]/head[[@C@]]test[[@O@]]body[[@C@]][[@O@]]/body[[@C@]][[@O@]]/html[[@C@]]
       </page>
+      <page title="My wonderfull web page 1" name="page4.htm">
+        [[@O@]]html[[@C@]][[@O@]]head[[@C@]][[@O@]]/head[[@C@]]test444[[@O@]]body[[@C@]][[@O@]]/body[[@C@]][[@O@]]/html[[@C@]]
+      </page>
       <folder title="main2">
         <page title="My wonderfull web page 2" name="page2.htm">
+	  [[@O@]]html[[@C@]][[@O@]]head[[@C@]][[@O@]]/head[[@C@]]test22[[@O@]]body[[@C@]][[@O@]]/body[[@C@]][[@O@]]/html[[@C@]]
         </page>
         <page title="My wonderfull web page 3" name="page3.htm">
+	  [[@O@]]html[[@C@]][[@O@]]head[[@C@]][[@O@]]/head[[@C@]]test33[@O@]]body[[@C@]][[@O@]]/body[[@C@]][[@O@]]/html[[@C@]]
         </page>
       </folder>
     </html>
@@ -20,11 +25,14 @@
     </style>
     <script>
       <file title="My script 1" name="myscript1.js">
+	test1
       </file>
       <folder title="main2">
         <file title="My script 3" name="myscript3.js">
+	  test2
         </file>
         <file title="My script 3" name="myscript31.js">
+	  test3
         </file>
       </folder>
     </script>

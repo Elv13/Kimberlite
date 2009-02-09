@@ -14,10 +14,13 @@ class ProjectManager2 : public QTreeWidget {
     ProjectManager2(QWidget *parent = 0);
     bool read(QIODevice *device);
     bool write(QIODevice *device);
+    QDomElement getDomElement(QTreeWidgetItem* anItem);
+    QDomDocument* getDomDocument();
 
   private slots:
     void updateDomElement(QTreeWidgetItem *item, int column);
-    void test(QTreeWidgetItem* item, QString text);
+    //void test(QTreeWidgetItem* item, QString text);
+    void loadPage(QTreeWidgetItem* anItem, int useless);
 
   private:
     void parseFolderElement(const QDomElement &element, QTreeWidgetItem *parentItem = 0);
@@ -37,6 +40,8 @@ class ProjectManager2 : public QTreeWidget {
     
   signals:
     void htmlPageChanged(QTreeWidgetItem*,QString);
+    void javaScriptChanged(QTreeWidgetItem*,QString);
+    void loadCss(QString);
 };
 QT_END_NAMESPACE
 #endif
