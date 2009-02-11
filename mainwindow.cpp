@@ -95,7 +95,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     //tabWMenu->tabBar()->setSizePolicy(sizePolicy);
     tabWMenu->setMinimumSize(QSize(0, 87));
     tabWMenu->setMaximumSize(QSize(9999999, 87));
-    /*tabWMenu->setStyleSheet(QString::fromUtf8("QTabWidget::tab-bar {\n"
+    tabWMenu->setStyleSheet(QString::fromUtf8("QTabWidget::tab-bar {\n"
 "	border-radius: 5px;\n"
 "}\n"
 "QTabWidget::pane {\n"
@@ -127,6 +127,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
 "border-radius: 5px;\n"
 "padding-left:15px;\n"
 "padding-right:15px;\n"
+"margin-bottom:3px;\n"
 "margin-left:2px;\n"
 "border: 2px solid grey;\n"
 "width:100%;\n"
@@ -140,13 +141,13 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
 "margin-left:5px;\n"
 "margin-right:5px;\n"
 "color:#B4B4B4;\n"
-"}"));*/
-    /*menufile = new QWidget();
+"}"));
+    menufile = new QWidget();
     menufile->setObjectName(QString::fromUtf8("menufile"));
-    menufile->setGeometry(QRect(0, 0, 1000, 81));*/
-    //tabWMenu->addTab(menufile, QString());
+    menufile->setGeometry(QRect(0, 0, 1000, 81));
+    tabWMenu->addTab(menufile, QString());
 
-    fileTB = new KToolBar(0);
+    fileTB = new KToolBar(menufile);
     QPalette aPalette;
     fileTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
 
@@ -220,17 +221,16 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     this, SLOT(quit()));
     fileTB->addAction(quitAction);
     
-    tabWMenu->addTab(fileTB, "File");
     
 
     menuEdit = new QWidget();
-    menuEdit->setStyleSheet("margin:0px;spacing:0px;padding:0px;");
+    //menuEdit->setStyleSheet("margin:0px;spacing:0px;padding:0px;");
     menuEdit->setObjectName(QString::fromUtf8("menuEdit"));
     //menuEdit->setGeometry(QRect(0, 0, 1000, 81));
     horizontalLayout_14 = new QHBoxLayout(menuEdit);
     horizontalLayout_14->setObjectName(QString::fromUtf8("horizontalLayout_14"));
     horizontalLayout_14->setContentsMargins(0,0,0,0);
-    editTB = new KToolBar(0);
+    editTB = new KToolBar(menuEdit);
     editTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
     horizontalLayout_14->addWidget(editTB);
     
@@ -608,7 +608,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     horizontalLayout_14->addItem(horizontalSpacer_3);
     horizontalLayout_14->setContentsMargins(0,0,0,0);
 
-    insertTB = new KToolBar(0);
+    insertTB = new KToolBar(menuInsert);
     insertTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
     hlInsert->addWidget(insertTB);
 
@@ -700,8 +700,8 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     btnNewLine->setText("New Line");
     sizePolicy1.setHeightForWidth(btnChar->sizePolicy().hasHeightForWidth());
     btnNewLine->setSizePolicy(sizePolicy1);
-    btnNewLine->setMinimumSize(QSize(100, 24));
-    btnNewLine->setMaximumSize(QSize(100, 24));
+    btnNewLine->setMinimumSize(QSize(100, 23));
+    btnNewLine->setMaximumSize(QSize(100, 23));
 
     vlSpacing->addWidget(btnNewLine);
 
@@ -710,8 +710,8 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     btnNewTab->setText("New Tab");
     sizePolicy1.setHeightForWidth(btnChar->sizePolicy().hasHeightForWidth());
     btnNewTab->setSizePolicy(sizePolicy1);
-    btnNewTab->setMinimumSize(QSize(100, 24));
-    btnNewTab->setMaximumSize(QSize(100, 24));
+    btnNewTab->setMinimumSize(QSize(100, 23));
+    btnNewTab->setMaximumSize(QSize(100, 23));
 
     vlSpacing->addWidget(btnNewTab);
 
@@ -720,8 +720,8 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     btnNewSpace->setText("New Space");
     sizePolicy1.setHeightForWidth(btnChar->sizePolicy().hasHeightForWidth());
     btnNewSpace->setSizePolicy(sizePolicy1);
-    btnNewSpace->setMinimumSize(QSize(100, 24));
-    btnNewSpace->setMaximumSize(QSize(100, 24));
+    btnNewSpace->setMinimumSize(QSize(100, 23));
+    btnNewSpace->setMaximumSize(QSize(100, 23));
     vlSpacing->addWidget(btnNewSpace);
     hlInsert->addLayout(vlSpacing);
 
