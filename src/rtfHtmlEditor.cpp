@@ -1,6 +1,6 @@
-#include "rtfCssEditor.h"
+#include "rtfHtmlEditor.h"
 
-RtfCssEditor::RtfCssEditor(QWidget *parent)
+RtfHtmlEditor::RtfHtmlEditor(QWidget *parent)
  : KTextEdit(parent), c(0)
  {
      setPlainText(tr("This TextEdit provides autocompletions for words that have more than"
@@ -8,11 +8,11 @@ RtfCssEditor::RtfCssEditor(QWidget *parent)
                      QKeySequence("Ctrl+E").toString(QKeySequence::NativeText));
  }
  
-  RtfCssEditor::~RtfCssEditor()
+  RtfHtmlEditor::~RtfHtmlEditor()
  {
  }
  
-  void RtfCssEditor::setCompleter(QCompleter *completer)
+  void RtfHtmlEditor::setCompleter(QCompleter *completer)
  {
      if (c)
          QObject::disconnect(c, 0, this, 0);
@@ -29,12 +29,12 @@ RtfCssEditor::RtfCssEditor(QWidget *parent)
                       this, SLOT(insertCompletion(const QString&)));
  }
  
-  QCompleter *RtfCssEditor::completer() const
+  QCompleter *RtfHtmlEditor::completer() const
  {
      return c;
  }
  
- void RtfCssEditor::insertCompletion(const QString& completion)
+ void RtfHtmlEditor::insertCompletion(const QString& completion)
  {
      if (c->widget() != this)
          return;
@@ -47,75 +47,34 @@ RtfCssEditor::RtfCssEditor(QWidget *parent)
      setTextCursor(tc);
  }
 
- void RtfCssEditor::insertTabulation()
- {
-     if (c->widget() != this)
-         return;
-     QTextCursor tc = textCursor();
-     int currentPos = tc.position();
-     tc.select(QTextCursor::LineUnderCursor);
-     if ((tc.selectedText().isEmpty() == false) && (tc.selectedText().indexOf("}") == -1)) {
-	tc.setPosition(currentPos);
-	tc.insertText("\n    ");
-	//tc.movePosition(QTextCursor::Right);
-	//tc.movePosition(QTextCursor::Left);
-	//tc.movePosition(QTextCursor::Left);
-	//tc.movePosition(QTextCursor::Left);
-	QRect cr = cursorRect();
-	cr.setWidth(c->popup()->sizeHintForColumn(0) + c->popup()->verticalScrollBar()->sizeHint().width());
-	c->complete(cr); // popup it up!
-     }
-     else
-       tc.insertText("\n");
-     tc.movePosition(QTextCursor::EndOfWord);
-     setTextCursor(tc);
- }
  
-  void RtfCssEditor::insertBrace()
- {
-     if (c->widget() != this)
-         return;
-      QTextCursor tc = textCursor();
-      //if (QTextCursor::NextWord)
-      tc.insertText("\n    \n}");
-      /*tc.movePosition(QTextCursor::Left);
-      tc.movePosition(QTextCursor::Left);*/
-      tc.movePosition(QTextCursor::Left);
-      tc.movePosition(QTextCursor::Left);
-      tc.movePosition(QTextCursor::EndOfWord);
-      setTextCursor(tc);
-      QRect cr = cursorRect();
-      cr.setWidth(c->popup()->sizeHintForColumn(0) + c->popup()->verticalScrollBar()->sizeHint().width());
-      c->complete(cr); // popup it up!
- }
- 
-  QString RtfCssEditor::textUnderCursor() const
+  QString RtfHtmlEditor::textUnderCursor() const
  {
      QTextCursor tc = textCursor();
      tc.select(QTextCursor::WordUnderCursor);
      return tc.selectedText();
  }
  
-  void RtfCssEditor::focusInEvent(QFocusEvent *e)
+  void RtfHtmlEditor::focusInEvent(QFocusEvent *e)
  {
      if (c)
          c->setWidget(this);
      QTextEdit::focusInEvent(e);
  }
  
-  void RtfCssEditor::keyPressEvent(QKeyEvent *e)
+  void RtfHtmlEditor::keyPressEvent(QKeyEvent *e)
  {
-    if (((e->key() == Qt::Key_Enter) || (e->key() == Qt::Key_Return)) && (!c->popup()->isVisible())) {
+    /*if (((e->key() == Qt::Key_Enter) || (e->key() == Qt::Key_Return)) && (!c->popup()->isVisible())) {
       printf("Enter pressed \n");
       if (textUnderCursor().indexOf("{") != -1) {
-	insertBrace();
+	//insertBrace();
 	return;
       }
       else {
 	insertTabulation();
-	return;
+	//return;
       }
-    }
+    }*/
     
      if (c && c->popup()->isVisible()) {
          // The following keys are forwarded by the completer to the widget

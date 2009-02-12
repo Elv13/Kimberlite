@@ -992,7 +992,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     tabHTML->setObjectName(QString::fromUtf8("tabHTML"));
     verticalLayout_3 = new QVBoxLayout(tabHTML);
     verticalLayout_3->setObjectName(QString::fromUtf8("verticalLayout_3"));
-    rtfHTMLEditor = new KTextEdit(tabHTML);
+    rtfHTMLEditor = new RtfHtmlEditor(tabHTML);
     rtfHTMLEditor->setObjectName(QString::fromUtf8("rtfHTMLEditor"));
     rtfHTMLEditor->setAcceptRichText(false);
     HtmlSyntaxHighlighter* htmlHighlighter = new HtmlSyntaxHighlighter(rtfHTMLEditor);
@@ -1000,6 +1000,19 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     rtfHTMLEditor->setWordWrapMode(QTextOption::NoWrap);
     rtfHTMLEditor->setWordWrapMode(QTextOption::NoWrap);
     connect(rtfHTMLEditor, SIGNAL(textChanged()), this, SLOT(setModified()));
+
+    QStringList wordList2;
+    QSqlQuery query23;
+    query23.exec("SELECT NAME FROM THTML_TAG");
+    
+    while (query23.next()) {
+      wordList2 <<  query23.value(0).toString();
+    }
+
+    htmlCompleter = new QCompleter(wordList2, tabWEditor);
+    htmlCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+    //cssCompleter->setWidget(rtfCSSEditor);
+    rtfHTMLEditor->setCompleter(htmlCompleter);
 
     /*aParser = new HtmlParser();
     std::string aFile = aParser->compressFile("/home/lepagee/dev/webkreator/test.htm");

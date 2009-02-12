@@ -74,6 +74,7 @@
 
 #include "src/CSSbeginnerWidget.h"
 #include "src/rtfCssEditor.h"
+#include "src/rtfHtmlEditor.h"
 #include "src/ProjectManager.h"
 #include "src/ProjectManager_v2.h"
 
@@ -167,7 +168,7 @@ public:
     QWebView *webPreview;
     QWidget *tabHTML;
     QVBoxLayout *verticalLayout_3;
-    KTextEdit *rtfHTMLEditor;
+    RtfHtmlEditor* rtfHTMLEditor;
     QPushButton *btnParse;
     QDockWidget *dockDebug;
     QListWidget* lstDebug;
@@ -208,6 +209,7 @@ public:
     QVBoxLayout *verticalLayout_17;
     RtfCssEditor *rtfCSSEditor;
     QCompleter* cssCompleter;
+    QCompleter* htmlCompleter;
     QWidget *tabValidator;
     QVBoxLayout *verticalLayout_16;
     QWebView *webValidator;
