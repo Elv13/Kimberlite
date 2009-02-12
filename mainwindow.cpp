@@ -1574,7 +1574,7 @@ QString MainWindow::parseCSS() {
 	parsedCSS += tmpCSS.left(tmpCSS.indexOf("{")).trimmed() + " {\n";
 	tmpCSS.remove(0,tmpCSS.indexOf("{")+1);
 	while ((tmpCSS.indexOf(";") < tmpCSS.indexOf("}")) && (tmpCSS.indexOf(";") != -1) && (tmpCSS.indexOf("}") != -1)) {
-	    parsedCSS += "	" +tmpCSS.left(tmpCSS.indexOf(";")+1).trimmed() + "\n";
+	    parsedCSS += "    " +tmpCSS.left(tmpCSS.indexOf(";")+1).trimmed() + "\n";
 	    tmpCSS.remove(0,tmpCSS.indexOf(";")+1);
 	}
       }

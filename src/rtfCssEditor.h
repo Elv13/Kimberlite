@@ -9,15 +9,9 @@
 #include <QAbstractItemView>
 #include <QKeyEvent>
 #include <QScrollBar>
-/*#include <>
-#include <>
-#include <>
-#include <>
-#include <>*/
 
 
- class RtfCssEditor : public KTextEdit
- {
+ class RtfCssEditor : public KTextEdit {
      Q_OBJECT
 
  public:
@@ -33,6 +27,8 @@
 
  private slots:
      void insertCompletion(const QString &completion);
+     void insertTabulation();
+    void insertBrace();
 
  private:
      QString textUnderCursor() const;
@@ -47,8 +43,10 @@ public:
   CssSyntaxHighlighter(QTextEdit* parent) : QSyntaxHighlighter(parent) {
  HighlightingRule rule;
 
+    
+
     keywordFormat.setForeground(Qt::darkBlue);
-    //keywordFormat.setFontWeight(QFont::Bold);
+    keywordFormat.setFontWeight(QFont::Bold);
     QStringList keywordPatterns;
 
   QSqlQuery query;
@@ -65,15 +63,25 @@ public:
 
     classFormat.setFontWeight(QFont::Bold);
     classFormat.setForeground(Qt::darkMagenta);
-    rule.pattern = QRegExp("\\bQ[A-Za-z]+\\b");
+    rule.pattern = QRegExp("[A-Za-z0-9.#: ]*[ \\,][\\{\\ ]");
     rule.format = classFormat;
     highlightingRules.append(rule);
 
-    singleLineCommentFormat.setForeground(Qt::gray);
+    singleLineCommentFormat.setForeground(Qt::red);
     singleLineCommentFormat.setFontWeight(QFont::Bold);
-    rule.pattern = QRegExp("//[^\n]*");
+    rule.pattern = QRegExp(":[A-Za-z]*[ \\,][ \\{]");
     rule.format = singleLineCommentFormat;
     highlightingRules.append(rule);
+
+    keywordFormat.setForeground(Qt::black);
+    keywordFormat.setFontWeight(QFont::Bold);
+    QStringList keywordPatterns2;
+    keywordPatterns2  << ":" << ";" << "\\{" << "\\}" << "\\$\\{" << "!";
+    foreach (QString pattern, keywordPatterns2) {
+        rule.pattern = QRegExp(pattern);
+        rule.format = keywordFormat;
+        highlightingRules.append(rule);
+    }
 
     multiLineCommentFormat.setForeground(Qt::gray);
     multiLineCommentFormat.setFontWeight(QFont::Bold);

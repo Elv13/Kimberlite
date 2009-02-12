@@ -42,8 +42,51 @@ RtfCssEditor::RtfCssEditor(QWidget *parent)
      int extra = completion.length() - c->completionPrefix().length();
      tc.movePosition(QTextCursor::Left);
      tc.movePosition(QTextCursor::EndOfWord);
-     tc.insertText(completion.right(extra));
+     tc.insertText(completion.right(extra) + ": ;");
+     tc.movePosition(QTextCursor::Left);
      setTextCursor(tc);
+ }
+
+ void RtfCssEditor::insertTabulation()
+ {
+     if (c->widget() != this)
+         return;
+     QTextCursor tc = textCursor();
+     int currentPos = tc.position();
+     tc.select(QTextCursor::LineUnderCursor);
+     if (tc.selectedText().isEmpty() == false) {
+	tc.setPosition(currentPos);
+	tc.insertText("\n    ");
+	//tc.movePosition(QTextCursor::Right);
+	//tc.movePosition(QTextCursor::Left);
+	//tc.movePosition(QTextCursor::Left);
+	//tc.movePosition(QTextCursor::Left);
+	QRect cr = cursorRect();
+	cr.setWidth(c->popup()->sizeHintForColumn(0) + c->popup()->verticalScrollBar()->sizeHint().width());
+	c->complete(cr); // popup it up!
+     }
+     else
+       tc.insertText("\n");
+     tc.movePosition(QTextCursor::EndOfWord);
+     setTextCursor(tc);
+ }
+ 
+  void RtfCssEditor::insertBrace()
+ {
+     if (c->widget() != this)
+         return;
+      QTextCursor tc = textCursor();
+      //if (QTextCursor::NextWord)
+      tc.insertText("\n    \n}");
+      /*tc.movePosition(QTextCursor::Left);
+      tc.movePosition(QTextCursor::Left);*/
+      tc.movePosition(QTextCursor::Left);
+      tc.movePosition(QTextCursor::Left);
+      tc.movePosition(QTextCursor::EndOfWord);
+      setTextCursor(tc);
+      QRect cr = cursorRect();
+      cr.setWidth(c->popup()->sizeHintForColumn(0) + c->popup()->verticalScrollBar()->sizeHint().width());
+      c->complete(cr); // popup it up!
  }
  
   QString RtfCssEditor::textUnderCursor() const
@@ -62,11 +105,25 @@ RtfCssEditor::RtfCssEditor(QWidget *parent)
  
   void RtfCssEditor::keyPressEvent(QKeyEvent *e)
  {
+    if (((e->key() == Qt::Key_Enter) || (e->key() == Qt::Key_Return)) && (!c->popup()->isVisible())) {
+      printf("Enter pressed \n");
+      if (textUnderCursor().indexOf("{") != -1) {
+	insertBrace();
+	return;
+      }
+      else {
+	insertTabulation();
+	return;
+      }
+    }
+    
      if (c && c->popup()->isVisible()) {
          // The following keys are forwarded by the completer to the widget
         switch (e->key()) {
         case Qt::Key_Enter:
+	  return;
         case Qt::Key_Return:
+	  return;
         case Qt::Key_Escape:
         case Qt::Key_Tab:
         case Qt::Key_Backtab:
