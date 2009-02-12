@@ -7,3 +7,4 @@
 #include "moc_mainwindow.cpp"
 #include "moc_htmlParser.cpp"
 #include "moc_ProjectManager_v2.cpp"
+#include "moc_rtfCssEditor.cpp"

@@ -12,6 +12,7 @@
       src/stringToTemplate.cpp
       src/ProjectManager.cpp
       src/ProjectManager_v2.cpp
+      src/rtfCssEditor.cpp
       )
 
       kde4_add_executable(kimberlite ${kimberlite_SRCS})

@@ -1299,9 +1299,22 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     tabexpert->setObjectName(QString::fromUtf8("tabexpert"));
     verticalLayout_17 = new QVBoxLayout(tabexpert);
     verticalLayout_17->setObjectName(QString::fromUtf8("verticalLayout_17"));
-    rtfCSSEditor = new KTextEdit(tabexpert);
+    rtfCSSEditor = new RtfCssEditor(tabexpert);
     rtfCSSEditor->setObjectName(QString::fromUtf8("rtfCSSEditor"));
     CssSyntaxHighlighter* cssHighlighter = new CssSyntaxHighlighter(rtfCSSEditor);
+    
+    QStringList wordList;
+    QSqlQuery query22;
+    query22.exec("SELECT TITLE FROM TCSS_TAG");
+    
+    while (query22.next()) {
+      wordList <<  query22.value(0).toString();
+    }
+
+    cssCompleter = new QCompleter(wordList, tabAdvanced);
+    cssCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+    //cssCompleter->setWidget(rtfCSSEditor);
+    rtfCSSEditor->setCompleter(cssCompleter);
 
     verticalLayout_17->addWidget(rtfCSSEditor);
 
@@ -1321,7 +1334,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     verticalLayout_16->addWidget(webValidator);
     
     tableDock->setWidget(aProjectManager);
-     connect(aProjectManager, SIGNAL(htmlPageChanged(QTreeWidgetItem*, QString)), this, SLOT(loadPage(QTreeWidgetItem*, QString)));
+    connect(aProjectManager, SIGNAL(htmlPageChanged(QTreeWidgetItem*, QString)), this, SLOT(loadPage(QTreeWidgetItem*, QString)));
     connect(aProjectManager, SIGNAL(javaScriptChanged(QTreeWidgetItem*, QString)), this, SLOT(loadScript(QTreeWidgetItem*, QString)));
     connect(aProjectManager, SIGNAL(loadCss(QString)), this, SLOT(loadCss(QString)));
     connect(treeWidget, SIGNAL(itemClicked(QTreeWidgetItem* , int)), this, SLOT(loadCSSClass(QTreeWidgetItem*)));
@@ -1547,10 +1560,11 @@ QString MainWindow::readCSSFile(QString path) {
 }
 
 QString MainWindow::parseCSS() {
+        printf("\nThis3");
   QString parsedCSS;
   QString tmpCSS = cssFile.trimmed();
   printf("\nThis is the complete text: %s \n\n", tmpCSS.toStdString().c_str());
-  if (tmpCSS.isEmpty() == false) {
+  if (tmpCSS.trimmed().isEmpty() == false) {
     while (tmpCSS.count() != 0) {
       if ((tmpCSS.indexOf("/*") != -1) && ((tmpCSS.indexOf("/*") < (tmpCSS.indexOf("{"))))) {
 	parsedCSS += tmpCSS.left(tmpCSS.indexOf("*/")+1) + "\n";
@@ -1569,7 +1583,10 @@ QString MainWindow::parseCSS() {
         tmpCSS = tmpCSS.trimmed();
     }
   }
-  printf("\nThis is the file:\n %s \n\n\n\n\n\n\n\n",parsedCSS.toStdString().c_str());
+  
+  printf("\nThis5");
+  //printf("\nThis is the file:\n %s \n\n\n\n\n\n\n\n",parsedCSS.toStdString().c_str());
+  printf("\nThis4");
   return parsedCSS;
 }
 
@@ -2537,15 +2554,15 @@ KIcon MainWindow::getRightIcon(QString text) {
 void MainWindow::loadScript(QTreeWidgetItem* anItem, QString text) {
   printf("Load script\n");
   if ((currentScript != NULL) && (anItem != currentScript)) {
-    //aProjectManager->getDomElement(anItem).firstChildElement().setText(rtfScriptEditor->text());
+    QDomElement currentElement = aProjectManager->getDomElement(currentScript);
+    printf("Old text= %s, new text = %s\n",aProjectManager->getDomElement(currentScript).firstChildElement().text().toStdString().c_str(),rtfScriptEditor->toPlainText().toStdString().c_str());
+    QDomElement oldTitleElement = currentElement.firstChildElement();
     QDomText newTitleText = aProjectManager->getDomDocument()->createTextNode(rtfScriptEditor->toPlainText());
-    //aProjectManager->getDomElement(anItem).dropFirstChildElement();
-    aProjectManager->getDomElement(anItem).firstChildElement().text().clear();
-    aProjectManager->getDomElement(anItem).firstChildElement().clear();
-    //aProjectManager->getDomElement(anItem).removeChildElements();
-    aProjectManager->getDomElement(anItem).firstChildElement().appendChild(newTitleText);
-    rtfScriptEditor->setPlainText(text.trimmed());
+    //aProjectManager->getDomElement(currentScript).replaceChild(newTitleText, oldTitleElement);
+    aProjectManager->getDomElement(currentScript).removeChild(oldTitleElement);
+    aProjectManager->getDomElement(currentScript).appendChild(newTitleText);
   }
+  rtfScriptEditor->setPlainText(text.trimmed());
   currentScript = anItem;
   /*rtfScriptEditor->setPlainText(text.trimmed());
   currentScript = anItem;*/
@@ -2554,7 +2571,9 @@ void MainWindow::loadScript(QTreeWidgetItem* anItem, QString text) {
 void MainWindow::loadCss(QString text) {
   printf("Load css\n");
   cssFile = text;
+        printf("\nThis1");
   rtfCSSEditor->setPlainText(parseCSS());
+        printf("\nThis2");
   //fillCSSAdvMode();
   styleSheetName = new  QTreeWidgetItem(treeWidget);
   styleSheetName->setText(0,"Style");
