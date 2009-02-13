@@ -4,6 +4,7 @@
 #include "moc_addProprietyWidget.cpp"
 #include "moc_stringToTemplate.cpp"
 #include "moc_CSSbeginnerWidget.cpp"
+#include "moc_rtfHtmlEditor.cpp"
 #include "moc_mainwindow.cpp"
 #include "moc_htmlParser.cpp"
 #include "moc_ProjectManager_v2.cpp"

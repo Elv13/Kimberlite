@@ -73,7 +73,7 @@ public:
     rule.format = singleLineCommentFormat;
     highlightingRules.append(rule);
 
-    keywordFormat.setForeground(Qt::black);
+    keywordFormat.setForeground(Qt::darkGray);
     keywordFormat.setFontWeight(QFont::Bold);
     QStringList keywordPatterns2;
     keywordPatterns2  << ":" << ";" << "\\{" << "\\}" << "\\$\\{" << "!";

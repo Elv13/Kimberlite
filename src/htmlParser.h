@@ -51,7 +51,7 @@ class HtmlParser{
     HtmlParser();
     QString compressFile(QString path);
     QString compressString(QString file);
-    QString getTag(QString aTag);
+    static QString getTag(QString aTag);
     QString htmlParser(QString inputFile, bool debug, bool toTemplate, bool mode, QTreeWidget* aTree);
     QVector<QString> listTag(QString inputFile);
     QVector<debugItem> debugVector;

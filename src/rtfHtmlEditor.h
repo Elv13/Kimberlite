@@ -9,6 +9,7 @@
 #include <QAbstractItemView>
 #include <QKeyEvent>
 #include <QScrollBar>
+#include <QStringList>
 
 
  class RtfHtmlEditor : public KTextEdit {
@@ -27,9 +28,11 @@
 
  private slots:
      void insertCompletion(const QString &completion);
-
+      void insertTabulation();
  private:
      QString textUnderCursor() const;
+     QStringList orphelinTags;
+     QStringList noNewLineTags;
 
  private:
      QCompleter *c;

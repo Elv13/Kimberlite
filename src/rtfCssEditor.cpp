@@ -3,9 +3,7 @@
 RtfCssEditor::RtfCssEditor(QWidget *parent)
  : KTextEdit(parent), c(0)
  {
-     setPlainText(tr("This TextEdit provides autocompletions for words that have more than"
-                     " 3 characters. You can trigger autocompletion using ") +
-                     QKeySequence("Ctrl+E").toString(QKeySequence::NativeText));
+
  }
  
   RtfCssEditor::~RtfCssEditor()
@@ -57,36 +55,48 @@ RtfCssEditor::RtfCssEditor(QWidget *parent)
      if ((tc.selectedText().isEmpty() == false) && (tc.selectedText().indexOf("}") == -1)) {
 	tc.setPosition(currentPos);
 	tc.insertText("\n    ");
-	//tc.movePosition(QTextCursor::Right);
-	//tc.movePosition(QTextCursor::Left);
-	//tc.movePosition(QTextCursor::Left);
-	//tc.movePosition(QTextCursor::Left);
 	QRect cr = cursorRect();
 	cr.setWidth(c->popup()->sizeHintForColumn(0) + c->popup()->verticalScrollBar()->sizeHint().width());
 	c->complete(cr); // popup it up!
      }
-     else
+     else {
+       tc.setPosition(currentPos);
        tc.insertText("\n");
+     }
      tc.movePosition(QTextCursor::EndOfWord);
      setTextCursor(tc);
  }
  
   void RtfCssEditor::insertBrace()
  {
-     if (c->widget() != this)
-         return;
+    if (c->widget() != this)
+        return;
       QTextCursor tc = textCursor();
-      //if (QTextCursor::NextWord)
+     int currentPos = tc.position();
+     tc.movePosition(QTextCursor::Down);
+     tc.select(QTextCursor::LineUnderCursor);
+    if (tc.selectedText().isEmpty() == true) {
+       tc.setPosition(currentPos);
+       //if (QTextCursor::NextWord)
       tc.insertText("\n    \n}");
       /*tc.movePosition(QTextCursor::Left);
       tc.movePosition(QTextCursor::Left);*/
       tc.movePosition(QTextCursor::Left);
       tc.movePosition(QTextCursor::Left);
-      tc.movePosition(QTextCursor::EndOfWord);
       setTextCursor(tc);
       QRect cr = cursorRect();
       cr.setWidth(c->popup()->sizeHintForColumn(0) + c->popup()->verticalScrollBar()->sizeHint().width());
       c->complete(cr); // popup it up!
+    }
+    else {
+      tc.setPosition(currentPos);
+      tc.insertText("\n    ");
+    }
+    tc.movePosition(QTextCursor::EndOfWord);
+    QRect cr = cursorRect();
+    cr.setWidth(c->popup()->sizeHintForColumn(0) + c->popup()->verticalScrollBar()->sizeHint().width());
+    c->complete(cr); // popup it up!
+      
  }
  
   QString RtfCssEditor::textUnderCursor() const
