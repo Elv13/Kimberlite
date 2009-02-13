@@ -1001,7 +1001,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     rtfHTMLEditor->setWordWrapMode(QTextOption::NoWrap);
     connect(rtfHTMLEditor, SIGNAL(textChanged()), this, SLOT(setModified()));
 
-    QStringList wordList2;
+    /*QStringList wordList2;
     QSqlQuery query23;
     query23.exec("SELECT NAME FROM THTML_TAG");
     
@@ -1012,7 +1012,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     htmlCompleter = new QCompleter(wordList2, tabWEditor);
     htmlCompleter->setCaseSensitivity(Qt::CaseInsensitive);
     //cssCompleter->setWidget(rtfCSSEditor);
-    rtfHTMLEditor->setCompleter(htmlCompleter);
+    rtfHTMLEditor->setCompleter(htmlCompleter);*/
 
     /*aParser = new HtmlParser();
     std::string aFile = aParser->compressFile("/home/lepagee/dev/webkreator/test.htm");

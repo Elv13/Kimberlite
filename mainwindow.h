@@ -209,7 +209,7 @@ public:
     QVBoxLayout *verticalLayout_17;
     RtfCssEditor *rtfCSSEditor;
     QCompleter* cssCompleter;
-    QCompleter* htmlCompleter;
+    //QCompleter* htmlCompleter;
     QWidget *tabValidator;
     QVBoxLayout *verticalLayout_16;
     QWebView *webValidator;

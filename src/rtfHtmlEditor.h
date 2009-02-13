@@ -30,9 +30,17 @@
      void insertCompletion(const QString &completion);
       void insertTabulation();
  private:
-     QString textUnderCursor() const;
-     QStringList orphelinTags;
-     QStringList noNewLineTags;
+    QWidget* parent;
+    QString textUnderCursor() const;
+    QStringList orphelinTags;
+    QStringList noNewLineTags;
+    QStringList tagList;
+    QStringList tmpList;
+    bool defaultCompletion;
+    bool isAtribute();
+    void fillTmpList(QString tag);
+    QCompleter* htmlCompleter;
+    QCompleter* tmpCompleter;
 
  private:
      QCompleter *c;
