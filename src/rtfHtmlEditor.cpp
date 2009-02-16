@@ -44,7 +44,10 @@ void RtfHtmlEditor::fillTmpList(QString tag) {
   while (query23.next()) {
     QString tmp =  query23.value(0).toString();
     while (tmp.indexOf(";") != -1) {
-      tmpList << tmp.left(tmp.indexOf(";"));
+      if (tmp.left(tmp.indexOf(";")).indexOf("(") != -1)
+        tmpList << tmp.left(tmp.indexOf(";")).left(tmp.left(tmp.indexOf(";")).indexOf("("));
+      else
+        tmpList << tmp.left(tmp.indexOf(";"));
       tmp.remove(0,tmp.indexOf(";")+1);
     }
   }
@@ -87,6 +90,10 @@ void RtfHtmlEditor::insertCompletion(const QString& completion) {
       tc.movePosition(QTextCursor::Left);
       tc.movePosition(QTextCursor::EndOfWord);
       int currentPos = tc.position();
+      tc.movePosition(QTextCursor::Left);
+      tc.select(QTextCursor::WordUnderCursor);
+      QString toAdd = ((tc.selectedText()[0] == '<') && (extra == completion.length()))?"":"<";
+      tc.setPosition(currentPos);
       tc.select(QTextCursor::LineUnderCursor);
       QString currentText(tc.selectedText()),tab;
       bool exit = false;
@@ -101,23 +108,24 @@ void RtfHtmlEditor::insertCompletion(const QString& completion) {
       tc.setPosition(currentPos);
       if (orphelinTags.indexOf(completion) == -1) {
 	if (noNewLineTags.indexOf(completion) != -1) {
-	  tc.insertText(completion.right(extra).toLower() + "></"+completion.toLower()+ ">");
-	  tc.setPosition(tc.position() - 3 - completion.count());
+	  tc.insertText(toAdd + completion.right(extra).toLower() + "></"+completion.toLower()+ ">");
+	  tc.setPosition(tc.position() - 3 - completion.count() /*+ toAdd.count()*/);
 	}
 	else {
-	  tc.insertText(completion.right(extra).toLower() + ">\n" + tab + "   \n" + tab + "</"+completion.toLower()+ ">");
-	  tc.setPosition(tc.position() - 4 - tab.count() - completion.count());
+	  tc.insertText(toAdd + completion.right(extra).toLower() + ">\n" + tab + "   \n" + tab + "</"+completion.toLower()+ ">");
+	  tc.setPosition(tc.position() - 4 - tab.count() - completion.count() /*+ toAdd.count()*/);
 	}
       }
       else {
 	if (noNewLineTags.indexOf(completion) != -1) 
-	  tc.insertText(completion.right(extra).toLower() + ">");
+	  tc.insertText(toAdd + completion.right(extra).toLower() + ">");
 	else {
-	  tc.insertText(completion.right(extra).toLower() + ">\n" + tab);
+	  tc.insertText(toAdd + completion.right(extra).toLower() + ">\n" + tab);
       }
     }
  }
  else {
+   
   tc.insertText(completion.right(extra).toLower() + "=\"\"");
   tc.movePosition(QTextCursor::Left);
   
@@ -207,6 +215,21 @@ bool RtfHtmlEditor::isAtribute() {
   }
   return false;
 }
+
+QString RtfHtmlEditor::getCurrentAtribute() { //TODO if ="|" != -2 but -1
+  QTextCursor tc = textCursor();
+  int currentPos = tc.position();
+  tc.movePosition(QTextCursor::StartOfLine);
+  int currentPosInLine = currentPos - tc.position();
+  tc.select(QTextCursor::LineUnderCursor);
+  QString line = tc.selectedText();
+  if ((line[currentPosInLine-1] == '=') || ((line[currentPosInLine-1] == '\"') && (line[currentPosInLine-2] == '='))) {
+    return line.mid(line.lastIndexOf(" ", currentPosInLine), currentPosInLine - line.lastIndexOf(" ", currentPosInLine)-2);
+  }
+  else {
+    return QString();
+  }
+}
  
  
 QString RtfHtmlEditor::textUnderCursor() const {
@@ -223,27 +246,50 @@ void RtfHtmlEditor::focusInEvent(QFocusEvent *e) {
  
 void RtfHtmlEditor::keyPressEvent(QKeyEvent *e) {
     bool isInAtribute = isAtribute();
-    bool isShortcut = ((e->modifiers() & Qt::ControlModifier) && e->key() == Qt::Key_E); // CTRL+E
+    bool isShortcut = ((e->modifiers() == Qt::ControlModifier) && (e->key() == Qt::Key_Space)); // CTRL+E
+    bool ctrlOrShift = e->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier);
     
     if ((defaultCompletion == false) && (isInAtribute == false)){
       defaultCompletion = true;
       setCompleter(htmlCompleter);
       delete tmpCompleter;
+      this->setFocus();
     }
-    else if ((isInAtribute) && (defaultCompletion == true)) {
+    
+    
+    if (isInAtribute && isShortcut/*&& (defaultCompletion == true)*/) {
+      if (getCurrentAtribute() != "") {
+        printf("This is the attribute: %s \n",getCurrentAtribute().toStdString().c_str());
+      }
+      
       QTextCursor tc = textCursor();
       int currentPos = tc.position();
       tc.select(QTextCursor::LineUnderCursor);
       QString tag = HtmlParser::getTag(tc.selectedText());
       if (tag[0] == '<')
 	tag = tag.remove(0,1);
-      printf("This is the tag: %s\n",tag.toStdString().c_str());
       tc.setPosition(currentPos);
       fillTmpList(tag.toUpper());
       defaultCompletion = false; 
+      QRect cr = cursorRect();
+      cr.setWidth(c->popup()->sizeHintForColumn(0) + c->popup()->verticalScrollBar()->sizeHint().width());
+      c->complete(cr);
+      return;
     }
     
     if (isShortcut == true) {
+      static QString eow("~!@#$%^&*()_+{}|:\"<>?,./;'[]\\-="); // end of word
+      bool hasModifier = (e->modifiers() != Qt::NoModifier) && !ctrlOrShift;
+      QString completionPrefix = textUnderCursor();
+      if (completionPrefix[0] == '<') {
+          completionPrefix = completionPrefix.remove(0,1);
+      }
+      
+      if (completionPrefix != c->completionPrefix()) {
+         c->setCompletionPrefix(completionPrefix);
+         c->popup()->setCurrentIndex(c->completionModel()->index(0, 0));
+     }
+     
       QRect cr = cursorRect();
       cr.setWidth(c->popup()->sizeHintForColumn(0) + c->popup()->verticalScrollBar()->sizeHint().width());
       c->complete(cr);
@@ -252,6 +298,7 @@ void RtfHtmlEditor::keyPressEvent(QKeyEvent *e) {
     
     if (((e->key() == Qt::Key_Enter) || (e->key() == Qt::Key_Return)) && (c->popup()->isVisible() == false)) {
 	insertTabulation();
+        this->setFocus();
 	return;
     }
     else if (e->key() == Qt::Key_Less) {
@@ -271,9 +318,8 @@ void RtfHtmlEditor::keyPressEvent(QKeyEvent *e) {
       QString tag = HtmlParser::getTag(tc.selectedText());
       if (tag[0] == '<')
 	tag = tag.remove(0,1);
-      printf("This is the tag: %s\n",tag.toStdString().c_str());
       tc.setPosition(currentPos);
-      fillTmpList(QString());
+      fillTmpList(tag.toUpper());
       defaultCompletion = false;
       QRect cr = cursorRect();
       cr.setWidth(c->popup()->sizeHintForColumn(0) + c->popup()->verticalScrollBar()->sizeHint().width());
@@ -285,55 +331,26 @@ void RtfHtmlEditor::keyPressEvent(QKeyEvent *e) {
       tc.insertText(" ");
       return;
     }
-
-     if (c && c->popup()->isVisible()) {
-         // The following keys are forwarded by the completer to the widget
-        switch (e->key()) {
-        case Qt::Key_Enter:
-	  return;
-        case Qt::Key_Return:
-	  return;
-        case Qt::Key_Escape:
-        case Qt::Key_Tab:
-        case Qt::Key_Less:
-        case Qt::Key_Backtab:
-             e->ignore();
-             return; // let the completer do default behavior
-        default:
-            break;
-        }
-     }
-
-     
-     if (!c || !isShortcut) // dont process the shortcut when we have a completer
-         QTextEdit::keyPressEvent(e);
-          const bool ctrlOrShift = e->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier);
-     if (!c || (ctrlOrShift && e->text().isEmpty()))
-         return;
-
-     static QString eow("~!@#$%^&*()_+{}|:\"<>?,./;'[]\\-="); // end of word
-     bool hasModifier = (e->modifiers() != Qt::NoModifier) && !ctrlOrShift;
-     QString completionPrefix = textUnderCursor();
-     if (completionPrefix[0] == '<') {
-        completionPrefix = completionPrefix.remove(0,1);
-     }
-     //else
-       //TODO insert a <
-
-     if (!isShortcut && (hasModifier || e->text().isEmpty()|| completionPrefix.length() < 3
-                       || eow.contains(e->text().right(1)))) {
-         c->popup()->hide();
-         return;
-     }
-
-     if (completionPrefix != c->completionPrefix()) {
-         c->setCompletionPrefix(completionPrefix);
-         c->popup()->setCurrentIndex(c->completionModel()->index(0, 0));
-     }
-     QRect cr = cursorRect();
-     cr.setWidth(c->popup()->sizeHintForColumn(0)
-                 + c->popup()->verticalScrollBar()->sizeHint().width());
-     c->complete(cr); // popup it up!
+    
+    if (c && c->popup()->isVisible()) {
+        // The following keys are forwarded by the completer to the widget
+      switch (e->key()) {
+      case Qt::Key_Enter:
+        return;
+      case Qt::Key_Return:
+        return;
+      case Qt::Key_Escape:
+      case Qt::Key_Tab:
+      case Qt::Key_Less:
+      case Qt::Key_Backtab:
+            e->ignore();
+            return; // let the completer do default behavior
+      default:
+          break;
+      }
+    }
+    
+    QTextEdit::keyPressEvent(e);
 }
  
  

@@ -51,7 +51,8 @@ CSSBeginnerWidget::CSSBeginnerWidget(QWidget* parent, QString tagName) : QWidget
     sizePolicy4.setVerticalStretch(0);
     sizePolicy4.setHeightForWidth(ckbName->sizePolicy().hasHeightForWidth());
     ckbName->setSizePolicy(sizePolicy4);
-    ckbName->setMinimumSize(QSize(135, 0));
+    ckbName->setMinimumSize(QSize(160, 0));
+    ckbName->setMaximumSize(QSize(160, 999999));
 
 
     hlCbbTag->addWidget(ckbName);

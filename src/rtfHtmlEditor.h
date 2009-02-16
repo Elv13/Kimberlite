@@ -29,6 +29,7 @@
  private slots:
      void insertCompletion(const QString &completion);
       void insertTabulation();
+    QString getCurrentAtribute();
  private:
     QWidget* parent;
     QString textUnderCursor() const;
