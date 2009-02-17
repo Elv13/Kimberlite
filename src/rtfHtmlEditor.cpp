@@ -1,7 +1,9 @@
 #include "rtfHtmlEditor.h"
 #include "htmlParser.h"
 
-RtfHtmlEditor::RtfHtmlEditor(QWidget *parent) : KTextEdit(parent), c(0),defaultCompletion(true) {   
+#include <KColorDialog>
+
+RtfHtmlEditor::RtfHtmlEditor(QWidget *parent) : KTextEdit(parent), c(0),defaultCompletion(true),is3rdLvlCompleter(false) {   
     this->parent = parent;
     QSqlQuery query;
     query.exec("SELECT NAME FROM THTML_TAG WHERE IFNEEDCLOSE = 0");
@@ -92,7 +94,11 @@ void RtfHtmlEditor::insertCompletion(const QString& completion) {
       int currentPos = tc.position();
       tc.movePosition(QTextCursor::Left);
       tc.select(QTextCursor::WordUnderCursor);
-      QString toAdd = ((tc.selectedText()[0] == '<') && (extra == completion.length()))?"":"<";
+      QString toAdd;
+      //QString toAdd = ((tc.selectedText()[0] == '<') && (extra == completion.length()))?"":"<";
+      printf("Count: %d %d \n",extra,completion.count());
+      if ((tc.selectedText()[0] != '<') && (extra == completion.count()))
+	toAdd = "<";
       tc.setPosition(currentPos);
       tc.select(QTextCursor::LineUnderCursor);
       QString currentText(tc.selectedText()),tab;
@@ -125,10 +131,15 @@ void RtfHtmlEditor::insertCompletion(const QString& completion) {
     }
  }
  else {
-   
-  tc.insertText(completion.right(extra).toLower() + "=\"\"");
-  tc.movePosition(QTextCursor::Left);
-  
+   if (is3rdLvlCompleter == true) {
+     tc.insertText(completion.right(extra).toLower());
+     //tc.movePosition(QTextCursor::Left);
+     is3rdLvlCompleter = false;
+   }
+   else {
+      tc.insertText(completion.right(extra).toLower() + "=\"\"");
+      tc.movePosition(QTextCursor::Left);
+   }
  }
  setTextCursor(tc);
 }
@@ -230,6 +241,62 @@ QString RtfHtmlEditor::getCurrentAtribute() { //TODO if ="|" != -2 but -1
     return QString();
   }
 }
+
+void RtfHtmlEditor::completeAttribute(QString attribute, QString tag) {
+  printf("\nThis is the attribute: %s \n",attribute.toStdString().c_str());
+  tmpList.clear();
+  QCompleter* oldCompleter;
+  if (attribute.trimmed() == "CLASS") {
+    //for (int i=0; i < 
+    printf("\nIt is \"CLASS\" \n");
+    tmpList << "class1" << "class2" << "class3" << "class4";
+  }
+  else if (attribute.trimmed() == "STYLE") {
+    QSqlQuery query23;
+    query23.exec("SELECT TITLE FROM TCSS_TAG" );
+      
+    while (query23.next()) {
+	  tmpList << query23.value(0).toString();
+    }
+  }
+  else if ((attribute.trimmed() == "BGCOLOR") || (attribute.trimmed() == "COLOR")) {
+    KColorDialog aDialog(this,true);
+    QColor aColor;
+    int result = aDialog.getColor( aColor );
+    if ( result == KColorDialog::Accepted ) {
+      tmpList << aColor.name();
+    }
+  }
+  else {
+    QSqlQuery query23;
+    query23.exec("SELECT PROPRIETIES FROM THTML_TAG WHERE NAME ='" + tag.toUpper() +"'"  );
+      
+    while (query23.next()) {
+      QStringList attributeList = query23.value(0).toString().split(";");
+      for (int i =0; i < attributeList.size();i++) {
+	printf("\nI manage to get here3!!! \n");
+	int indexP = attributeList[i].indexOf("(");
+	if (indexP != -1) {
+	  printf("\nI manage to get here2!!! '%s' '%s' \n",attributeList[i].left(indexP).toStdString().c_str(),attribute.toUpper().toStdString().c_str());
+	  if (attributeList[i].left(indexP).trimmed() == attribute.toUpper().trimmed()) {
+	    QStringList valueList = attributeList[i].mid(indexP+1,attributeList[i].indexOf(")") - (indexP+1)).split(",");
+	    for (int j =0; j < valueList.size();j++)
+	      tmpList << valueList[j];
+	  }
+	}
+      }
+    }
+  }
+    
+  
+  if (defaultCompletion == false) {
+    oldCompleter = tmpCompleter;
+  }
+  tmpCompleter = new QCompleter(tmpList, parent);
+  setCompleter(tmpCompleter);
+  if (defaultCompletion == false)
+    delete oldCompleter;
+}
  
  
 QString RtfHtmlEditor::textUnderCursor() const {
@@ -258,18 +325,22 @@ void RtfHtmlEditor::keyPressEvent(QKeyEvent *e) {
     
     
     if (isInAtribute && isShortcut/*&& (defaultCompletion == true)*/) {
-      if (getCurrentAtribute() != "") {
-        printf("This is the attribute: %s \n",getCurrentAtribute().toStdString().c_str());
-      }
-      
       QTextCursor tc = textCursor();
       int currentPos = tc.position();
       tc.select(QTextCursor::LineUnderCursor);
-      QString tag = HtmlParser::getTag(tc.selectedText());
+      QString tag = HtmlParser::getTag(tc.selectedText()).toUpper();
       if (tag[0] == '<')
 	tag = tag.remove(0,1);
       tc.setPosition(currentPos);
-      fillTmpList(tag.toUpper());
+      
+      QString currentAttribute = getCurrentAtribute();
+      if (currentAttribute != "") {
+	is3rdLvlCompleter = true;
+	completeAttribute(currentAttribute.toUpper(), tag);
+      }
+      else
+	fillTmpList(tag.toUpper());
+      
       defaultCompletion = false; 
       QRect cr = cursorRect();
       cr.setWidth(c->popup()->sizeHintForColumn(0) + c->popup()->verticalScrollBar()->sizeHint().width());

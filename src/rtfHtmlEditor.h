@@ -40,8 +40,10 @@
     bool defaultCompletion;
     bool isAtribute();
     void fillTmpList(QString tag);
+    void completeAttribute(QString attribute, QString tag);
     QCompleter* htmlCompleter;
     QCompleter* tmpCompleter;
+    bool is3rdLvlCompleter;
 
  private:
      QCompleter *c;
@@ -58,7 +60,7 @@ public:
     QStringList keywordPatterns;
 
   //while (query.next()) {
-    keywordPatterns << "value=";
+    /*keywordPatterns << "value=";
     keywordPatterns << "name=";
     keywordPatterns << "style=";
     keywordPatterns << "href=";
@@ -72,17 +74,17 @@ public:
     keywordPatterns << "rel=";
     keywordPatterns << "frame=";
     keywordPatterns << "rules=";
-    /*keywordPatterns << "name=";
-    keywordPatterns << "name=";
-    keywordPatterns << "name=";
-    keywordPatterns << "name=";*/
 
   //}
     foreach (QString pattern, keywordPatterns) {
         rule.pattern = QRegExp(pattern);
         rule.format = keywordFormat;
         highlightingRules.append(rule);
-    }
+    }*/
+
+    rule.pattern = QRegExp(" [a-zA-Z]*\\=");
+    rule.format = keywordFormat;
+    highlightingRules.append(rule);
 
     classFormat.setFontWeight(QFont::Bold);
     classFormat.setForeground(Qt::darkMagenta);
@@ -101,7 +103,7 @@ public:
     multiLineCommentFormat.setFontWeight(QFont::Bold);
 
     quotationFormat.setForeground(Qt::darkGreen);
-    rule.pattern = QRegExp("\".*\" ");
+    rule.pattern = QRegExp("\\\"[^\"]*\\\"");
     rule.format = quotationFormat;
     highlightingRules.append(rule);
 
