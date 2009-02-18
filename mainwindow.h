@@ -294,6 +294,7 @@ public:
     void showCSS(bool);
     void showDebugger(bool);
     void addHtmlPage();
+    void modeChanged(int index);
   public slots:
     void loadPage(QTreeWidgetItem* item, QString text);
     void loadScript(QTreeWidgetItem* anItem, QString text);

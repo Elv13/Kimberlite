@@ -159,8 +159,12 @@ void RtfHtmlEditor::insertTabulation() {
       nextLine = tc.selectedText();
       
       tc.setPosition(currentPos);
-      tc.select(QTextCursor::LineUnderCursor);
     }
+    tc.movePosition(QTextCursor::EndOfLine);
+    int endPos = tc.position();
+    tc.setPosition(currentPos);
+    tc.select(QTextCursor::LineUnderCursor);
+    
     
     QString tab;
     bool exit = false;
@@ -171,6 +175,18 @@ void RtfHtmlEditor::insertTabulation() {
       else
         tab += " ";
       i++;
+    }
+    
+    if (endPos > currentPos) {
+      tc.setPosition(currentPos);
+      tc.select(QTextCursor::LineUnderCursor);
+      tc.removeSelectedText();
+      //tc.removeText();
+      if ((currentText.right(endPos - currentPos)[0] == '<') &&(currentText.right(endPos - currentPos)[1] != '/')) //TODO add a gettag to check orphelin tags
+        tab += "   ";
+      tc.insertText(currentText.left(currentText.count() - (endPos - currentPos)) + "\n" + tab + currentText.right(endPos - currentPos)); //TODO there must be a better way to do that :/
+      setTextCursor(tc);
+      return;
     }
     
     if ((currentText.indexOf("</") != -1) && (tab.count() >=3)) {
@@ -313,8 +329,21 @@ void RtfHtmlEditor::focusInEvent(QFocusEvent *e) {
  
 void RtfHtmlEditor::keyPressEvent(QKeyEvent *e) {
     bool isInAtribute = isAtribute();
-    bool isShortcut = ((e->modifiers() == Qt::ControlModifier) && (e->key() == Qt::Key_Space)); // CTRL+E
+    bool isShortcut = ((e->modifiers() == Qt::ControlModifier) && (e->key() == Qt::Key_Space)); // CTRL+S
     bool ctrlOrShift = e->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier);
+    
+    if (c->popup()->isVisible()) {
+      //c->popup()->setHidden(true);
+      QString completionPrefix = textUnderCursor();
+      if (completionPrefix[0] == '<') {
+          completionPrefix = completionPrefix.remove(0,1);
+      }
+      //completionPrefix.chop(1);
+      if (completionPrefix != c->completionPrefix()) {
+         c->setCompletionPrefix(completionPrefix);
+         c->popup()->setCurrentIndex(c->completionModel()->index(0, 0));
+      }
+    }
     
     if ((defaultCompletion == false) && (isInAtribute == false)){
       defaultCompletion = true;
@@ -347,8 +376,8 @@ void RtfHtmlEditor::keyPressEvent(QKeyEvent *e) {
       c->complete(cr);
       return;
     }
-    
-    if (isShortcut == true) {
+    else if (isShortcut == true) {
+      printf("Is not in atribute \n");
       static QString eow("~!@#$%^&*()_+{}|:\"<>?,./;'[]\\-="); // end of word
       bool hasModifier = (e->modifiers() != Qt::NoModifier) && !ctrlOrShift;
       QString completionPrefix = textUnderCursor();
@@ -359,7 +388,7 @@ void RtfHtmlEditor::keyPressEvent(QKeyEvent *e) {
       if (completionPrefix != c->completionPrefix()) {
          c->setCompletionPrefix(completionPrefix);
          c->popup()->setCurrentIndex(c->completionModel()->index(0, 0));
-     }
+      }
      
       QRect cr = cursorRect();
       cr.setWidth(c->popup()->sizeHintForColumn(0) + c->popup()->verticalScrollBar()->sizeHint().width());

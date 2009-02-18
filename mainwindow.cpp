@@ -1351,6 +1351,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     connect(aProjectManager, SIGNAL(javaScriptChanged(QTreeWidgetItem*, QString)), this, SLOT(loadScript(QTreeWidgetItem*, QString)));
     connect(aProjectManager, SIGNAL(loadCss(QString)), this, SLOT(loadCss(QString)));
     connect(treeWidget, SIGNAL(itemClicked(QTreeWidgetItem* , int)), this, SLOT(loadCSSClass(QTreeWidgetItem*)));
+    connect(tabWEditor, SIGNAL(currentChanged(int)), this, SLOT(modeChanged(int)));
     QString fileName = "/home/lepagee/dev/myproject/kimberlite/test2.wkp";
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
@@ -2591,5 +2592,13 @@ void MainWindow::loadCss(QString text) {
   styleSheetName = new  QTreeWidgetItem(treeWidget);
   styleSheetName->setText(0,"Style");
   updateClassTree();
-  //fillCSSAdvMode();
+  fillCSSAdvMode();
+}
+
+void MainWindow::modeChanged(int index) {
+  printf("I am here \n");
+  if (index == 0) {
+    webPreview->setHtml(rtfHTMLEditor->toPlainText());
+    //webPreview->page()->setContentEditable(true);
+  }
 }
