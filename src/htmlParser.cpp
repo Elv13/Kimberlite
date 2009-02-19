@@ -95,7 +95,7 @@ QVector<QString> HtmlParser::listTag(QString inputFile) {
 }
 
 QString HtmlParser::parse(QString inputFile, bool debug, bool toTemplate, bool mode = true /*true = indent, false = tree*/, QTreeWidget* aTree = NULL) {
-  QVector<QString> tagList(listTag(inputFile));
+  /*QVector<QString> tagList(listTag(inputFile));
   QVector<uint> levelList = htmlParser(tagList);
   QString tag;
   for (int i=0; i < tagList.size();i++) {
@@ -117,7 +117,7 @@ QString HtmlParser::parse(QString inputFile, bool debug, bool toTemplate, bool m
       }
       else if ((orphelinTags.indexOf(tag) != -1) && (tagList[i][tagList[i].size() -2] != '/') && (tagList[i].indexOf(" ") != -1) && (tagList[i][1] != '!'))  //TODO recheck if it need "else"
         debugVector << *(new debugItem(i, 0, "Warning:  Missing \"/\" at the end of tag \"" + getTag(tagList[i]) + "\" add it to comply with xHTML standard"));
-      /*Other exeptions*/
+      
       if ((tag == "SCRIPT") && (getTag(tagList[i+1]) != "SCRIPT"))  //BUG array overflow possible
         debugVector << *(new debugItem(i, 3, "Information: Using javascript or css code directly in HTML file is not a good practice, use separate file"));
       else if ((tag == "STYLE") && (getTag(tagList[i+1]) != "STYLE"))  //BUG array overflow possible
@@ -132,7 +132,7 @@ QString HtmlParser::parse(QString inputFile, bool debug, bool toTemplate, bool m
     return QString("salut");
   }
   else
-    return indentHtml(toTemplate, tagList, levelList);
+    return indentHtml(toTemplate, tagList, levelList);*/
 }
 
 QVector<uint> HtmlParser::htmlParser(QVector<QString> tagList){
@@ -168,46 +168,15 @@ QVector<uint> HtmlParser::htmlParser(QVector<QString> tagList){
     return levelList;
 }
 
-QString HtmlParser::indentHtml(bool toTemplate, QVector<QString> tagList, QVector<uint> levelList) {
-  QString markerDefinition;
-  if (toTemplate == true) 
-    tagList = ConvertToTemplate(tagList, markerDefinition);
-  QString tab, parsedHTML, tag2, previousTag;
-  for (int j=0; j < tagList.size();j++) {
-    tag2 = getTag(tagList[j]);
-    tab.clear();
-    if ((noNewLineTags.indexOf(tag2) != -1) || (tagList[j][0] != '<')) {
-        if ((tagList[j][0] == '<') && (needNewLineOnOpen.indexOf(tag2) != -1) && (parsedHTML[parsedHTML.size()-1] != '\n') && (tagList[j].left(2) != "</")) {
-              parsedHTML += "\n";
-              for (int k =0; k < levelList[j]; k++) 
-                    tab += "   ";
-              parsedHTML += tab;
-        }
-        if (parsedHTML[parsedHTML.size()-1] == '\n') {
-              for (int k =0; k < levelList[j]; k++) 
-                    tab += "   ";
-              parsedHTML += tab + tagList[j];
-        }
-        else 
-              parsedHTML +=tagList[j];
-        if ((tagList[j].left(2) == "</") && (needNewLineOnClose.indexOf(tag2) != -1)) 
-              parsedHTML += "\n";
-    }
-    else {
-        if ((parsedHTML.right(1) != "\n") && (parsedHTML != "")) 
-              parsedHTML += "\n";
-        for (int k =0; k < levelList[j]; k++) 
-              tab += "   ";
-        parsedHTML += tab + tagList[j].trimmed() + "\n";
-    }
-  }
-  if (toTemplate == true)
-        parsedHTML += "<!-- \n" + markerDefinition + " \n-->";
-  return parsedHTML;
+void HtmlParser::updateTree(QString file, QTreeWidget* aTree) {
+  /*HtmlData pageData;
+  pageData.tagList = listTag(file);
+  pageData.levelList = htmlParser(pageData.tagList);
+  updateTree(pageData.tagList,pageData.levelList,aTree);*/
 }
 
-void HtmlParser::updateTree(bool toTemplate, QVector<QString> tagList, QVector<uint> levelList, QTreeWidget* aTree) {
-  QTreeWidgetItem* previousNode; //TODO ?
+void HtmlParser::updateTree(QVector<QString> tagList, QVector<uint> levelList, QTreeWidget* aTree) {
+  /*QTreeWidgetItem* previousNode; //TODO ?
   QTreeWidgetItem* aNode;
   aTree->clear();
   for (int j=0; j < tagList.size();j++) {
@@ -223,10 +192,10 @@ void HtmlParser::updateTree(bool toTemplate, QVector<QString> tagList, QVector<u
       aNode = new QTreeWidgetItem(previousNode->parent()->parent(),QStringList(tagList[j]));
     previousNode = aNode;
   }
-  aTree->expandAll();
+  aTree->expandAll();*/
 }
 
-QVector<QString> HtmlParser::ConvertToTemplate(QVector<QString> tagList, QString &markerDefinition) {
+/*QVector<QString> HtmlParser::ConvertToTemplate(QVector<QString> tagList, QString &markerDefinition) {
   markerList.clear();
   for (int k=0; k < tagList.size();k++) 
     if ((tagList[k][0] != '<') && (tagList[k].left(3) != "###")) {
@@ -234,8 +203,53 @@ QVector<QString> HtmlParser::ConvertToTemplate(QVector<QString> tagList, QString
           aPopup.exec();
     }
   return tagList;
-}
+}*/
 
 QVector<QString> HtmlParser::translate(QVector<QString> tagList, QString markerDefinition) {
-  ConvertToTemplate(tagList, markerDefinition);
+  //ConvertToTemplate(tagList, markerDefinition);
+}
+
+HtmlData HtmlParser::getHtmlData(QString inputFile) {
+  HtmlData pageData;
+  pageData.tagList = listTag(inputFile);
+  pageData.levelList = htmlParser(pageData.tagList);
+  return pageData;
+}
+
+QString HtmlParser::getParsedHtml(QString inputFile) {
+  HtmlData pageData = getHtmlData(inputFile);
+  return getParsedHtml(pageData);
+}
+
+QString HtmlParser::getParsedHtml(HtmlData &pageData) {
+  QString tab, parsedHTML, tag2, previousTag;
+  for (int j=0; j < pageData.tagList.size();j++) {
+    tag2 = getTag(pageData.tagList[j]);
+    tab.clear();
+    if ((noNewLineTags.indexOf(tag2) != -1) || (pageData.tagList[j][0] != '<')) {
+        if ((pageData.tagList[j][0] == '<') && (needNewLineOnOpen.indexOf(tag2) != -1) && (parsedHTML[parsedHTML.size()-1] != '\n') && (pageData.tagList[j].left(2) != "</")) {
+              parsedHTML += "\n";
+              for (int k =0; k < pageData.levelList[j]; k++) 
+                    tab += "   ";
+              parsedHTML += tab;
+        }
+        if (parsedHTML[parsedHTML.size()-1] == '\n') {
+              for (int k =0; k < pageData.levelList[j]; k++) 
+                    tab += "   ";
+              parsedHTML += tab + pageData.tagList[j];
+        }
+        else 
+              parsedHTML += pageData.tagList[j];
+        if ((pageData.tagList[j].left(2) == "</") && (needNewLineOnClose.indexOf(tag2) != -1)) 
+              parsedHTML += "\n";
+    }
+    else {
+        if ((parsedHTML.right(1) != "\n") && (parsedHTML != "")) 
+              parsedHTML += "\n";
+        for (int k =0; k < pageData.levelList[j]; k++) 
+              tab += "   ";
+        parsedHTML += tab + pageData.tagList[j].trimmed() + "\n";
+    }
+  }
+  return parsedHTML;
 }

@@ -52,6 +52,7 @@
 #include "src/addProprietyWidget.h"
 #include "src/stringToTemplate.h"
 #include "src/ProjectManager_v2.h"
+#include "src/template.h"
 #include <ktip.h>
 
 MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage(NULL),currentScript(NULL) {
@@ -1409,7 +1410,7 @@ fillCSSBegMode("#header");
 QTreeWidgetItem* styleSheetName = new  QTreeWidgetItem(treeWidget);
 styleSheetName->setText(0,"StyleSheet.css");
 //treeWidget->append(new QTreeWidgetItem((QTreeWidget*)0, append(new QTreeWidgetItem((QTreeWidget*)0, QStringList(QString("item: %1"))));));
-fillCSSAdvMode();
+////fillCSSAdvMode();
 QStringList classList = getClassList();
 for (int j =0; j < classList.count();j++) {
   QTreeWidgetItem* aTreeViewWidgetItem = new  QTreeWidgetItem(styleSheetName);
@@ -2005,8 +2006,9 @@ void MainWindow::fillCSSAdvMode() {
 void MainWindow::reParse() {
     aParser->debugVector.clear();
     QString aFile = aParser->compressString(rtfHTMLEditor->toPlainText());
-    aParser->parse(aFile,true,false,false,treeHtml);
-    rtfHTMLEditor->setPlainText(aParser->parse(aFile,false,false,true, NULL));
+    //aParser->updateTree(aFile,treeHtml);
+    updateHtmlTree(rtfHTMLEditor->toPlainText());
+    rtfHTMLEditor->setPlainText(aParser->getParsedHtml(aFile));
     lstDebug->clear();
     
     for (int i =0; i < aParser->debugVector.size(); i++) {
@@ -2024,15 +2026,19 @@ void MainWindow::reParse() {
 void MainWindow::templaterize(bool check) {
     if (check == true) {
     //aParser = new HtmlParser();
-      std::string aFile = aParser->compressString(rtfHTMLEditor->toPlainText()).toStdString();
-      rtfHTMLEditor->setPlainText(aParser->parse(QString::fromStdString(aFile),true,true,true,NULL));
+      //QString aFile = aParser->compressString(rtfHTMLEditor->toPlainText());
+      //rtfHTMLEditor->setPlainText(aParser->getParsedHtml(aFile));
+      StringConverter* aStringConverter = new StringConverter(this);
+      aStringConverter->toTemplate(aParser->compressString(rtfHTMLEditor->toPlainText()));
     }
 }
 
 void MainWindow::translate() {
     //aParser = new HtmlParser();
-    QString aFile = aParser->compressString(rtfHTMLEditor->toPlainText());
-    rtfHTMLEditor->setPlainText(aParser->parse(aFile,true,true,true,NULL));
+    //QString aFile = aParser->compressString(rtfHTMLEditor->toPlainText());
+    //rtfHTMLEditor->setPlainText(aParser->getParsedHtml(aFile));
+    StringConverter* aStringConverter = new StringConverter(this);
+    aStringConverter->toTemplate(aParser->compressString(rtfHTMLEditor->toPlainText()));
 }
 
 void MainWindow::newProject(){
@@ -2096,7 +2102,7 @@ void MainWindow::openProject() {
             }
             QString aFile = aParser->compressFile(aProject->htmlPage[0]);
             pageName = aProject->htmlPage[0];
-            rtfHTMLEditor->setPlainText(aParser->parse(aFile,true, false,true,NULL));
+            rtfHTMLEditor->setPlainText(aParser->getParsedHtml(aFile));
             //cout << aProject->cssPage.toStdString(); exit(33);
             readCSSFile("/home/lepagee/dev/myproject/kimberlite/StyleSheet.css");
             //readCSSFile(aProject->cssPage);
@@ -2104,7 +2110,7 @@ void MainWindow::openProject() {
             styleSheetName = new  QTreeWidgetItem(treeWidget);
             styleSheetName->setText(0,aProject->cssPage);
             //treeWidget->append(new QTreeWidgetItem((QTreeWidget*)0, append(new QTreeWidgetItem((QTreeWidget*)0, QStringList(QString("item: %1"))));));
-            fillCSSAdvMode();
+            ////fillCSSAdvMode();
             QStringList classList = getClassList();
             
             updateClassTree();
@@ -2188,7 +2194,7 @@ void MainWindow::loadPage(QTableWidgetItem* anItem) {
   pageName = anItem->text();
   isModified = false;
   QString aFile = aParser->compressFile(pageName);
-  rtfHTMLEditor->setPlainText(aParser->parse(aFile,true, false,true,NULL));
+  rtfHTMLEditor->setPlainText(aParser->getParsedHtml(aFile));
 }
 
 void MainWindow::loadPage(QTreeWidgetItem* item, QString text) {
@@ -2198,8 +2204,8 @@ void MainWindow::loadPage(QTreeWidgetItem* item, QString text) {
   }*/
   isModified = false;
   QString aFile = aParser->compressString(text.trimmed());
-  rtfHTMLEditor->setPlainText(aParser->parse(aFile,true, false,true,NULL));
-  aParser->parse(aFile,true,false,false,treeHtml);
+  rtfHTMLEditor->setPlainText(aParser->getParsedHtml(aFile));
+  aParser->getParsedHtml(aFile);
 }
 
 void MainWindow::setModified() {
@@ -2592,7 +2598,7 @@ void MainWindow::loadCss(QString text) {
   styleSheetName = new  QTreeWidgetItem(treeWidget);
   styleSheetName->setText(0,"Style");
   updateClassTree();
-  fillCSSAdvMode();
+  ////fillCSSAdvMode();
 }
 
 void MainWindow::modeChanged(int index) {
@@ -2601,4 +2607,25 @@ void MainWindow::modeChanged(int index) {
     webPreview->setHtml(rtfHTMLEditor->toPlainText());
     //webPreview->page()->setContentEditable(true);
   }
+}
+
+void MainWindow::updateHtmlTree(QString file) {
+  HtmlData pageData = aParser->getHtmlData(file);
+  QTreeWidgetItem* previousNode; //TODO ?
+  QTreeWidgetItem* aNode;
+  treeHtml->clear();
+  for (int j=0; j < pageData.tagList.size();j++) {
+    if (pageData.levelList[j] == 0) {
+      aNode = new QTreeWidgetItem(QStringList(pageData.tagList[j]));
+      treeHtml->addTopLevelItem(aNode);
+    }
+    else if (pageData.levelList[j] > pageData.levelList[(j > 0)?j-1:0]) 
+      aNode = new QTreeWidgetItem(previousNode,QStringList(pageData.tagList[j]));
+    else if (pageData.levelList[j] == pageData.levelList[(j > 0)?j-1:0]) 
+      aNode = new QTreeWidgetItem(previousNode->parent(),QStringList(pageData.tagList[j]));
+    else 
+      aNode = new QTreeWidgetItem(previousNode->parent()->parent(),QStringList(pageData.tagList[j]));
+    previousNode = aNode;
+  }
+  treeHtml->expandAll();
 }

@@ -269,6 +269,7 @@ public:
     void disableWidget(bool value);
     void splitSubClass(QString name, QTreeWidgetItem* parent);
     KIcon getRightIcon(QString text);
+    void updateHtmlTree(QString file);
     int previousCssMode;
     QTreeWidgetItem* currentHTMLPage;
 

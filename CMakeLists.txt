@@ -14,6 +14,7 @@
       src/ProjectManager_v2.cpp
       src/rtfCssEditor.cpp
       src/rtfHtmlEditor.cpp
+      src/template.cpp
       )
 
       kde4_add_executable(kimberlite ${kimberlite_SRCS})

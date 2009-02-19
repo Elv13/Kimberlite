@@ -23,6 +23,8 @@
         @date 13 August 2008
         @version 0.1-pre-alpah0
 */
+#ifndef HTML_PARSER
+#define HTML_PARSER
 #include <QStringList>
 #include <QThread>
 #include <QSyntaxHighlighter>
@@ -33,7 +35,12 @@
 #include <QtSql>
 #include "stringToTemplate.h"
 
-using namespace std;
+//using namespace std;
+
+struct HtmlData {
+  QVector<QString> tagList;
+  QVector<uint> levelList;
+};
 
 class debugItem {
   public:
@@ -55,6 +62,11 @@ class HtmlParser{
     QString parse(QString inputFile, bool debug, bool toTemplate, bool mode, QTreeWidget* aTree);
     QVector<QString> listTag(QString inputFile);
     QVector<debugItem> debugVector;
+    HtmlData getHtmlData(QString inputFile);
+    QString getParsedHtml(HtmlData &pageData);
+    QString getParsedHtml(QString inputFile);
+    void updateTree(QString file, QTreeWidget* aTree);
+    void updateTree(QVector<QString> tagList, QVector<uint> levelList, QTreeWidget* aTree);
     
   private:
     QStringList orphelinTags;
@@ -62,12 +74,11 @@ class HtmlParser{
     QStringList needNewLineOnClose;
     QStringList needNewLineOnOpen;
     QStringList markerList;
-    QVector<QString> ConvertToTemplate(QVector<QString> tagList, QString &markerDefinition);
+    //QVector<QString> ConvertToTemplate(QVector<QString> tagList, QString &markerDefinition);
     QVector<QString> translate(QVector<QString> tagList, QString markerDefinition);
     QVector<uint> htmlParser(QVector<QString> tagList);
     QString indentHtml(bool toTemplate, QVector<QString> tagList, QVector<uint> levelList);
-    void updateTree(bool toTemplate, QVector<QString> tagList, QVector<uint> levelList, QTreeWidget* aTree);
-    
+
 };
 
 /*class ParserThread : public QThread {
@@ -86,3 +97,4 @@ class HtmlParser{
       //QString aCommand;
 
 };*/
+#endif //HTML_PARSER
