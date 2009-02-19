@@ -52,7 +52,7 @@ class HtmlParser{
     QString compressFile(QString path);
     QString compressString(QString file);
     static QString getTag(QString aTag);
-    QString htmlParser(QString inputFile, bool debug, bool toTemplate, bool mode, QTreeWidget* aTree);
+    QString parse(QString inputFile, bool debug, bool toTemplate, bool mode, QTreeWidget* aTree);
     QVector<QString> listTag(QString inputFile);
     QVector<debugItem> debugVector;
     
@@ -64,9 +64,9 @@ class HtmlParser{
     QStringList markerList;
     QVector<QString> ConvertToTemplate(QVector<QString> tagList, QString &markerDefinition);
     QVector<QString> translate(QVector<QString> tagList, QString markerDefinition);
-    
-    QString indentHtml(bool toTemplate, QVector<QString> tagList, QVector<int> levelList);
-    void updateTree(bool toTemplate, QVector<QString> tagList, QVector<int> levelList, QTreeWidget* aTree);
+    QVector<uint> htmlParser(QVector<QString> tagList);
+    QString indentHtml(bool toTemplate, QVector<QString> tagList, QVector<uint> levelList);
+    void updateTree(bool toTemplate, QVector<QString> tagList, QVector<uint> levelList, QTreeWidget* aTree);
     
 };
 

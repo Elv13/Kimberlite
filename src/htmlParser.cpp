@@ -94,9 +94,50 @@ QVector<QString> HtmlParser::listTag(QString inputFile) {
   return tagList;
 }
 
-QString HtmlParser::htmlParser(QString inputFile, bool debug, bool toTemplate, bool mode = true /*true = indent, false = tree*/, QTreeWidget* aTree = NULL) {
-      QVector<QString> tagList(listTag(inputFile));
-      QVector<int> levelList;
+QString HtmlParser::parse(QString inputFile, bool debug, bool toTemplate, bool mode = true /*true = indent, false = tree*/, QTreeWidget* aTree = NULL) {
+  QVector<QString> tagList(listTag(inputFile));
+  QVector<uint> levelList = htmlParser(tagList);
+  QString tag;
+  for (int i=0; i < tagList.size();i++) {
+    tag = getTag(tagList[i]);
+    if (debug == true) {
+      if ((orphelinTags.indexOf(tag) != -1) && (tagList[i][1] == '/')) 
+        debugVector << *(new debugItem(i, 0,  "Warning:  tag \"" + tag + "\" don't need to be closed (HTML 4.01)"));
+      else if ((orphelinTags.indexOf(tag) == -1) && (tagList[i][0] == '<') && (tagList[i][1] == '/')) { //TODO remove all duplicated if crap
+        int k =i-1;
+        bool found = false;
+        while ((k >=0) && (found == false)) {
+          if (levelList[i] == levelList[k])
+            found = true;
+          else
+            k--;
+        }
+        if ((found == true) && (getTag(tagList[i]) != getTag(tagList[k]))) 
+          debugVector << *(new debugItem(k, 1, "Error:  tag \"" + getTag(tagList[k]) + "\" does not close at the right place"));
+      }
+      else if ((orphelinTags.indexOf(tag) != -1) && (tagList[i][tagList[i].size() -2] != '/') && (tagList[i].indexOf(" ") != -1) && (tagList[i][1] != '!'))  //TODO recheck if it need "else"
+        debugVector << *(new debugItem(i, 0, "Warning:  Missing \"/\" at the end of tag \"" + getTag(tagList[i]) + "\" add it to comply with xHTML standard"));
+      /*Other exeptions*/
+      if ((tag == "SCRIPT") && (getTag(tagList[i+1]) != "SCRIPT"))  //BUG array overflow possible
+        debugVector << *(new debugItem(i, 3, "Information: Using javascript or css code directly in HTML file is not a good practice, use separate file"));
+      else if ((tag == "STYLE") && (getTag(tagList[i+1]) != "STYLE"))  //BUG array overflow possible
+        debugVector << *(new debugItem(i, 3, "Information: Using javascript or css code directly in HTML file is not a good practice, use separate file"));
+    }
+  }
+  
+  if ((debug == true) && (levelList.size() != 0) && (levelList[levelList.size() -1] != 0)) 
+    debugVector << *(new debugItem(levelList.size(), 1, "Error:  Parsing failed, one or more tag may be missing"));
+  if (mode == false)  {
+    updateTree(toTemplate, tagList, levelList, aTree);
+    return QString("salut");
+  }
+  else
+    return indentHtml(toTemplate, tagList, levelList);
+}
+
+QVector<uint> HtmlParser::htmlParser(QVector<QString> tagList){
+      //QVector<QString> tagList(listTag(inputFile));
+      QVector<uint> levelList;
       QString tag;
       bool orphelin = false;
       for (int i=0; i < tagList.size();i++) {
@@ -108,7 +149,7 @@ QString HtmlParser::htmlParser(QString inputFile, bool debug, bool toTemplate, b
                     if ((getTag(tagList[i]) == getTag(tagList[i-1])) && (tagList[i-1][1] != '/'))
                       levelList.push_back(levelList[i-1]);
                     else 
-                      levelList.push_back(levelList[i-1]-1);
+                      levelList.push_back((levelList[i-1] > 0)?levelList[i-1]-1:0);
               }
               else if ((tagList[i-1][0]  == '<') && ((tagList[i-1][1]  != '/')) && (orphelinTags.indexOf(getTag(tagList[i-1])) == -1)) 
                     levelList.push_back(levelList[i-1]+1);
@@ -123,41 +164,11 @@ QString HtmlParser::htmlParser(QString inputFile, bool debug, bool toTemplate, b
               else 
                     levelList.push_back(levelList[i-1]);
         }
-        if (debug == true) {
-          if ((orphelinTags.indexOf(tag) != -1) && (tagList[i][1] == '/')) 
-            debugVector << *(new debugItem(i, 0,  "Warning:  tag \"" + tag + "\" don't need to be closed (HTML 4.01)"));
-          else if ((orphelinTags.indexOf(tag) == -1) && (tagList[i][0] == '<') && (tagList[i][1] == '/')) { //TODO remove all duplicated if crap
-            int k =i-1;
-            bool found = false;
-            while ((k >=0) && (found == false)) {
-              if (levelList[i] == levelList[k])
-                found = true;
-              else
-                k--;
-            }
-            if ((found == true) && (getTag(tagList[i]) != getTag(tagList[k]))) 
-              debugVector << *(new debugItem(k, 1, "Error:  tag \"" + getTag(tagList[k]) + "\" does not close at the right place"));
-          }
-          else if ((orphelinTags.indexOf(tag) != -1) && (tagList[i][tagList[i].size() -2] != '/') && (tagList[i].indexOf(" ") != -1) && (tagList[i][1] != '!'))  //TODO recheck if it need "else"
-            debugVector << *(new debugItem(i, 0, "Warning:  Missing \"/\" at the end of tag \"" + getTag(tagList[i]) + "\" add it to comply with xHTML standard"));
-          /*Other exeptions*/
-          if ((tag == "SCRIPT") && (getTag(tagList[i+1]) != "SCRIPT"))  //BUG array overflow possible
-            debugVector << *(new debugItem(i, 3, "Information: Using javascript or css code directly in HTML file is not a good practice, use separate file"));
-          else if ((tag == "STYLE") && (getTag(tagList[i+1]) != "STYLE"))  //BUG array overflow possible
-            debugVector << *(new debugItem(i, 3, "Information: Using javascript or css code directly in HTML file is not a good practice, use separate file"));
-        }
-      }
-    if ((debug == true) && (levelList.size() != 0) && (levelList[levelList.size() -1] != 0)) 
-        debugVector << *(new debugItem(levelList.size(), 1, "Error:  Parsing failed, one or more tag may be missing"));
-    if (mode == false)  {
-      updateTree(toTemplate, tagList, levelList, aTree);
-      return QString("salut");
     }
-    else
-      return indentHtml(toTemplate, tagList, levelList);
+    return levelList;
 }
 
-QString HtmlParser::indentHtml(bool toTemplate, QVector<QString> tagList, QVector<int> levelList) {
+QString HtmlParser::indentHtml(bool toTemplate, QVector<QString> tagList, QVector<uint> levelList) {
   QString markerDefinition;
   if (toTemplate == true) 
     tagList = ConvertToTemplate(tagList, markerDefinition);
@@ -195,7 +206,7 @@ QString HtmlParser::indentHtml(bool toTemplate, QVector<QString> tagList, QVecto
   return parsedHTML;
 }
 
-void HtmlParser::updateTree(bool toTemplate, QVector<QString> tagList, QVector<int> levelList, QTreeWidget* aTree) {
+void HtmlParser::updateTree(bool toTemplate, QVector<QString> tagList, QVector<uint> levelList, QTreeWidget* aTree) {
   QTreeWidgetItem* previousNode; //TODO ?
   QTreeWidgetItem* aNode;
   aTree->clear();
@@ -204,9 +215,9 @@ void HtmlParser::updateTree(bool toTemplate, QVector<QString> tagList, QVector<i
       aNode = new QTreeWidgetItem(QStringList(tagList[j]));
       aTree->addTopLevelItem(aNode);
     }
-    else if (levelList[j] > levelList[j-1]) 
+    else if (levelList[j] > levelList[(j > 0)?j-1:0]) 
       aNode = new QTreeWidgetItem(previousNode,QStringList(tagList[j]));
-    else if (levelList[j] == levelList[j-1]) 
+    else if (levelList[j] == levelList[(j > 0)?j-1:0]) 
       aNode = new QTreeWidgetItem(previousNode->parent(),QStringList(tagList[j]));
     else 
       aNode = new QTreeWidgetItem(previousNode->parent()->parent(),QStringList(tagList[j]));

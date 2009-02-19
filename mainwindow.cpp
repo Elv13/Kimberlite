@@ -2005,8 +2005,8 @@ void MainWindow::fillCSSAdvMode() {
 void MainWindow::reParse() {
     aParser->debugVector.clear();
     QString aFile = aParser->compressString(rtfHTMLEditor->toPlainText());
-    aParser->htmlParser(aFile,true,false,false,treeHtml);
-    rtfHTMLEditor->setPlainText(aParser->htmlParser(aFile,false,false,true, NULL));
+    aParser->parse(aFile,true,false,false,treeHtml);
+    rtfHTMLEditor->setPlainText(aParser->parse(aFile,false,false,true, NULL));
     lstDebug->clear();
     
     for (int i =0; i < aParser->debugVector.size(); i++) {
@@ -2025,14 +2025,14 @@ void MainWindow::templaterize(bool check) {
     if (check == true) {
     //aParser = new HtmlParser();
       std::string aFile = aParser->compressString(rtfHTMLEditor->toPlainText()).toStdString();
-      rtfHTMLEditor->setPlainText(aParser->htmlParser(QString::fromStdString(aFile),true,true,true,NULL));
+      rtfHTMLEditor->setPlainText(aParser->parse(QString::fromStdString(aFile),true,true,true,NULL));
     }
 }
 
 void MainWindow::translate() {
     //aParser = new HtmlParser();
     QString aFile = aParser->compressString(rtfHTMLEditor->toPlainText());
-    rtfHTMLEditor->setPlainText(aParser->htmlParser(aFile,true,true,true,NULL));
+    rtfHTMLEditor->setPlainText(aParser->parse(aFile,true,true,true,NULL));
 }
 
 void MainWindow::newProject(){
@@ -2096,7 +2096,7 @@ void MainWindow::openProject() {
             }
             QString aFile = aParser->compressFile(aProject->htmlPage[0]);
             pageName = aProject->htmlPage[0];
-            rtfHTMLEditor->setPlainText(aParser->htmlParser(aFile,true, false,true,NULL));
+            rtfHTMLEditor->setPlainText(aParser->parse(aFile,true, false,true,NULL));
             //cout << aProject->cssPage.toStdString(); exit(33);
             readCSSFile("/home/lepagee/dev/myproject/kimberlite/StyleSheet.css");
             //readCSSFile(aProject->cssPage);
@@ -2188,7 +2188,7 @@ void MainWindow::loadPage(QTableWidgetItem* anItem) {
   pageName = anItem->text();
   isModified = false;
   QString aFile = aParser->compressFile(pageName);
-  rtfHTMLEditor->setPlainText(aParser->htmlParser(aFile,true, false,true,NULL));
+  rtfHTMLEditor->setPlainText(aParser->parse(aFile,true, false,true,NULL));
 }
 
 void MainWindow::loadPage(QTreeWidgetItem* item, QString text) {
@@ -2198,8 +2198,8 @@ void MainWindow::loadPage(QTreeWidgetItem* item, QString text) {
   }*/
   isModified = false;
   QString aFile = aParser->compressString(text.trimmed());
-  rtfHTMLEditor->setPlainText(aParser->htmlParser(aFile,true, false,true,NULL));
-  aParser->htmlParser(aFile,true,false,false,treeHtml);
+  rtfHTMLEditor->setPlainText(aParser->parse(aFile,true, false,true,NULL));
+  aParser->parse(aFile,true,false,false,treeHtml);
 }
 
 void MainWindow::setModified() {
