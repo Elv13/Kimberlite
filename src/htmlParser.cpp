@@ -4,19 +4,19 @@ HtmlParser::HtmlParser()  {
   QSqlQuery query;
   query.exec("SELECT NAME FROM THTML_TAG WHERE IFNEEDCLOSE = 0");
   while (query.next()) 
-    orphelinTags << query.value(0).toString();
+    htmlInfo.orphelinTags << query.value(0).toString();
   query.exec("SELECT NAME FROM THTML_TAG WHERE IFNEEDNEWLINE = 0");
   while (query.next()) 
-    noNewLineTags << query.value(0).toString();
+    htmlInfo.noNewLineTags << query.value(0).toString();
   query.exec("SELECT NAME FROM THTML_TAG WHERE IFNEEDNEWLINE = 2");
   while (query.next()) {
-    needNewLineOnClose << query.value(0).toString();
-    noNewLineTags << query.value(0).toString();
+    htmlInfo.needNewLineOnClose << query.value(0).toString();
+    htmlInfo.noNewLineTags << query.value(0).toString();
   }
   query.exec("SELECT NAME FROM THTML_TAG WHERE IFNEEDNEWLINE = 3");
   while (query.next()) {
-    needNewLineOnOpen << query.value(0).toString();
-    noNewLineTags << query.value(0).toString();
+    htmlInfo.needNewLineOnOpen << query.value(0).toString();
+    htmlInfo.noNewLineTags << query.value(0).toString();
   }
 }
 
@@ -51,10 +51,10 @@ QString HtmlParser::getTag(QString aTag) {
       if (tag[0] == '/') 
             tag = aTag.remove(0,1);
       if (tag.right(1) == ">") 
-            tag = aTag.remove(tag.size()-1,1);
+            aTag.chop(1);
     }
   }
-  return tag.toUpper();;
+  return tag.toUpper();
 }
 
 QVector<QString> HtmlParser::listTag(QString inputFile) {
@@ -144,22 +144,22 @@ QVector<uint> HtmlParser::htmlParser(QVector<QString> tagList){
         tag = getTag(tagList[i]);
         if (i==0)
               levelList.push_back(0);
-        else if ((tagList[i][0] == '<') && (orphelinTags.indexOf(getTag(tagList[i])) == -1)) {
+        else if ((tagList[i][0] == '<') && (htmlInfo.orphelinTags.indexOf(getTag(tagList[i])) == -1)) {
               if (tagList[i][1] == '/') {
                     if ((getTag(tagList[i]) == getTag(tagList[i-1])) && (tagList[i-1][1] != '/'))
                       levelList.push_back(levelList[i-1]);
                     else 
                       levelList.push_back((levelList[i-1] > 0)?levelList[i-1]-1:0);
               }
-              else if ((tagList[i-1][0]  == '<') && ((tagList[i-1][1]  != '/')) && (orphelinTags.indexOf(getTag(tagList[i-1])) == -1)) 
+              else if ((tagList[i-1][0]  == '<') && ((tagList[i-1][1]  != '/')) && (htmlInfo.orphelinTags.indexOf(getTag(tagList[i-1])) == -1)) 
                     levelList.push_back(levelList[i-1]+1);
               else 
                     levelList.push_back(levelList[i-1]);
         }
         else {
-              if ((tagList[i][0] == '<') && (orphelinTags.indexOf(tag) != -1))
+              if ((tagList[i][0] == '<') && (htmlInfo.orphelinTags.indexOf(tag) != -1))
                 orphelin = true;
-              if ((tagList[i-1][0]  == '<') && ((tagList[i-1][1]  != '/')) && (orphelinTags.indexOf(getTag(tagList[i-1])) == -1)) 
+              if ((tagList[i-1][0]  == '<') && ((tagList[i-1][1]  != '/')) && (htmlInfo.orphelinTags.indexOf(getTag(tagList[i-1])) == -1)) 
                     levelList.push_back(levelList[i-1]+1);
               else 
                     levelList.push_back(levelList[i-1]);
@@ -226,8 +226,8 @@ QString HtmlParser::getParsedHtml(HtmlData &pageData) {
   for (int j=0; j < pageData.tagList.size();j++) {
     tag2 = getTag(pageData.tagList[j]);
     tab.clear();
-    if ((noNewLineTags.indexOf(tag2) != -1) || (pageData.tagList[j][0] != '<')) {
-        if ((pageData.tagList[j][0] == '<') && (needNewLineOnOpen.indexOf(tag2) != -1) && (parsedHTML[parsedHTML.size()-1] != '\n') && (pageData.tagList[j].left(2) != "</")) {
+    if ((htmlInfo.noNewLineTags.indexOf(tag2) != -1) || (pageData.tagList[j][0] != '<')) {
+        if ((pageData.tagList[j][0] == '<') && (htmlInfo.needNewLineOnOpen.indexOf(tag2) != -1) && (parsedHTML[parsedHTML.size()-1] != '\n') && (pageData.tagList[j].left(2) != "</")) {
               parsedHTML += "\n";
               for (int k =0; k < pageData.levelList[j]; k++) 
                     tab += "   ";
@@ -240,7 +240,7 @@ QString HtmlParser::getParsedHtml(HtmlData &pageData) {
         }
         else 
               parsedHTML += pageData.tagList[j];
-        if ((pageData.tagList[j].left(2) == "</") && (needNewLineOnClose.indexOf(tag2) != -1)) 
+        if ((pageData.tagList[j].left(2) == "</") && (htmlInfo.needNewLineOnClose.indexOf(tag2) != -1)) 
               parsedHTML += "\n";
     }
     else {

@@ -42,6 +42,13 @@ struct HtmlData {
   QVector<uint> levelList;
 };
 
+struct W3Cinfo {
+  QStringList orphelinTags;
+  QStringList noNewLineTags;
+  QStringList needNewLineOnClose;
+  QStringList needNewLineOnOpen;
+};
+
 class debugItem {
   public:
     debugItem(int _line, int _icon, QString _message) : line(_line), icon(_icon), message(_message) {}
@@ -67,12 +74,13 @@ class HtmlParser{
     QString getParsedHtml(QString inputFile);
     void updateTree(QString file, QTreeWidget* aTree);
     void updateTree(QVector<QString> tagList, QVector<uint> levelList, QTreeWidget* aTree);
+    W3Cinfo htmlInfo;
     
   private:
-    QStringList orphelinTags;
+    /*QStringList orphelinTags;
     QStringList noNewLineTags;
     QStringList needNewLineOnClose;
-    QStringList needNewLineOnOpen;
+    QStringList needNewLineOnOpen;*/
     QStringList markerList;
     //QVector<QString> ConvertToTemplate(QVector<QString> tagList, QString &markerDefinition);
     QVector<QString> translate(QVector<QString> tagList, QString markerDefinition);
