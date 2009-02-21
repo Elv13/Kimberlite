@@ -4,7 +4,7 @@
   <project title="Test2">
     <html>
       <page title="My wonderfull web page 1" name="page1.htm">
-        [[@O@]]html[[@C@]][[@O@]]head[[@C@]][[@O@]]/head[[@C@]]test[[@O@]]body[[@C@]][[@O@]]/body[[@C@]][[@O@]]/html[[@C@]]
+        [[@O@]]html[[@C@]][[@O@]]head[[@C@]][[@O@]]/head[[@C@]]test[[@O@]]body[[@C@]][[@O@]]html[[@C@]][[@O@]]/html[[@C@]][[@O@]]/body[[@C@]][[@O@]]/html[[@C@]]
       </page>
       <page title="My wonderfull web page 1" name="page4.htm">
         [[@O@]]html[[@C@]][[@O@]]head[[@C@]][[@O@]]/head[[@C@]]test444[[@O@]]body[[@C@]][[@O@]]/body[[@C@]][[@O@]]/html[[@C@]]
@@ -14,7 +14,8 @@
 	  [[@O@]]html[[@C@]][[@O@]]head[[@C@]][[@O@]]/head[[@C@]]test22[[@O@]]body[[@C@]][[@O@]]/body[[@C@]][[@O@]]/html[[@C@]]
         </page>
         <page title="My wonderfull web page 3" name="page3.htm">
-	  [[@O@]]html[[@C@]][[@O@]]head[[@C@]][[@O@]]/head[[@C@]]test33[@O@]]body[[@C@]][[@O@]]/body[[@C@]][[@O@]]/html[[@C@]]
+	  [[@O@]]html[[@C@]][[@O@]]head[[@C@]][[@O@]]/head[[@C@]]test33[@O@]]body[[@C@]]
+          [@O@]]a[[@C@]][@O@]]/a[[@C@]][[@O@]]/body[[@C@]][[@O@]]/html[[@C@]]
         </page>
       </folder>
     </html>

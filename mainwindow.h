@@ -272,7 +272,7 @@ public:
     void updateHtmlTree(QString file);
     int previousCssMode;
     QTreeWidgetItem* currentHTMLPage;
-    void debug(HtmlData* pageData);
+    void debug();
 
   private slots:
     void setupToolTip();

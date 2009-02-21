@@ -60,33 +60,20 @@ class debugItem {
 };
 
 class HtmlParser{
-    //Q_OBJECT
   public:
     HtmlParser();
     QString compressFile(QString path);
     QString compressString(QString file);
     static QString getTag(QString aTag);
-    QString parse(QString inputFile, bool debug, bool toTemplate, bool mode, QTreeWidget* aTree);
     QVector<QString> listTag(QString inputFile);
-    QVector<debugItem> debugVector;
     HtmlData getHtmlData(QString inputFile);
     QString getParsedHtml(HtmlData &pageData);
     QString getParsedHtml(QString inputFile);
-    void updateTree(QString file, QTreeWidget* aTree);
-    void updateTree(QVector<QString> tagList, QVector<uint> levelList, QTreeWidget* aTree);
     W3Cinfo htmlInfo;
     
   private:
-    /*QStringList orphelinTags;
-    QStringList noNewLineTags;
-    QStringList needNewLineOnClose;
-    QStringList needNewLineOnOpen;*/
     QStringList markerList;
-    //QVector<QString> ConvertToTemplate(QVector<QString> tagList, QString &markerDefinition);
-    QVector<QString> translate(QVector<QString> tagList, QString markerDefinition);
     QVector<uint> htmlParser(QVector<QString> tagList);
-    QString indentHtml(bool toTemplate, QVector<QString> tagList, QVector<uint> levelList);
-
 };
 
 /*class ParserThread : public QThread {
