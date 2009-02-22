@@ -96,7 +96,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     //tabWMenu->tabBar()->setSizePolicy(sizePolicy);
     tabWMenu->setMinimumSize(QSize(0, 87));
     tabWMenu->setMaximumSize(QSize(9999999, 87));
-    tabWMenu->setStyleSheet(QString::fromUtf8("QTabWidget::tab-bar {\n"
+    /*tabWMenu->setStyleSheet(QString::fromUtf8("QTabWidget::tab-bar {\n"
 "	border-radius: 5px;\n"
 "}\n"
 "QTabWidget::pane {\n"
@@ -142,7 +142,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
 "margin-left:5px;\n"
 "margin-right:5px;\n"
 "color:#B4B4B4;\n"
-"}"));
+"}"));*/
     menufile = new QWidget();
     menufile->setObjectName(QString::fromUtf8("menufile"));
     menufile->setGeometry(QRect(0, 0, 1000, 81));
@@ -1153,6 +1153,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////TODO//TODO
     cssHeight = new CSSBeginnerWidget(tabBeginner,"height");
+   // ashCssBeg[] =;
     verticalLayout_9->addWidget(cssHeight);
 
     cssWidth = new CSSBeginnerWidget(tabBeginner,"width");
@@ -1555,7 +1556,7 @@ QString MainWindow::readCSSFile(QString path) {
 	    //line = line.remove(line.count() -2,2); //Remove UNICODE linefeed
 	  }
 
-	  cssFile += line;
+	  CssParser::cssFile += line;
       }
 
       KIO::NetAccess::removeTempFile(tmpFile);
@@ -1567,24 +1568,23 @@ QString MainWindow::readCSSFile(QString path) {
     }*/
 
 
-    while (cssFile.indexOf("\n") != -1) {
-      cssFile.remove(cssFile.indexOf("\n"),1);
+    while (CssParser::cssFile.indexOf("\n") != -1) {
+      CssParser::cssFile.remove(CssParser::cssFile.indexOf("\n"),1);
     }
-  printf("%s",cssFile.toStdString().c_str());
-  return cssFile;
+  printf("%s",CssParser::cssFile.toStdString().c_str());
+  return CssParser::cssFile;
 }
 
-QString MainWindow::parseCSS() {
-        printf("\nThis3");
+/*QString MainWindow::parseCSS() {
   QString parsedCSS;
   QString tmpCSS = cssFile.trimmed();
   printf("\nThis is the complete text: %s \n\n", tmpCSS.toStdString().c_str());
   if (tmpCSS.trimmed().isEmpty() == false) {
-    while (tmpCSS.count() != 0) {
-      if ((tmpCSS.indexOf("/*") != -1) && ((tmpCSS.indexOf("/*") < (tmpCSS.indexOf("{"))))) {
-	parsedCSS += tmpCSS.left(tmpCSS.indexOf("*/")+1) + "\n";
-	tmpCSS.remove(0,tmpCSS.indexOf("*/")+1);
-      }
+    while (tmpCSS.count() != 0) {*/
+      //if ((tmpCSS.indexOf("/*") != -1) && ((tmpCSS.indexOf("/*") < (tmpCSS.indexOf("{"))))) {
+	//parsedCSS += tmpCSS.left(tmpCSS.indexOf("*/")+1) + "\n";
+	//tmpCSS.remove(0,tmpCSS.indexOf("*/")+1);
+     /* }
       else {
 	parsedCSS += tmpCSS.left(tmpCSS.indexOf("{")).trimmed() + " {\n";
 	tmpCSS.remove(0,tmpCSS.indexOf("{")+1);
@@ -1603,22 +1603,22 @@ QString MainWindow::parseCSS() {
   //printf("\nThis is the file:\n %s \n\n\n\n\n\n\n\n",parsedCSS.toStdString().c_str());
   printf("\nThis4");
   return parsedCSS;
-}
+}*/
 
-QStringList MainWindow::getClass(QString className) {
+/*QStringList MainWindow::getClass(QString className) {
   QString parsedCSS = parseCSS();
   QStringList aClass;
   parsedCSS.remove(0,parsedCSS.indexOf(className + " {")+ className.count() +2 );
   parsedCSS.remove(parsedCSS.indexOf("\n}"), parsedCSS.count() - (parsedCSS.indexOf("\n}")-2)).trimmed();
   printf("La class : %s",parsedCSS.trimmed().toStdString().c_str());
   while (parsedCSS.count() != 0) {
-    printf("file: %s[/] \n",parsedCSS.toStdString().c_str());
-    if ((parsedCSS.indexOf("/*") != -1) && ((parsedCSS.indexOf("/*") < (parsedCSS.indexOf(";"))))) {
-      aClass.push_back(parsedCSS.left(parsedCSS.indexOf("*/")+2).trimmed());
-      printf("A Line: %s \n",parsedCSS.left(parsedCSS.indexOf("*/")+2).trimmed().toStdString().c_str());
-      parsedCSS.remove(0,parsedCSS.indexOf("*/")+2);
-    }
-    else if (parsedCSS.indexOf(";") == -1)
+    printf("file: %s[/] \n",parsedCSS.toStdString().c_str());*/
+    //if ((parsedCSS.indexOf("/*") != -1) && ((parsedCSS.indexOf("/*") < (parsedCSS.indexOf(";"))))) {
+      //aClass.push_back(parsedCSS.left(parsedCSS.indexOf("*/")+2).trimmed());
+      //printf("A Line: %s //\n",parsedCSS.left(parsedCSS.indexOf("*/")+2).trimmed().toStdString().c_str());
+      //parsedCSS.remove(0,parsedCSS.indexOf("*/")+2);
+    //}
+    /*else if (parsedCSS.indexOf(";") == -1)
       parsedCSS.clear();
     else {
       aClass.push_back(parsedCSS.left(parsedCSS.indexOf(";")+1).trimmed());
@@ -1629,16 +1629,16 @@ QStringList MainWindow::getClass(QString className) {
   }
   //*printf("\nSA          :%d",aClass.count());
   return aClass;
-}
+}*/
 
-QString MainWindow::getPropriety(QString line) {
+/*QString MainWindow::getPropriety(QString line) {
   line = line.trimmed();
   line = line.left(line.indexOf(":"));
   line = line.trimmed().toLower();
   return line;
-}
+}*/
 
-QString MainWindow::getValue(QString line) {
+/*QString MainWindow::getValue(QString line) {
   line = line.trimmed();
   QString anUnit = getUnit(line);
   QString line2;
@@ -1655,9 +1655,9 @@ printf("%d",anUnit.count());
   }
   line2 = line2.trimmed().toLower();
   return line2;
-}
+}*/
 
-QString MainWindow::getUnit(QString line) {
+/*QString MainWindow::getUnit(QString line) {
   line = line.trimmed();
   QString anUnit = "-1";
   QSqlQuery query;
@@ -1673,93 +1673,93 @@ printf("\n Unit: %s  Line: %s %s \n",possibleValues[i].toStdString().c_str(),lin
     }
   }
   return anUnit;
-}
+}*/
 
 void MainWindow::fillCSSBegMode(QString className) {
-  QStringList aClass = getClass(className);
+  QStringList aClass = CssParser::getClass(className);
   for (int i =0; i < aClass.count(); i++) {
-    if (getPropriety(aClass[i]) == "height") {
+    if (CssParser::getPropriety(aClass[i]) == "height") {
       cssHeight->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "width") {
+    else if (CssParser::getPropriety(aClass[i]) == "width") {
       cssWidth->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "text-align") {
+    else if (CssParser::getPropriety(aClass[i]) == "text-align") {
       cssText_align->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "text-transform") {
+    else if (CssParser::getPropriety(aClass[i]) == "text-transform") {
       cssText_transform->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "color") {
+    else if (CssParser::getPropriety(aClass[i]) == "color") {
       cssColor->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "font-family") {
+    else if (CssParser::getPropriety(aClass[i]) == "font-family") {
       cssFont_family->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "font-size") {
+    else if (CssParser::getPropriety(aClass[i]) == "font-size") {
       cssFont_size->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "font-style") {
+    else if (CssParser::getPropriety(aClass[i]) == "font-style") {
       cssFont_style->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "font-weight") {
+    else if (CssParser::getPropriety(aClass[i]) == "font-weight") {
       cssFont_weight->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "background-image") {
+    else if (CssParser::getPropriety(aClass[i]) == "background-image") {
       cssBackground_image->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "background-color") {
+    else if (CssParser::getPropriety(aClass[i]) == "background-color") {
       cssBackground_color->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "background-repeat") {
+    else if (CssParser::getPropriety(aClass[i]) == "background-repeat") {
       cssBackground_repeat->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "border-width") {
+    else if (CssParser::getPropriety(aClass[i]) == "border-width") {
       cssBorder_width->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "border-color") {
+    else if (CssParser::getPropriety(aClass[i]) == "border-color") {
       cssBorder_color->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "border-style") {
+    else if (CssParser::getPropriety(aClass[i]) == "border-style") {
       cssBorder_style->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "float") {
+    else if (CssParser::getPropriety(aClass[i]) == "float") {
       cssFloat->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "position") {
+    else if (CssParser::getPropriety(aClass[i]) == "position") {
       cssPosition->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "z-index") {
+    else if (CssParser::getPropriety(aClass[i]) == "z-index") {
       cssZ_index->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "margin-top") {
+    else if (CssParser::getPropriety(aClass[i]) == "margin-top") {
       cssMargin_top->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "margin-bottom") {
+    else if (CssParser::getPropriety(aClass[i]) == "margin-bottom") {
       cssMargin_bottom->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "margin-left") {
+    else if (CssParser::getPropriety(aClass[i]) == "margin-left") {
       cssMargin_left->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "margin-right") {
+    else if (CssParser::getPropriety(aClass[i]) == "margin-right") {
       cssMargin_right->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "padding-top") {
+    else if (CssParser::getPropriety(aClass[i]) == "padding-top") {
       cssPadding_top->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "padding-bottom") {
+    else if (CssParser::getPropriety(aClass[i]) == "padding-bottom") {
       cssPadding_bottom->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "padding-left") {
+    else if (CssParser::getPropriety(aClass[i]) == "padding-left") {
       cssPadding_left->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "padding-right") {
+    else if (CssParser::getPropriety(aClass[i]) == "padding-right") {
       cssPadding_right->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "list-style") {
+    else if (CssParser::getPropriety(aClass[i]) == "list-style") {
       cssList_style->fillMe(aClass[i]);
     }
-    else if (getPropriety(aClass[i]) == "cursor") {
+    else if (CssParser::getPropriety(aClass[i]) == "cursor") {
       cssCursor->fillMe(aClass[i]);
     }
     //else
@@ -1767,7 +1767,7 @@ void MainWindow::fillCSSBegMode(QString className) {
   }
 }
 
-QString MainWindow::setClass(QString className, QString content) {
+/*QString MainWindow::setClass(QString className, QString content) {
       QStringList classList = getClassList();
       QString newCSSStyle;
       for (int i =0; i < classList.count();i++) {
@@ -1788,9 +1788,9 @@ QString MainWindow::setClass(QString className, QString content) {
       
       printf("This is the new file: \n%s\n\n\n\n\n",newCSSStyle.toStdString().c_str());
       return newCSSStyle;
-}
+}*/
 
-QStringList MainWindow::getClassList() {
+/*QStringList MainWindow::getClassList() {
   QStringList classList;
   QString cssFile = parseCSS();
 
@@ -1811,7 +1811,7 @@ QStringList MainWindow::getClassList() {
   }
 
   return classList;
-}
+}*/
 
 void MainWindow::fillCSSAdvMode() {
   QString color1 = "background-color:#7AEEFF;";
@@ -1819,7 +1819,7 @@ void MainWindow::fillCSSAdvMode() {
   QString color = color1;
   int nbRow =0;
   tblCSSPage->setRowCount(nbRow);
-  QStringList classList = getClassList();
+  QStringList classList = CssParser::getClassList();
   for (int i =0; i < classList.count();i++) {
     nbRow++;
     tblCSSPage->setRowCount(nbRow);
@@ -1845,7 +1845,7 @@ void MainWindow::fillCSSAdvMode() {
     classNameBackground4->setStyleSheet(color);
     tblCSSPage->setCellWidget((nbRow-1), 4, classNameBackground4);
 
-    QStringList proprietyList = getClass(classList[i]);
+    QStringList proprietyList = CssParser::getClass(classList[i]);
     for (int j =0; j < proprietyList.count();j++) {
       QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
       sizePolicy.setHorizontalStretch(0);
@@ -1863,7 +1863,7 @@ void MainWindow::fillCSSAdvMode() {
       QWidget* proprietyNameBackground = new QWidget(tblCSSPage);
       proprietyNameBackground->setStyleSheet(color);
       QLabel* lblProprietyName = new QLabel(proprietyNameBackground);
-      lblProprietyName->setText("    "+getPropriety(proprietyList[j])+": ");
+      lblProprietyName->setText("    "+CssParser::getPropriety(proprietyList[j])+": ");
       tblCSSPage->setCellWidget((nbRow-1), 0, proprietyNameBackground);
 
 
@@ -1923,7 +1923,7 @@ void MainWindow::fillCSSAdvMode() {
 
       QList<bool>* isEditable = new QList<bool>;
       QSqlQuery query;
-      query.exec("SELECT VALUE,UNIT FROM TCSS_TAG WHERE TITLE = '"+ getPropriety(proprietyList[j]) +"'");
+      query.exec("SELECT VALUE,UNIT FROM TCSS_TAG WHERE TITLE = '"+ CssParser::getPropriety(proprietyList[j]) +"'");
       
       while (query.next()) {
 	QStringList possibleValues = query.value(0).toString().split(";");
@@ -2095,17 +2095,17 @@ void MainWindow::openProject() {
             //cout << aProject->cssPage.toStdString(); exit(33);
             readCSSFile("/home/lepagee/dev/myproject/kimberlite/StyleSheet.css");
             //readCSSFile(aProject->cssPage);
-            rtfCSSEditor->setText(parseCSS());
+            rtfCSSEditor->setText(CssParser::parseCSS());
             styleSheetName = new  QTreeWidgetItem(treeWidget);
             styleSheetName->setText(0,aProject->cssPage);
             //treeWidget->append(new QTreeWidgetItem((QTreeWidget*)0, append(new QTreeWidgetItem((QTreeWidget*)0, QStringList(QString("item: %1"))));));
             ////fillCSSAdvMode();
-            QStringList classList = getClassList();
+            QStringList classList = CssParser::getClassList();
             
             updateClassTree();
 	    if (classList.count() > 0) {
 	      //currentClassName = classList[0];
-	      getClass(classList[0]);
+	      //CssParser::getClass(classList[0]);
 	      fillCSSBegMode(classList[0]);
 	    }
             /*for (int j = 0; j < classList.count(); j++) {
@@ -2157,7 +2157,7 @@ void MainWindow::setupToolTip() {
 }
 
 void MainWindow::loadCSSClass(QTreeWidgetItem* anItem) {
-  QString newStyle = setClass(currentClassName, clearCssBeg());
+  QString newStyle = CssParser::setClass(currentClassName, clearCssBeg());
   QString className;
   QTreeWidgetItem* currentLevel = anItem;
   while (currentLevel != styleSheetName) {
@@ -2171,9 +2171,9 @@ void MainWindow::loadCSSClass(QTreeWidgetItem* anItem) {
   currentClassName = className;
   fillCSSBegMode(currentClassName);
   cout << newStyle.toStdString() <<endl;
-  cssFile = newStyle;
+  CssParser::cssFile = newStyle;
   saveProjectAs(aProject->cssPage , newStyle);
-  rtfCSSEditor->setText(parseCSS());
+  rtfCSSEditor->setText(CssParser::parseCSS());
 }
 
 void MainWindow::loadPage(QTableWidgetItem* anItem) {
@@ -2473,10 +2473,10 @@ void MainWindow::changeCssMode(int mode) {
 }
 
 void MainWindow::updateClassTree() {
-  QStringList classList = getClassList();
+  QStringList classList = CssParser::getClassList();
   if (classList.count() > 0) {
     currentClassName = classList[0];
-    getClass(classList[0]);
+    //CssParser::getClass(classList[0]);
     fillCSSBegMode(classList[0]);
   }
   for (int j = 0; j < classList.count(); j++) {
@@ -2579,9 +2579,9 @@ void MainWindow::loadScript(QTreeWidgetItem* anItem, QString text) {
 
 void MainWindow::loadCss(QString text) {
   printf("Load css\n");
-  cssFile = text;
+  CssParser::cssFile = text;
         printf("\nThis1");
-  rtfCSSEditor->setPlainText(parseCSS());
+  rtfCSSEditor->setPlainText(CssParser::parseCSS());
         printf("\nThis2");
   //fillCSSAdvMode();
   styleSheetName = new  QTreeWidgetItem(treeWidget);

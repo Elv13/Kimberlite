@@ -24,10 +24,11 @@
         @version 0.1-pre-alpah0
 */
 
-#ifndef UI_MAINWINDOW_20__2D__20_UNTITLED_H
-#define UI_MAINWINDOW_20__2D__20_UNTITLED_H
+#ifndef UI_MAINWINDOW
+#define UI_MAINWINDOW
 
 #include "src/htmlParser.h"
+#include "src/cssParser.h"
 
 #include <QtCore/QVariant>
 #include <KXmlGuiWindow>
@@ -71,6 +72,7 @@
 #include <QTreeWidgetItem>
 #include <QString>
 #include <QCompleter>
+#include <QHash>
 
 #include "src/CSSbeginnerWidget.h"
 #include "src/rtfCssEditor.h"
@@ -86,17 +88,10 @@ public:
     MainWindow(QWidget* parent);
     void retranslateUi();
     QString readCSSFile(QString path);
-    QString parseCSS();
-    QStringList getClass(QString className);
-    QStringList getClassList();
-    static QString getPropriety(QString line);
-    static QString getValue(QString line);
-    static QString getUnit(QString line);
     void fillCSSBegMode(QString className);
     void fillCSSAdvMode();
     ProjectManager* aProject;
     QWidget *centralwidget;
-    //QVBoxLayout *verticalLayout;
     KTabWidget *tabWMenu;
     QWidget *menufile;
     QWidget *menuEdit;
@@ -209,7 +204,6 @@ public:
     QVBoxLayout *verticalLayout_17;
     RtfCssEditor *rtfCSSEditor;
     QCompleter* cssCompleter;
-    //QCompleter* htmlCompleter;
     QWidget *tabValidator;
     QVBoxLayout *verticalLayout_16;
     QWebView *webValidator;
@@ -226,6 +220,7 @@ public:
     KToolBar* optionsTB;
     KToolBar* helpTB;
     QSqlDatabase* db;
+    QHash<CSSBeginnerWidget*> ashCssBeg;
     CSSBeginnerWidget* cssHeight;
     CSSBeginnerWidget* cssWidth;
     CSSBeginnerWidget* cssText_align;
@@ -254,7 +249,6 @@ public:
     CSSBeginnerWidget* cssPadding_right;
     CSSBeginnerWidget* cssList_style;
     CSSBeginnerWidget* cssCursor;
-    QString cssFile;
     ProjectManager2* aProjectManager;
     QTreeWidgetItem* currentScript;
 
@@ -264,7 +258,7 @@ public:
     bool isModified;
     QString pageName;
     QString currentClassName;
-    QString setClass(QString className, QString content);
+    //QString setClass(QString className, QString content);
     QString clearCssBeg();
     void disableWidget(bool value);
     void splitSubClass(QString name, QTreeWidgetItem* parent);
@@ -306,4 +300,4 @@ public:
 
 QT_END_NAMESPACE
 
-#endif // UI_MAINWINDOW_20__2D__20_UNTITLED_H
+#endif // UI_MAINWINDOW

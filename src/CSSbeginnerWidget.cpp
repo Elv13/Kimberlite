@@ -145,7 +145,7 @@ void CSSBeginnerWidget::fillMe(QString line) {
 
 
 
-      QString anUnit = MainWindow::getUnit(line);
+      QString anUnit = CssParser::getUnit(line);
       if (anUnit.count()) {
 	bool found = false;
 	int i = 0;
@@ -159,13 +159,13 @@ void CSSBeginnerWidget::fillMe(QString line) {
 	}
 	cbbValue->setCurrentIndex(cbbValue->count() -1);
 	cbbValue->setEditable(true);
-	cbbValue->lineEdit()->setText(MainWindow::getValue(line));
+	cbbValue->lineEdit()->setText(CssParser::getValue(line));
 	/*cbbUnit->setEnabled(true);
 	cbbUnit->setEditable(true);
 	cbbUnit->lineEdit()->setText(anUnit);*/
       }
       else {
-	QString aValue = MainWindow::getValue(line);
+	QString aValue = CssParser::getValue(line);
 	bool found = false;
 	int i = 0;
 	while((found == false) && i < cbbValue->count()) {
@@ -179,7 +179,7 @@ void CSSBeginnerWidget::fillMe(QString line) {
 	if (found == false) {
 	  cbbValue->setCurrentIndex(cbbValue->count() -1);
 	  cbbValue->setEditable(true);
-	  cbbValue->lineEdit()->setText(MainWindow::getValue(line));
+	  cbbValue->lineEdit()->setText(CssParser::getValue(line));
 	  cbbValue->setStyleSheet(QString::fromUtf8("background-color:#FFA1A1;"));
 	}
       }

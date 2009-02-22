@@ -1,5 +1,6 @@
 #include "rtfHtmlEditor.h"
 #include "htmlParser.h"
+#include "cssParser.h"
 
 #include <KColorDialog>
 
@@ -265,7 +266,7 @@ void RtfHtmlEditor::completeAttribute(QString attribute, QString tag) {
   if (attribute.trimmed() == "CLASS") {
     //for (int i=0; i < 
     printf("\nIt is \"CLASS\" \n");
-    tmpList << "class1" << "class2" << "class3" << "class4";
+    tmpList = CssParser::getClassList();
   }
   else if (attribute.trimmed() == "STYLE") {
     QSqlQuery query23;

@@ -33,9 +33,7 @@
 #include <QString>
 #include <QFile>
 #include <QtSql>
-#include "stringToTemplate.h"
-
-//using namespace std;
+//#include "stringToTemplate.h"
 
 struct HtmlData {
   QVector<QString> tagList;
