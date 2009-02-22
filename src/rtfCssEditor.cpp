@@ -71,10 +71,10 @@ RtfCssEditor::RtfCssEditor(QWidget *parent)
  {
     if (c->widget() != this)
         return;
-      QTextCursor tc = textCursor();
-     int currentPos = tc.position();
-     tc.movePosition(QTextCursor::Down);
-     tc.select(QTextCursor::LineUnderCursor);
+    QTextCursor tc = textCursor();
+    int currentPos = tc.position();
+    tc.movePosition(QTextCursor::Down);
+    tc.select(QTextCursor::LineUnderCursor);
     if (tc.selectedText().isEmpty() == true) {
        tc.setPosition(currentPos);
        //if (QTextCursor::NextWord)

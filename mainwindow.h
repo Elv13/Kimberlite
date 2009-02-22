@@ -220,8 +220,9 @@ public:
     KToolBar* optionsTB;
     KToolBar* helpTB;
     QSqlDatabase* db;
-    QHash<CSSBeginnerWidget*> ashCssBeg;
-    CSSBeginnerWidget* cssHeight;
+    QStringList cssBegTagList;
+    QHash<QString, CSSBeginnerWidget*> ashCssBeg;
+    /*CSSBeginnerWidget* cssHeight;
     CSSBeginnerWidget* cssWidth;
     CSSBeginnerWidget* cssText_align;
     CSSBeginnerWidget* cssText_transform;
@@ -248,7 +249,7 @@ public:
     CSSBeginnerWidget* cssPadding_left;
     CSSBeginnerWidget* cssPadding_right;
     CSSBeginnerWidget* cssList_style;
-    CSSBeginnerWidget* cssCursor;
+    CSSBeginnerWidget* cssCursor;*/
     ProjectManager2* aProjectManager;
     QTreeWidgetItem* currentScript;
 
@@ -290,6 +291,9 @@ public:
     void showDebugger(bool);
     void addHtmlPage();
     void modeChanged(int index);
+    
+    void setBold();
+    
   public slots:
     void loadPage(QTreeWidgetItem* item, QString text);
     void loadScript(QTreeWidgetItem* anItem, QString text);
