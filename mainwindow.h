@@ -55,6 +55,7 @@
 #include <QtGui/QWidget>
 #include <QtWebKit/QWebView>
 #include <QDomDocument>
+#include <QFontComboBox>
 #include "kcolorcombo.h"
 #include "kcombobox.h"
 #include "knuminput.h"
@@ -82,6 +83,15 @@
 
 QT_BEGIN_NAMESPACE
 
+class IndexedTreeWidgetItem : public QTreeWidgetItem {
+  public:
+    IndexedTreeWidgetItem(QTreeWidget* parent, uint id) :QTreeWidgetItem(parent),index(id) {}
+    IndexedTreeWidgetItem(QTreeWidgetItem* parent, const QStringList &strings, uint id) :QTreeWidgetItem(parent,strings),index(id){}
+    IndexedTreeWidgetItem(QTreeWidget* parent, const QStringList &strings, uint id) :QTreeWidgetItem(parent,strings),index(id){}
+    IndexedTreeWidgetItem(const QStringList &strings, uint id) :QTreeWidgetItem (strings),index(id) {}
+    uint index;
+};
+
 class MainWindow  : public KXmlGuiWindow {
    Q_OBJECT
 public:
@@ -100,7 +110,7 @@ public:
     QSpacerItem *horizontalSpacer_3;
     QVBoxLayout *vlTextAtribute;
     QHBoxLayout *hlFont;
-    KComboBox *cbbFont;
+    QFontComboBox *cbbFont;
     KIntSpinBox *cbbFontSize;
     QHBoxLayout *hlTextAtributeButton;
     KPushButton *btnBold;
@@ -222,34 +232,6 @@ public:
     QSqlDatabase* db;
     QStringList cssBegTagList;
     QHash<QString, CSSBeginnerWidget*> ashCssBeg;
-    /*CSSBeginnerWidget* cssHeight;
-    CSSBeginnerWidget* cssWidth;
-    CSSBeginnerWidget* cssText_align;
-    CSSBeginnerWidget* cssText_transform;
-    CSSBeginnerWidget* cssColor;
-    CSSBeginnerWidget* cssFont_family;
-    CSSBeginnerWidget* cssFont_size;
-    CSSBeginnerWidget* cssFont_style;
-    CSSBeginnerWidget* cssFont_weight;
-    CSSBeginnerWidget* cssBackground_image;
-    CSSBeginnerWidget* cssBackground_color;
-    CSSBeginnerWidget* cssBackground_repeat;
-    CSSBeginnerWidget* cssBorder_width;
-    CSSBeginnerWidget* cssBorder_color;
-    CSSBeginnerWidget* cssBorder_style;
-    CSSBeginnerWidget* cssFloat;
-    CSSBeginnerWidget* cssPosition;
-    CSSBeginnerWidget* cssZ_index;
-    CSSBeginnerWidget* cssMargin_top;
-    CSSBeginnerWidget* cssMargin_bottom;
-    CSSBeginnerWidget* cssMargin_left;
-    CSSBeginnerWidget* cssMargin_right;
-    CSSBeginnerWidget* cssPadding_top;
-    CSSBeginnerWidget* cssPadding_bottom;
-    CSSBeginnerWidget* cssPadding_left;
-    CSSBeginnerWidget* cssPadding_right;
-    CSSBeginnerWidget* cssList_style;
-    CSSBeginnerWidget* cssCursor;*/
     ProjectManager2* aProjectManager;
     QTreeWidgetItem* currentScript;
 
@@ -264,7 +246,7 @@ public:
     void disableWidget(bool value);
     void splitSubClass(QString name, QTreeWidgetItem* parent);
     KIcon getRightIcon(QString text);
-    void updateHtmlTree(QString file);
+    void updateHtmlTree(QString &file);
     int previousCssMode;
     QTreeWidgetItem* currentHTMLPage;
     void debug();
@@ -282,12 +264,15 @@ public:
     void saveFile();
     void loadCSSClass(QTreeWidgetItem* anItem);
     void loadPage(QTableWidgetItem* anItem);
+    void setHtmlCursor(QTreeWidgetItem* item, int column);
     void setModified();
     void changeCssMode(int mode);
     void updateClassTree();
+    void debugHtml();
     
     void showPageList(bool);
     void showCSS(bool);
+    void showHtml(bool state);
     void showDebugger(bool);
     void addHtmlPage();
     void modeChanged(int index);

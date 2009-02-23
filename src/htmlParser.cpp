@@ -1,4 +1,27 @@
 #include "htmlParser.h"
+/*W3Cinfo HtmlParser::htmlInfo = load();
+
+W3Cinfo load()  {
+  QSqlQuery query;
+  W3Cinfo someInfo;
+  query.exec("SELECT NAME FROM THTML_TAG WHERE IFNEEDCLOSE = 0");
+  while (query.next()) 
+    someInfo.orphelinTags << query.value(0).toString();
+  query.exec("SELECT NAME FROM THTML_TAG WHERE IFNEEDNEWLINE = 0");
+  while (query.next()) 
+    someInfo.noNewLineTags << query.value(0).toString();
+  query.exec("SELECT NAME FROM THTML_TAG WHERE IFNEEDNEWLINE = 2");
+  while (query.next()) {
+    someInfo.needNewLineOnClose << query.value(0).toString();
+    someInfo.noNewLineTags << query.value(0).toString();
+  }
+  query.exec("SELECT NAME FROM THTML_TAG WHERE IFNEEDNEWLINE = 3");
+  while (query.next()) {
+    someInfo.needNewLineOnOpen << query.value(0).toString();
+    someInfo.noNewLineTags << query.value(0).toString();
+  }
+  return someInfo;
+}*/
 
 HtmlParser::HtmlParser()  {
   QSqlQuery query;

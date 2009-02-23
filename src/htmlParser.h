@@ -55,12 +55,13 @@ class debugItem {
     int character;
     QString message;
 };
+W3Cinfo load();
 
 class HtmlParser{
   public:
     HtmlParser();
-    QString compressFile(QString path);
-    QString compressString(QString file);
+    static QString compressFile(QString path);
+    static QString compressString(QString file);
     static QString getTag(QString aTag);
     QVector<QString> listTag(QString inputFile);
     HtmlData getHtmlData(QString inputFile);

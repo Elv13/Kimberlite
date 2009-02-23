@@ -59,15 +59,12 @@
 
 MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage(NULL),currentScript(NULL) {
   isModified = false;
-  //test code
   aProject = new ProjectManager("test.wkp");
   cout << aProject->projectName.toStdString() << endl;
   setWindowTitle(QApplication::translate("this", "Kimberlite - ", 0, QApplication::UnicodeUTF8) + aProject->projectName);
   for (int i =0;i<aProject->htmlPage.count();i++) {
     cout << aProject->htmlPage[i].toStdString() << endl;
   }
-  //exit(33);
-  //end of test code
 
   setupToolTip(); 
   cout << "This: " <<   KStandardDirs::locate( "appdata", "kimberlite.db" ).toStdString() << endl;
@@ -80,22 +77,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
       printf("ERROR while opening the database, get ready for a crash");
     }
     aParser = new HtmlParser();
-/*if (this->objectName().isEmpty())
-        this->setObjectName(QString::fromUtf8("this"));
-    this->resize(1008, 717);*/
-    /*centralwidget = new QWidget(this);
-    centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
-    centralwidget->setGeometry(QRect(0, 0, 1008, 696));*/
-    //verticalLayout = new QVBoxLayout(0);
-    //verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
     tabWMenu = new KTabWidget(this);
-    //tabWMenu->setObjectName(QString::fromUtf8("tabWMenu"));
-    //QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    /*sizePolicy.setHorizontalStretch(0);
-    sizePolicy.setVerticalStretch(0);
-    sizePolicy.setHeightForWidth(tabWMenu->sizePolicy().hasHeightForWidth());*/
-    //tabWMenu->setSizePolicy(sizePolicy);
-    //tabWMenu->tabBar()->setSizePolicy(sizePolicy);
     tabWMenu->setMinimumSize(QSize(0, 87));
     tabWMenu->setMaximumSize(QSize(9999999, 87));
     /*tabWMenu->setStyleSheet(QString::fromUtf8("QTabWidget::tab-bar {\n"
@@ -295,33 +277,6 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     this, SLOT(quit()));
     editTB->addAction(findAction);
 
-    KAction* zoomInAction = new KAction(this);
-    zoomInAction->setText(i18n("Zoom In"));
-    zoomInAction->setIcon(KIcon("zoom-in"));
-    zoomInAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("zoomin", zoomInAction);
-    connect(zoomInAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    editTB->addAction(zoomInAction);
-
-    KAction* zoomOutAction = new KAction(this);
-    zoomOutAction->setText(i18n("Zoom Out"));
-    zoomOutAction->setIcon(KIcon("zoom-out"));
-    zoomOutAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("zoomout", zoomOutAction);
-    connect(zoomOutAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    editTB->addAction(zoomOutAction);
-
-    KAction* zoomOriAction = new KAction(this);
-    zoomOriAction->setText(i18n("Zoom 1:1"));
-    zoomOriAction->setIcon(KIcon("zoom-original"));
-    zoomOriAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("zoomnormal", zoomOriAction);
-    connect(zoomOutAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    editTB->addAction(zoomOriAction);
-
     editTB->addSeparator();
 
     vlTextAtribute = new QVBoxLayout();
@@ -331,7 +286,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     hlFont->setContentsMargins(0,0,0,0);
     hlFont->setObjectName(QString::fromUtf8("hlFont"));
     hlFont->setSizeConstraint(QLayout::SetMinimumSize);
-    cbbFont = new KComboBox(menuEdit);
+    cbbFont = new QFontComboBox(menuEdit);
     cbbFont->setObjectName(QString::fromUtf8("cbbFont"));
     cbbFont->setMinimumSize(QSize(225, 0));
     cbbFont->setMaximumSize(QSize(225, 16777215));
@@ -345,6 +300,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     sizePolicy1.setVerticalStretch(0);
     sizePolicy1.setHeightForWidth(cbbFontSize->sizePolicy().hasHeightForWidth());
     cbbFontSize->setSizePolicy(sizePolicy1);
+    cbbFontSize->setSuffix("px");
 
     hlFont->addWidget(cbbFontSize);
 
@@ -453,6 +409,11 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     vlOther->setObjectName(QString::fromUtf8("vlOther"));
     cbbHeader = new KComboBox(menuEdit);
     cbbHeader->setObjectName(QString::fromUtf8("cbbHeader"));
+    cbbHeader->addItem("H1");
+    cbbHeader->addItem("H2");
+    cbbHeader->addItem("H3");
+    cbbHeader->addItem("H4");
+    cbbHeader->addItem("H6");
 
     vlOther->addWidget(cbbHeader);
 
@@ -569,7 +530,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
 
     KAction* viewPageList = new KAction(this);
     viewPageList->setCheckable(true);
-    viewPageList->setText(i18n("Page List"));
+    viewPageList->setText(i18n("Project"));
     viewPageList->setIcon(KIcon("text-x-katefilelist"));
     viewPageList->setShortcut(Qt::CTRL + Qt::Key_W);
     actionCollection()->addAction("viewPageList", viewPageList);
@@ -587,6 +548,16 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     this, SLOT(showCSS(bool)));
     viewTB->addAction(viewCSSClass);
     
+    KAction* viewHtml = new KAction(this);
+    viewHtml->setCheckable(true);
+    viewHtml->setText(i18n("HTML Tree"));
+    viewHtml->setIcon(KIcon("text-x-katefilelist"));
+    viewHtml->setShortcut(Qt::CTRL + Qt::Key_W);
+    actionCollection()->addAction("viewCSSClass", viewHtml);
+    connect(viewHtml, SIGNAL(triggered(bool)),
+    this, SLOT(showHtml(bool)));
+    viewTB->addAction(viewHtml);
+    
     KAction* viewDebugger = new KAction(this);
     viewDebugger->setCheckable(true);
     viewDebugger->setText(i18n("Debugger"));
@@ -596,6 +567,37 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     connect(viewDebugger, SIGNAL(triggered(bool)),
     this, SLOT(showDebugger(bool)));
     viewTB->addAction(viewDebugger);
+    
+    viewTB->addSeparator();
+      
+    KAction* zoomInAction = new KAction(this);
+    zoomInAction->setText(i18n("Zoom In"));
+    zoomInAction->setIcon(KIcon("zoom-in"));
+    zoomInAction->setShortcut(Qt::CTRL + Qt::Key_W);
+    actionCollection()->addAction("zoomin", zoomInAction);
+    connect(zoomInAction, SIGNAL(triggered(bool)),
+    this, SLOT(quit()));
+    viewTB->addAction(zoomInAction);
+
+    KAction* zoomOutAction = new KAction(this);
+    zoomOutAction->setText(i18n("Zoom Out"));
+    zoomOutAction->setIcon(KIcon("zoom-out"));
+    zoomOutAction->setShortcut(Qt::CTRL + Qt::Key_W);
+    actionCollection()->addAction("zoomout", zoomOutAction);
+    connect(zoomOutAction, SIGNAL(triggered(bool)),
+    this, SLOT(quit()));
+    viewTB->addAction(zoomOutAction);
+
+    KAction* zoomOriAction = new KAction(this);
+    zoomOriAction->setText(i18n("Zoom 1:1"));
+    zoomOriAction->setIcon(KIcon("zoom-original"));
+    zoomOriAction->setShortcut(Qt::CTRL + Qt::Key_W);
+    actionCollection()->addAction("zoomnormal", zoomOriAction);
+    connect(zoomOutAction, SIGNAL(triggered(bool)),
+    this, SLOT(quit()));
+    viewTB->addAction(zoomOriAction);
+
+
     
     
     menuInsert = new QWidget();
@@ -772,7 +774,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     debugAction->setShortcut(Qt::CTRL + Qt::Key_W);
     actionCollection()->addAction("debug", debugAction);
     connect(debugAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
+    this, SLOT(debugHtml()));
     toolsTB->addAction(debugAction);
 
     toolsTB->addSeparator();
@@ -876,43 +878,27 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     this, SLOT(quit()));
     helpTB->addAction(reportBugAction);
 
-    //verticalLayout->addWidget(tabWMenu);
+
     setMenuWidget(tabWMenu);
-    
-    /*mainLayout = new QHBoxLayout(this);
-    mainLayout->setObjectName(QString::fromUtf8("mainLayout"));*/
 
     dockHtmlTree = new QDockWidget(this);
     treeHtml = new QTreeWidget(this);
     dockHtmlTree->setWidget(treeHtml);
     addDockWidget(Qt::LeftDockWidgetArea, dockHtmlTree);
+    connect(treeHtml, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
+    this, SLOT(setHtmlCursor(QTreeWidgetItem*, int)));
  
     tableDock = new QDockWidget(this);
     tableDock->setObjectName(QString::fromUtf8("tableDock"));
-    //tableDock->setHidden(true);
-    
+
     aProjectManager = new ProjectManager2(0);
     
     
     tableDockCentral = new QWidget();
     tableDockCentral->setObjectName(QString::fromUtf8("tableDockCentral"));
-    //tableDockCentral->setGeometry(QRect(4, 22, 166, 556));
-    //tableDockCentral->setMaximumSize(200,9999);
-    //tableDock->setMaximumSize(200,9999);
     verticalLayout_4 = new QVBoxLayout(tableDockCentral);
     verticalLayout_4->setObjectName(QString::fromUtf8("verticalLayout_4"));
-    /*tableView = new QTableWidget(tableDockCentral);
-    tableView->setObjectName(QString::fromUtf8("tableView"));
-    if (tableView->columnCount() < 2)
-       tableView->setColumnCount(2);
-   
-    connect(tableView, SIGNAL(itemClicked(QTableWidgetItem*)),
-    this, SLOT(loadPage(QTableWidgetItem*)));
-    
-    QTableWidgetItem *__colItem10 = new QTableWidgetItem("column 1");
-    tableView->setHorizontalHeaderItem(0, __colItem10);
 
-    verticalLayout_4->addWidget(tableView);*/
     addDockWidget(Qt::LeftDockWidgetArea, tableDock);
     hlButton = new QHBoxLayout();
     hlButton->setObjectName(QString::fromUtf8("hlButton"));
@@ -935,11 +921,9 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
 
     treeDock = new QDockWidget(this);
     treeDock->setObjectName(QString::fromUtf8("treeDock"));
-    //treeDock->setHidden(true);
     treeDockCentral = new QWidget();
     treeDockCentral->setObjectName(QString::fromUtf8("treeDockCentral"));
-    //treeDockCentral->setGeometry(QRect(4, 22, 166, 556));
-    //treeDock->setMaximumSize(200,9999);
+
     verticalLayout_5 = new QVBoxLayout(treeDockCentral);
     verticalLayout_5->setObjectName(QString::fromUtf8("verticalLayout_5"));
     treeWidget = new QTreeWidget(treeDockCentral);
@@ -966,21 +950,9 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     verticalLayout_5->addLayout(hlButton2);
 
     treeDock->setWidget(treeDockCentral);
-
-    //mainLayout->addWidget(treeDock);
-
-    /*centralWidget2 = new QWidget(centralwidget);
-    centralWidget2->setObjectName(QString::fromUtf8("centralWidget2"));
-    verticalLayout_2 = new QVBoxLayout(centralWidget2);
-    verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));*/
     tabWEditor = new QTabWidget(this);
     setCentralWidget(tabWEditor);
     tabWEditor->setObjectName(QString::fromUtf8("tabWEditor"));
-    /*tabWEditor->setStyleSheet(QString::fromUtf8("QTabWidget::pane {\n"
-"	margin-top:0px;\n"
-"	spacing:0px;\n"
-"	padding-top:4px;\n"
-"}"));*/
     tabWEditor->setTabPosition(QTabWidget::South);
     tabPreview = new QWidget();
     tabPreview->setObjectName(QString::fromUtf8("tabPreview"));
@@ -1006,33 +978,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     rtfHTMLEditor->setWordWrapMode(QTextOption::NoWrap);
     connect(rtfHTMLEditor, SIGNAL(textChanged()), this, SLOT(setModified()));
 
-    /*QStringList wordList2;
-    QSqlQuery query23;
-    query23.exec("SELECT NAME FROM THTML_TAG");
-    
-    while (query23.next()) {
-      wordList2 <<  query23.value(0).toString();
-    }
-
-    htmlCompleter = new QCompleter(wordList2, tabWEditor);
-    htmlCompleter->setCaseSensitivity(Qt::CaseInsensitive);
-    //cssCompleter->setWidget(rtfCSSEditor);
-    rtfHTMLEditor->setCompleter(htmlCompleter);*/
-
-    /*aParser = new HtmlParser();
-    std::string aFile = aParser->compressFile("/home/lepagee/dev/webkreator/test.htm");
-    rtfHTMLEditor->setPlainText(QString::fromStdString(aParser->htmlParser(aFile,true, false)));*/
-
     verticalLayout_3->addWidget(rtfHTMLEditor);
-
-    /*btnParse = new QPushButton(tabHTML);
-    btnParse->setObjectName(QString::fromUtf8("btnParse"));
-    sizePolicy.setHeightForWidth(btnParse->sizePolicy().hasHeightForWidth());
-    //btnParse->setSizePolicy(sizePolicy);
-    connect(btnParse, SIGNAL(clicked()), this, SLOT(reParse()));
-
-
-    verticalLayout_3->addWidget(btnParse);*/
 
     dockDebug = new QDockWidget(tabHTML);
     dockDebug->setObjectName(QString::fromUtf8("dockDebug"));
@@ -1045,13 +991,11 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     dockDebug->setMinimumSize(QSize(0, 150));
     dockDebugContents = new QWidget();
     dockDebugContents->setObjectName(QString::fromUtf8("dockDebugContents"));
-    //dockDebugContents->setGeometry(QRect(4, 22, 573, 131));
     dockDebug->setWidget(dockDebugContents);
     verticalLayout_99 = new QVBoxLayout(dockDebugContents);
     verticalLayout_99->setObjectName(QString::fromUtf8("verticalLayout_99"));
     lstDebug = new QListWidget(dockDebugContents);
     verticalLayout_99->addWidget(lstDebug);
-
 
     verticalLayout_3->addWidget(dockDebug);
 
@@ -1207,7 +1151,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     grbOther = new QGroupBox(scrollAreaWidgetContents);
     grbOther->setObjectName(QString::fromUtf8("grbOther"));
     QVBoxLayout* aQVBoxLayout = new QVBoxLayout(grbOther);
-    aQVBoxLayout->setContentsMargins(0,0,0,0);
+    //aQVBoxLayout->setContentsMargins(0,0,0,0);
     
     verticalLayout_15 = new QVBoxLayout();
     verticalLayout_15->setObjectName(QString::fromUtf8("verticalLayout_15"));
@@ -1658,12 +1602,9 @@ void MainWindow::fillCSSAdvMode() {
 }
 
 void MainWindow::reParse() {
-    //aParser->debugVector.clear();
     QString aFile = aParser->compressString(rtfHTMLEditor->toPlainText());
-    //aParser->updateTree(aFile,treeHtml);
     updateHtmlTree(aFile);
     rtfHTMLEditor->setPlainText(aParser->getParsedHtml(aFile));
-    debug();
 }
 
 void MainWindow::templaterize(bool check) {
@@ -1747,7 +1688,7 @@ void MainWindow::openProject() {
             pageName = aProject->htmlPage[0];
             rtfHTMLEditor->setPlainText(aParser->getParsedHtml(aFile));
             //cout << aProject->cssPage.toStdString(); exit(33);
-            readCSSFile("/home/lepagee/dev/myproject/kimberlite/StyleSheet.css");
+            //readCSSFile("/home/lepagee/dev/myproject/kimberlite/StyleSheet.css");
             //readCSSFile(aProject->cssPage);
             rtfCSSEditor->setText(CssParser::parseCSS());
             styleSheetName = new  QTreeWidgetItem(treeWidget);
@@ -1797,6 +1738,15 @@ void MainWindow::showDebugger(bool state) {
   }
   else {
     dockDebug->setHidden(true);
+  }
+}
+
+void MainWindow::showHtml(bool state) {
+  if (state == true ) {
+    dockHtmlTree->setHidden(false);
+  }
+  else {
+    dockHtmlTree->setHidden(true);
   }
 }
 
@@ -2035,33 +1985,44 @@ void MainWindow::modeChanged(int index) {
   }
 }
 
-void MainWindow::updateHtmlTree(QString file) {
+void MainWindow::updateHtmlTree(QString &file) {
   HtmlData pageData = aParser->getHtmlData(file);
-  QTreeWidgetItem* previousNode; //TODO ?
-  QTreeWidgetItem* aNode;
+  IndexedTreeWidgetItem* previousNode(NULL);
+  IndexedTreeWidgetItem* aNode(NULL);
+  int index(0), size(pageData.tagList.size());
   treeHtml->clear();
-  for (int j=0; j < pageData.tagList.size();j++) {
-    if (pageData.levelList[j] == 0) {
-      aNode = new QTreeWidgetItem(QStringList(pageData.tagList[j]));
-      treeHtml->addTopLevelItem(aNode);
-    }
+  for (int j=0; j < size;j++) {
+    if (pageData.levelList[j] == 0)
+      aNode = new IndexedTreeWidgetItem(treeHtml,QStringList(pageData.tagList[j]),index);
     else if (pageData.levelList[j] > pageData.levelList[(j > 0)?j-1:0]) 
-      aNode = new QTreeWidgetItem(previousNode,QStringList(pageData.tagList[j]));
+      aNode = new IndexedTreeWidgetItem(previousNode,QStringList(pageData.tagList[j]),index);
     else if (pageData.levelList[j] == pageData.levelList[(j > 0)?j-1:0]) 
-      aNode = new QTreeWidgetItem(previousNode->parent(),QStringList(pageData.tagList[j]));
+      aNode = new IndexedTreeWidgetItem(previousNode->parent(),QStringList(pageData.tagList[j]),index);
     else 
-      aNode = new QTreeWidgetItem(previousNode->parent()->parent(),QStringList(pageData.tagList[j]));
+      aNode = new IndexedTreeWidgetItem(previousNode->parent()->parent(),QStringList(pageData.tagList[j]),index);
     previousNode = aNode;
+    index += pageData.tagList[j].count()+1 + (3*(pageData.levelList[j+((size-1!=j)?1:0)]));
   }
   treeHtml->expandAll();
 }
 
+void MainWindow::setHtmlCursor(QTreeWidgetItem* item, int column) {
+  QTextCursor tc = rtfHTMLEditor->textCursor();
+  tc.setPosition(((IndexedTreeWidgetItem*) item)->index);
+  rtfHTMLEditor->setTextCursor(tc);
+  rtfHTMLEditor->setFocus();
+}
+
+void MainWindow::debugHtml() {
+  showDebugger(true);
+  debug();
+}
+
 void MainWindow::debug() {
   lstDebug->clear();
-  //if (pageData == NULL) {
-    HtmlData pageData = aParser->getHtmlData(aParser->compressString(rtfHTMLEditor->toPlainText()));
-  //}
-  //if (pageData == NULL) return;
+  QString aFile = HtmlParser::compressString(rtfHTMLEditor->toPlainText());
+  HtmlData pageData = aParser->getHtmlData(aFile);
+  updateHtmlTree(aFile);
   
   QString tag;
   QVector<debugItem> debugVector;

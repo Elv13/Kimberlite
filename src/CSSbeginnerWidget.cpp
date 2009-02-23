@@ -65,6 +65,7 @@ CSSBeginnerWidget::CSSBeginnerWidget(QWidget* parent, QString tagName) : QWidget
 
     cbbUnit = new QComboBox(this);
     cbbUnit->setMinimumSize(QSize(75, 0));
+    cbbUnit->setMaximumSize(QSize(75, 99));
     cbbUnit->setObjectName(QString::fromUtf8("cbbUnit"));
     sizePolicy1.setHeightForWidth(cbbUnit->sizePolicy().hasHeightForWidth());
     cbbUnit->setSizePolicy(sizePolicy1);
