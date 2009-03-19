@@ -14,8 +14,15 @@
 #include <QtGui/QSpacerItem>
 #include <QtGui/QVBoxLayout>
 #include <QDialog>
+#include <QVector>
 #include <sonnet/dictionarycombobox.h>
 #include "htmlParser.h"
+
+struct StringInfo {
+  int index;
+  QString originalText;
+  QString newText;
+};
 
 class StringConverter : public QDialog {
 public:
@@ -42,8 +49,8 @@ public:
     QPushButton *pushButton;
     QString translate(QString file);
     QString toTemplate(QString file);
-
-
+    QVector<StringInfo> stringVector;
+    int index;
 };
 
 #endif // TRANSLATEE11004_H

@@ -66,15 +66,15 @@ QString HtmlParser::getTag(QString aTag) {
     else {
       tag = aTag.remove(0,1);
       while (tag[0] == ' ') 
-            tag = tag.mid(1, tag.size() -1);
+	tag = tag.mid(1, tag.size() -1);
       if (tag.indexOf(" ") != -1) 
-            tag = tag.left(tag.indexOf(" "));
+	tag = tag.left(tag.indexOf(" "));
       else 
-            tag  = tag.left(tag.size() -1);
+	tag  = tag.left(tag.size() -1);
       if (tag[0] == '/') 
-            tag = aTag.remove(0,1);
+	tag = aTag.remove(0,1);
       if (tag.right(1) == ">") 
-            tag.chop(1);
+	tag.chop(1);
     }
   }
   return tag.toUpper();
@@ -192,4 +192,16 @@ QString HtmlParser::getParsedHtml(HtmlData &pageData) {
     }
   }
   return parsedHTML;
+}
+
+void HtmlParser::setAttribute(HtmlData &pageData, QString tag, uint index, QString attribute, QString value) {
+  int i=0;
+  for (int j =0; j < pageData.tagList.size(); j++)
+    if (HtmlParser::getTag(pageData.tagList[j]).toUpper() == tag.toUpper())
+      if (i == index) {
+	pageData.tagList[j].insert(pageData.tagList[j].count() - 1, " " + attribute + "=\"" + value + "\"");
+	break;
+      }
+      else
+	i++;
 }

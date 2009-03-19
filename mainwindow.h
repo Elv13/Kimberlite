@@ -110,7 +110,7 @@ public:
     QSpacerItem *horizontalSpacer_3;
     QVBoxLayout *vlTextAtribute;
     QHBoxLayout *hlFont;
-    QFontComboBox *cbbFont;
+    QComboBox *cbbFont;
     KIntSpinBox *cbbFontSize;
     QHBoxLayout *hlTextAtributeButton;
     KPushButton *btnBold;
@@ -129,14 +129,14 @@ public:
     KPushButton *btnChar;
     KPushButton *btnTable;
     KPushButton *btnList;
-    QVBoxLayout *vlColor;
-    QHBoxLayout *hlTextColor;
+    QGridLayout *vlColor;
+    //QHBoxLayout *hlTextColor;
     QLabel *lblTextColor;
     KColorCombo *kcbbTextColor;
-    QHBoxLayout *hlHighlightColor;
+    //QHBoxLayout *hlHighlightColor;
     QLabel *lblHighlightColor;
     KColorCombo *cbbHighlightColor;
-    QHBoxLayout *hlBackgroundColor;
+    //QHBoxLayout *hlBackgroundColor;
     QLabel *lblBackgroundColor;
     KColorCombo *cbbBackgroundColor;
     QWidget *menuInsert;
@@ -254,7 +254,7 @@ public:
   private slots:
     void setupToolTip();
     void reParse();
-    void templaterize(bool check);
+    void templaterize();
     void translate();
     void newProject(); 
     void openProject();
@@ -278,6 +278,22 @@ public:
     void modeChanged(int index);
     
     void setBold();
+    void setItalic();
+    void setUnderline();
+    void setAlignCenter();
+    void setAlignRight();
+    void setAlignLeft();
+    void setJustify();
+    void execCommand(const QString &cmd, const QString &arg);
+    void addTag(QString prefix, QString suffix);
+    void addTag(QString prefix, QString suffix, QString cmd, QString arg);
+    void setHeader(QString text);
+    void setFont(QString text);
+    void setFontSize(int size);
+    void setBackgroundColor();
+    void setHighlightColor();
+    void setTextColor();
+    void setUList();
     
   public slots:
     void loadPage(QTreeWidgetItem* item, QString text);

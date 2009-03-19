@@ -286,10 +286,13 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     hlFont->setContentsMargins(0,0,0,0);
     hlFont->setObjectName(QString::fromUtf8("hlFont"));
     hlFont->setSizeConstraint(QLayout::SetMinimumSize);
-    cbbFont = new QFontComboBox(menuEdit);
+    cbbFont = new QComboBox(menuEdit);
     cbbFont->setObjectName(QString::fromUtf8("cbbFont"));
     cbbFont->setMinimumSize(QSize(225, 0));
     cbbFont->setMaximumSize(QSize(225, 16777215));
+    cbbFont->addItems(QFontDatabase().families());
+    connect(cbbFont, SIGNAL(currentIndexChanged (QString)),
+    this, SLOT(setFont(QString)));
 
     hlFont->addWidget(cbbFont);
 
@@ -301,6 +304,8 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     sizePolicy1.setHeightForWidth(cbbFontSize->sizePolicy().hasHeightForWidth());
     cbbFontSize->setSizePolicy(sizePolicy1);
     cbbFontSize->setSuffix("px");
+    connect(cbbFontSize, SIGNAL(valueChanged(int)),
+    this, SLOT(setFontSize(int)));
 
     hlFont->addWidget(cbbFontSize);
 
@@ -330,6 +335,8 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     btnUnderline->setMaximumSize(QSize(30, 16777215));
     KIcon* icnUnderLine = new KIcon("format-text-underline");
     btnUnderline->setIcon(*icnUnderLine);
+    connect(btnUnderline, SIGNAL(clicked()),
+    this, SLOT(setUnderline()));
 
     hlTextAtributeButton->addWidget(btnUnderline);
 
@@ -341,6 +348,8 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     btnItalic->setMaximumSize(QSize(30, 16777215));
     KIcon* icnItalic = new KIcon("format-text-italic");
     btnItalic->setIcon(*icnItalic);
+    connect(btnItalic, SIGNAL(clicked()),
+    this, SLOT(setItalic()));
 
     hlTextAtributeButton->addWidget(btnItalic);
 
@@ -359,6 +368,8 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     btnAlignLeft->setMaximumSize(QSize(30, 16777215));
     KIcon* icnAlignLeft = new KIcon("format-justify-left");
     btnAlignLeft->setIcon(*icnAlignLeft);
+    connect(btnAlignLeft, SIGNAL(clicked()),
+    this, SLOT(setAlignLeft()));
 
     hlTextAtributeButton->addWidget(btnAlignLeft);
 
@@ -370,6 +381,8 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     btnAlignCenter->setMaximumSize(QSize(30, 16777215));
     KIcon* icnAlignCenter = new KIcon("format-justify-center");
     btnAlignCenter->setIcon(*icnAlignCenter);
+    connect(btnAlignCenter, SIGNAL(clicked()),
+    this, SLOT(setAlignCenter()));
 
     hlTextAtributeButton->addWidget(btnAlignCenter);
 
@@ -381,6 +394,8 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     btnAlignRight->setMaximumSize(QSize(30, 16777215));
     KIcon* icnAlignRight = new KIcon("format-justify-right");
     btnAlignRight->setIcon(*icnAlignRight);
+    connect(btnAlignRight, SIGNAL(clicked()),
+    this, SLOT(setAlignRight()));
 
     hlTextAtributeButton->addWidget(btnAlignRight);
 
@@ -392,6 +407,8 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     btnJustify->setMaximumSize(QSize(30, 16777215));
     KIcon* icnJustify = new KIcon("format-justify-fill");
     btnJustify->setIcon(*icnJustify);
+    connect(btnJustify, SIGNAL(clicked()),
+    this, SLOT(setJustify()));
 
     hlTextAtributeButton->addWidget(btnJustify);
 
@@ -414,6 +431,8 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     cbbHeader->addItem("H3");
     cbbHeader->addItem("H4");
     cbbHeader->addItem("H6");
+    connect(cbbHeader, SIGNAL(currentIndexChanged (QString)),
+    this, SLOT(setHeader(QString)));
 
     vlOther->addWidget(cbbHeader);
 
@@ -423,6 +442,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     btnLink->setObjectName(QString::fromUtf8("btnLink"));
     sizePolicy1.setHeightForWidth(btnLink->sizePolicy().hasHeightForWidth());
     btnLink->setSizePolicy(sizePolicy1);
+    btnLink->setIcon(KIcon("insert-link"));
     btnLink->setMinimumSize(QSize(30, 30));
     btnLink->setMaximumSize(QSize(30, 16777215));
 
@@ -432,6 +452,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     btnChar->setObjectName(QString::fromUtf8("btnChar"));
     sizePolicy1.setHeightForWidth(btnChar->sizePolicy().hasHeightForWidth());
     btnChar->setSizePolicy(sizePolicy1);
+    btnChar->setIcon(KIcon("draw-text"));
     btnChar->setMinimumSize(QSize(30, 30));
     btnChar->setMaximumSize(QSize(30, 16777215));
 
@@ -440,6 +461,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     btnTable = new KPushButton(menuEdit);
     btnTable->setObjectName(QString::fromUtf8("btnTable"));
     sizePolicy1.setHeightForWidth(btnTable->sizePolicy().hasHeightForWidth());
+    btnTable->setIcon(KIcon("insert-table"));
     btnTable->setSizePolicy(sizePolicy1);
     btnTable->setMinimumSize(QSize(30, 30));
     btnTable->setMaximumSize(QSize(30, 16777215));
@@ -450,9 +472,12 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     btnList->setObjectName(QString::fromUtf8("btnList"));
     sizePolicy1.setHeightForWidth(btnList->sizePolicy().hasHeightForWidth());
     btnList->setSizePolicy(sizePolicy1);
+    btnList->setIcon(KIcon("format-list-unordered"));
     btnList->setMinimumSize(QSize(30, 30));
     btnList->setMaximumSize(QSize(30, 16777215));
-
+    connect(btnList, SIGNAL(clicked()),
+    this, SLOT(setUList()));
+    
     hlOther->addWidget(btnList);
 
 
@@ -461,57 +486,45 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
 
     horizontalLayout_14->addLayout(vlOther);
 
-    vlColor = new QVBoxLayout();
+    vlColor = new QGridLayout();
     vlColor->setSpacing(0);
     vlColor->setObjectName(QString::fromUtf8("vlColor"));
-    hlTextColor = new QHBoxLayout();
-    hlTextColor->setSpacing(0);
-    hlTextColor->setObjectName(QString::fromUtf8("hlTextColor"));
-    hlTextColor->setSizeConstraint(QLayout::SetMinimumSize);
+    
     lblTextColor = new QLabel(menuEdit);
     lblTextColor->setObjectName(QString::fromUtf8("lblTextColor"));
-
-    hlTextColor->addWidget(lblTextColor);
+    KIcon* icnTextColor = new KIcon("format-text-color");
+    lblTextColor->setPixmap(icnTextColor->pixmap(16,QIcon::Normal,QIcon::On));
+    vlColor->addWidget(lblTextColor,0,0);
 
     kcbbTextColor = new KColorCombo(menuEdit);
     kcbbTextColor->setObjectName(QString::fromUtf8("kcbbTextColor"));
+    connect(kcbbTextColor, SIGNAL(currentIndexChanged(int)),
+    this, SLOT(setTextColor()));
+    vlColor->addWidget(kcbbTextColor,0,1);
 
-    hlTextColor->addWidget(kcbbTextColor);
-
-
-    vlColor->addLayout(hlTextColor);
-
-    hlHighlightColor = new QHBoxLayout();
-    hlHighlightColor->setSpacing(0);
-    hlHighlightColor->setObjectName(QString::fromUtf8("hlHighlightColor"));
     lblHighlightColor = new QLabel(menuEdit);
     lblHighlightColor->setObjectName(QString::fromUtf8("lblHighlightColor"));
-
-    hlHighlightColor->addWidget(lblHighlightColor);
+    KIcon* icnHighlightColor = new KIcon("format-stroke-color");
+    lblHighlightColor->setPixmap(icnHighlightColor->pixmap(16,QIcon::Normal,QIcon::On));
+    vlColor->addWidget(lblHighlightColor,1,0);
 
     cbbHighlightColor = new KColorCombo(menuEdit);
     cbbHighlightColor->setObjectName(QString::fromUtf8("cbbHighlightColor"));
+    connect(cbbHighlightColor, SIGNAL(currentIndexChanged(int)),
+    this, SLOT(setHighlightColor()));
+    vlColor->addWidget(cbbHighlightColor,1,1);
 
-    hlHighlightColor->addWidget(cbbHighlightColor);
-
-
-    vlColor->addLayout(hlHighlightColor);
-
-    hlBackgroundColor = new QHBoxLayout();
-    hlBackgroundColor->setSpacing(0);
-    hlBackgroundColor->setObjectName(QString::fromUtf8("hlBackgroundColor"));
     lblBackgroundColor = new QLabel(menuEdit);
     lblBackgroundColor->setObjectName(QString::fromUtf8("lblBackgroundColor"));
-
-    hlBackgroundColor->addWidget(lblBackgroundColor);
+    KIcon* icnBackgroundColor = new KIcon("fill-color");
+    lblBackgroundColor->setPixmap(icnBackgroundColor->pixmap(16,QIcon::Normal,QIcon::On));
+    vlColor->addWidget(lblBackgroundColor,2,0);
 
     cbbBackgroundColor = new KColorCombo(menuEdit);
     cbbBackgroundColor->setObjectName(QString::fromUtf8("cbbBackgroundColor"));
-
-    hlBackgroundColor->addWidget(cbbBackgroundColor);
-
-
-    vlColor->addLayout(hlBackgroundColor);
+    connect(cbbBackgroundColor, SIGNAL(currentIndexChanged(int)),
+    this, SLOT(setBackgroundColor()));
+    vlColor->addWidget(cbbBackgroundColor,2,1);
 
 
     horizontalLayout_14->addLayout(vlColor);
@@ -756,7 +769,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     templaterizeAction->setShortcut(Qt::CTRL + Qt::Key_W);
     actionCollection()->addAction("templaterize", templaterizeAction);
     connect(templaterizeAction, SIGNAL(triggered(bool)),
-    this, SLOT(templaterize(bool)));
+    this, SLOT(templaterize()));
     toolsTB->addAction(templaterizeAction);
 
     KAction* translateAction = new KAction(this);
@@ -764,7 +777,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     translateAction->setIcon(KIcon("application-x-marble"));
     translateAction->setShortcut(Qt::CTRL + Qt::Key_W);
     actionCollection()->addAction("translate", translateAction);
-    connect(templaterizeAction, SIGNAL(triggered(bool)),
+    connect(translateAction, SIGNAL(triggered(bool)),
     this, SLOT(translate()));
     toolsTB->addAction(translateAction);
 
@@ -1306,9 +1319,9 @@ void MainWindow::retranslateUi()
     {
     setWindowTitle(QApplication::translate("this", "Kimberlite", 0, QApplication::UnicodeUTF8));
     tabWMenu->setTabText(tabWMenu->indexOf(menufile), QApplication::translate("this", "File", 0, QApplication::UnicodeUTF8));
-    lblTextColor->setText(QApplication::translate("this", "icn", 0, QApplication::UnicodeUTF8));
-    lblHighlightColor->setText(QApplication::translate("this", "icn", 0, QApplication::UnicodeUTF8));
-    lblBackgroundColor->setText(QApplication::translate("this", "icn", 0, QApplication::UnicodeUTF8));
+    //lblTextColor->setText(QApplication::translate("this", "Text:", 0, QApplication::UnicodeUTF8));
+    //lblHighlightColor->setText(QApplication::translate("this", "Highlight:", 0, QApplication::UnicodeUTF8));
+    //lblBackgroundColor->setText(QApplication::translate("this", "Background:", 0, QApplication::UnicodeUTF8));
     tabWMenu->setTabText(tabWMenu->indexOf(menuEdit), QApplication::translate("this", "Edit", 0, QApplication::UnicodeUTF8));
     tabWMenu->setTabText(tabWMenu->indexOf(menuView), QApplication::translate("this", "View", 0, QApplication::UnicodeUTF8));
     tabWMenu->setTabText(tabWMenu->indexOf(menuInsert), QApplication::translate("this", "Insert", 0, QApplication::UnicodeUTF8));
@@ -1607,22 +1620,14 @@ void MainWindow::reParse() {
     rtfHTMLEditor->setPlainText(aParser->getParsedHtml(aFile));
 }
 
-void MainWindow::templaterize(bool check) {
-    if (check == true) {
-    //aParser = new HtmlParser();
-      //QString aFile = aParser->compressString(rtfHTMLEditor->toPlainText());
-      //rtfHTMLEditor->setPlainText(aParser->getParsedHtml(aFile));
-      StringConverter* aStringConverter = new StringConverter(this);
-      aStringConverter->toTemplate(aParser->compressString(rtfHTMLEditor->toPlainText()));
-    }
+void MainWindow::templaterize() {
+    StringConverter* aStringConverter = new StringConverter(this);
+    aStringConverter->toTemplate(aParser->compressString(rtfHTMLEditor->toPlainText()));
 }
 
 void MainWindow::translate() {
-    //aParser = new HtmlParser();
-    //QString aFile = aParser->compressString(rtfHTMLEditor->toPlainText());
-    //rtfHTMLEditor->setPlainText(aParser->getParsedHtml(aFile));
     StringConverter* aStringConverter = new StringConverter(this);
-    aStringConverter->toTemplate(aParser->compressString(rtfHTMLEditor->toPlainText()));
+    aStringConverter->translate(aParser->compressString(rtfHTMLEditor->toPlainText()));
 }
 
 void MainWindow::newProject(){
@@ -2077,10 +2082,119 @@ void MainWindow::setBold() {
       #endif
       break;
     case 1:
-      QTextCursor tc = rtfHTMLEditor->textCursor();
-      QString text = tc.selectedText();
-      tc.removeSelectedText();
-      tc.insertText("<b>" + text + "</b>");
+      addTag("<b>","</b>");
       break;
+  }
+}
+
+void MainWindow::setItalic() {
+  switch (tabWEditor->currentIndex()) {
+    case 0:
+      #if QT_VERSION >= 0x040500
+      webPreview->page()->triggerAction(QWebPage::ToggleItalic,true);
+      #endif
+      break;
+    case 1:
+      addTag("<i>","</i>");
+      break;
+  }
+}
+
+void MainWindow::setUnderline() {
+  switch (tabWEditor->currentIndex()) {
+    case 0:
+      #if QT_VERSION >= 0x040500
+      webPreview->page()->triggerAction(QWebPage::ToggleUnderline,true);
+      #endif
+      break;
+    case 1:
+      addTag("<u>","</u>");
+      break;
+  }
+}
+
+void MainWindow::execCommand(const QString &cmd, const QString &arg = "") {
+  QWebFrame *frame = webPreview->page()->mainFrame();
+  QString js;
+  if (arg != "")
+    js = QString("document.execCommand(\"%1\", false, \"%2\")").arg(cmd).arg(arg);
+  else
+    js = QString("document.execCommand(\"%1\", false, null)").arg(cmd);
+  frame->evaluateJavaScript(js);
+}
+
+void MainWindow::addTag(QString prefix, QString suffix) {
+  QTextCursor tc = rtfHTMLEditor->textCursor();
+  QString text = tc.selectedText();
+  tc.removeSelectedText();
+  tc.insertText(prefix + text + suffix);
+}
+
+void MainWindow::addTag(QString prefix, QString suffix, QString cmd, QString arg = "") {
+  switch (tabWEditor->currentIndex()) {
+    case 0:
+      #if QT_VERSION >= 0x040500
+      execCommand(cmd,arg);
+      #endif
+      break;
+    case 1:
+      addTag(prefix,suffix);
+      break;
+  }
+}
+
+void MainWindow::setAlignCenter() {
+  addTag("<center>","</center>","justifyCenter");
+}
+
+void MainWindow::setAlignLeft() {
+  addTag("<font style=\"text-align:left\">","</font>","justifyLeft");
+}
+
+void MainWindow::setAlignRight() {
+  addTag("<font style=\"text-align:right\">","</font>","justifyRight");
+}
+
+void MainWindow::setJustify() {
+  addTag("<font style=\"text-align:justify\">","</font>","justifyFull");
+}
+
+void MainWindow::setHeader(QString text) {
+  addTag("<"+text+">","</"+text+">","formatBlock",text.toLower());
+}
+
+void MainWindow::setFont(QString text) {
+  addTag("<font face=\""+text+"\">","</font>","fontName", text.toLower());
+}
+
+void MainWindow::setFontSize(int size) {
+  QString number = QString::number(size);
+  addTag("<font size=\""+number+"\">","</font>","fontSize",number);
+}
+
+void MainWindow::setTextColor() {
+  QString color = kcbbTextColor->color().name();
+  addTag("<font color=\""+color+"\">","</font>","foreColor", color);
+}
+
+void MainWindow::setHighlightColor() {
+  QString color = cbbHighlightColor->color().name();
+  addTag("<font style=\"background-color:"+color+"\">","</font>","hiliteColor", color);
+}
+
+void MainWindow::setUList() {
+  addTag("<ul>","</ul>","insertUnorderedList");
+}
+
+void MainWindow::setBackgroundColor() {
+  if (tabWEditor->currentIndex() == 0) {
+    rtfHTMLEditor->setPlainText(webPreview->page()->mainFrame()->toHtml());
+  }
+  QString color = cbbBackgroundColor->color().name();
+  HtmlData pageData = aParser->getHtmlData(rtfHTMLEditor->toPlainText());
+  HtmlParser::setAttribute(pageData, "body", 0, "bgcolor", color);
+  rtfHTMLEditor->setPlainText(aParser->getParsedHtml(pageData));
+  if (tabWEditor->currentIndex() == 0) {
+    webPreview->setHtml(rtfHTMLEditor->toPlainText());
   }
 }

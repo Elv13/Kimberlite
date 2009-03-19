@@ -68,6 +68,7 @@ class HtmlParser{
     QString getParsedHtml(HtmlData &pageData);
     QString getParsedHtml(QString inputFile);
     W3Cinfo htmlInfo;
+    static void setAttribute(HtmlData &pageData, QString tag, uint index, QString attribute, QString value);
     
   private:
     QStringList markerList;

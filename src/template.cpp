@@ -1,6 +1,6 @@
 #include "template.h"
 
-StringConverter::StringConverter(QWidget* parent) : QDialog(parent) {
+StringConverter::StringConverter(QWidget* parent) : QDialog(parent),index(0) {
     resize(631, 404);
     verticalLayout_4 = new QVBoxLayout(this);
     verticalLayout_4->setObjectName(QString::fromUtf8("verticalLayout_4"));
@@ -123,24 +123,54 @@ StringConverter::StringConverter(QWidget* parent) : QDialog(parent) {
 }
 
 QString StringConverter::translate(QString file) {
-  show();
-  HtmlParser aParser;
-  HtmlData pageData = aParser.getHtmlData(file);
-  for (int i=0;i < pageData.tagList.size();i++) {
-    if (pageData.tagList[i][0] != '<') {
-      printf("I need to translate \n");
-    }
-  }
-}
-
-QString StringConverter::toTemplate(QString file) {
-  show();
+  label_4->setHidden(true);
+  lineEdit->setHidden(true);
+  sonnet__dictionarycombobox->setHidden(true);
   HtmlParser aParser;
   HtmlData pageData = aParser.getHtmlData(file);
   QString list = "<!-- \n";
   for (int i=0;i < pageData.tagList.size();i++) {
-    if (pageData.tagList[i][0] != '<') {
-      printf("I need to translate \n");
-    }
+    if (pageData.tagList[i].count() > 0)
+      if (pageData.tagList[i][0] != '<') {
+	qDebug() << "I need to translate" << pageData.tagList[i];
+	StringInfo* aString = new StringInfo;
+	aString->index = i;
+	aString->originalText = pageData.tagList[i];
+	stringVector.push_back(*aString);
+      }
   }
+  
+  if (stringVector.size() > 0) {
+    plainTextEdit_2->setPlainText(stringVector[0].originalText);
+    label->setText("1/" + QString::number(stringVector.size()));
+    show();
+  }
+  return QString();
+}
+
+QString StringConverter::toTemplate(QString file) {
+  plainTextEdit->setHidden(true);
+  label_3->setHidden(true);
+  label_6->setHidden(true);
+  sonnet__dictionarycombobox->setHidden(true);
+  HtmlParser aParser;
+  HtmlData pageData = aParser.getHtmlData(file);
+  QString list = "<!-- \n";
+  for (int i=0;i < pageData.tagList.size();i++) {
+    if (pageData.tagList[i].count() > 0)
+      if (pageData.tagList[i][0] != '<') {
+	qDebug() << "I need to translate" << pageData.tagList[i];
+	StringInfo* aString = new StringInfo;
+	aString->index = i;
+	aString->originalText = pageData.tagList[i];
+	stringVector.push_back(*aString);
+      }
+  }
+  
+  if (stringVector.size() > 0) {
+    plainTextEdit_2->setPlainText(stringVector[0].originalText);
+    label->setText("1/" + QString::number(stringVector.size()));
+    show();
+  }
+  return QString();
 }
