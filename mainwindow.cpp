@@ -2187,14 +2187,12 @@ void MainWindow::setUList() {
 }
 
 void MainWindow::setBackgroundColor() {
-  if (tabWEditor->currentIndex() == 0) {
+  if (tabWEditor->currentIndex() == 0)
     rtfHTMLEditor->setPlainText(webPreview->page()->mainFrame()->toHtml());
-  }
   QString color = cbbBackgroundColor->color().name();
   HtmlData pageData = aParser->getHtmlData(rtfHTMLEditor->toPlainText());
   HtmlParser::setAttribute(pageData, "body", 0, "bgcolor", color);
   rtfHTMLEditor->setPlainText(aParser->getParsedHtml(pageData));
-  if (tabWEditor->currentIndex() == 0) {
+  if (tabWEditor->currentIndex() == 0)
     webPreview->setHtml(rtfHTMLEditor->toPlainText());
-  }
 }

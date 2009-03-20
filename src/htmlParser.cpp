@@ -197,11 +197,22 @@ QString HtmlParser::getParsedHtml(HtmlData &pageData) {
 void HtmlParser::setAttribute(HtmlData &pageData, QString tag, uint index, QString attribute, QString value) {
   int i=0;
   for (int j =0; j < pageData.tagList.size(); j++)
-    if (HtmlParser::getTag(pageData.tagList[j]).toUpper() == tag.toUpper())
+    if ((HtmlParser::getTag(pageData.tagList[j]).toUpper() == tag.toUpper()) && (pageData.tagList[j][1] != '/'))
       if (i == index) {
-	pageData.tagList[j].insert(pageData.tagList[j].count() - 1, " " + attribute + "=\"" + value + "\"");
+	if (getAttribute(pageData.tagList[j],attribute) == NULL)
+	  pageData.tagList[j].insert(pageData.tagList[j].count() - 1, " " + attribute + "=\"" + value + "\"");
+	else
+	  pageData.tagList[j].replace(getAttribute(pageData.tagList[j],attribute),value);
 	break;
       }
       else
 	i++;
+}
+
+QString HtmlParser::getAttribute(QString tag, QString attribute) {
+  int position = tag.toLower().indexOf(attribute.toLower());
+  if (position == -1)
+    return NULL;
+  else if (tag[position+attribute.count()] == '=')
+    return tag.mid(tag.indexOf("=",position)+2,tag.indexOf((tag.indexOf(" ",position) != -1)?" ":">",position)-2 - (position+1+attribute.count()));
 }

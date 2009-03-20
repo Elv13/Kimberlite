@@ -18,13 +18,18 @@
 #include <sonnet/dictionarycombobox.h>
 #include "htmlParser.h"
 
+#define eTranslate 0
+#define eTemplate 1
+
 struct StringInfo {
   int index;
   QString originalText;
   QString newText;
 };
 
+
 class StringConverter : public QDialog {
+  Q_OBJECT
 public:
     StringConverter(QWidget* parent);
     QVBoxLayout *verticalLayout_4;
@@ -47,10 +52,18 @@ public:
     QPushButton *pushButton_3;
     QPushButton *pushButton_2;
     QPushButton *pushButton;
+    QPushButton *btnFinish;
     QString translate(QString file);
     QString toTemplate(QString file);
     QVector<StringInfo> stringVector;
     int index;
+    bool mode;
+  private slots:
+    void nextTag();
+    void previousTag();
+    void finish();
+  private:
+    bool findDuplicate(QString name);
 };
 
 #endif // TRANSLATEE11004_H
