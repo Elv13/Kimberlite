@@ -52,6 +52,11 @@
 #include <QTextCursor>
 #include <QDir>
 #include <KCharSelect>
+#include <KShortcutsEditor>
+#include <KEditToolBar>
+#include <KAboutApplicationDialog>
+#include <KBugReport>
+#include <KAboutData>
 #include "src/CSSbeginnerWidget.h"
 #include "src/addProprietyWidget.h"
 #include "src/stringToTemplate.h"
@@ -651,11 +656,11 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     ashActions["Configure WebKreator"]->setDisabled(true);
 
     createAction("Configure ToolBars", "configure-toolbars", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Configure ToolBars"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    connect(ashActions["Configure ToolBars"], SIGNAL(triggered(bool)), this, SLOT(editToolbar()));
     optionsTB->addAction(ashActions["Configure ToolBars"]);
 
     createAction("Configure Shortcuts", "configure-shortcuts", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Configure Shortcuts"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    connect(ashActions["Configure Shortcuts"], SIGNAL(triggered(bool)), this, SLOT(editShortcut()));
     optionsTB->addAction(ashActions["Configure Shortcuts"]);
 
     menuHelp = new QWidget();
@@ -669,15 +674,16 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     createAction("Manual", "help-contents", Qt::CTRL + Qt::Key_W);
     connect(ashActions["Manual"], SIGNAL(triggered(bool)), this, SLOT(quit()));
     helpTB->addAction(ashActions["Manual"]);
+    ashActions["Manual"]->setDisabled(true);
 
     createAction("About", "help-about", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["About"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    connect(ashActions["About"], SIGNAL(triggered(bool)), this, SLOT(aboutKimberlite()));
     helpTB->addAction(ashActions["About"]);
 
     helpTB->addSeparator();
 
     createAction("Report A Bug", "tools-report-bug", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Report A Bug"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    connect(ashActions["Report A Bug"], SIGNAL(triggered(bool)), this, SLOT(reportBug()));
     helpTB->addAction(ashActions["Report A Bug"]);
 
     setMenuWidget(tabWMenu); //BUG
@@ -2058,6 +2064,32 @@ void MainWindow::insertLink() {
 void MainWindow::insertChar() {
   KDialog* aDialog = new KDialog(this);
   aDialog->setMainWidget(new KCharSelect(aDialog));
+  aDialog->show();
+}
+
+void MainWindow::editShortcut() {
+  KDialog* aDialog = new KDialog(this);
+  aDialog->setMainWidget(new KShortcutsEditor(actionCollection(),aDialog));
+  aDialog->show();
+}
+
+void MainWindow::editToolbar() {
+  KEditToolBar* aToolbarEditor = new KEditToolBar(actionCollection());
+  aToolbarEditor->show();
+}
+
+void MainWindow::aboutKimberlite() {
+  KAboutData* aboutData = new KAboutData( "kimberlite", "kimberlite",
+  ki18n("Kimberlite"), "0.0.9",
+  ki18n("A complete environemnt to develop, manage and execute Unix scripts"),
+  KAboutData::License_GPL,
+  ki18n("Copyright (c) 2008 Emmanuel Lepage Vallee") );
+  KAboutApplicationDialog* aDialog = new KAboutApplicationDialog(aboutData,this);
+  aDialog->show();
+}
+
+void MainWindow::reportBug() {
+  KBugReport* aDialog = new KBugReport();
   aDialog->show();
 }
 

@@ -308,6 +308,11 @@ public:
     void insertLink();
     void insertChar();
     
+    void editToolbar();
+    void editShortcut();
+    void aboutKimberlite();
+    void reportBug();
+    
   public slots:
     void loadPage(QTreeWidgetItem* item, QString text);
     void loadScript(QTreeWidgetItem* anItem, QString text);
