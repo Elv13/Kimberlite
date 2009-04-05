@@ -50,11 +50,14 @@
 #include <QListWidgetItem>
 #include <QWebFrame>
 #include <QTextCursor>
+#include <QDir>
 #include "src/CSSbeginnerWidget.h"
 #include "src/addProprietyWidget.h"
 #include "src/stringToTemplate.h"
 #include "src/ProjectManager_v2.h"
 #include "src/template.h"
+#include "src/ressourcesManager.h"
+#include "src/newTable.h"
 #include <ktip.h>
 
 MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage(NULL),currentScript(NULL) {
@@ -136,146 +139,76 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     QPalette aPalette;
     fileTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
 
+    createAction("New Project", "document-new", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["New Project"], SIGNAL(triggered(bool)),this, SLOT(newProject()));
+    fileTB->addAction(ashActions["New Project"]);
 
-    KAction* newProjectAction = new KAction(this);
-    newProjectAction->setText(i18n("New Project"));
-    newProjectAction->setIcon(KIcon("document-new"));
-    newProjectAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("newProject", newProjectAction);
-    connect(newProjectAction, SIGNAL(triggered(bool)),
-    this, SLOT(newProject()));
-    fileTB->addAction(newProjectAction);
-
-    KAction* openProjectAction = new KAction(this);
-    openProjectAction->setText(i18n("Open Project"));
-    openProjectAction->setIcon(KIcon("document-open"));
-    openProjectAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("openProject", newProjectAction);
-    connect(openProjectAction, SIGNAL(triggered(bool)),
-    this, SLOT(openProject()));
-    fileTB->addAction(openProjectAction);
+    createAction("Open Project", "document-open", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Open Project"], SIGNAL(triggered(bool)),this, SLOT(openProject()));
+    fileTB->addAction(ashActions["Open Project"]);
 
     fileTB->addSeparator();
 
-    KAction* saveProjectAction = new KAction(this);
-    saveProjectAction->setText(i18n("Save"));
-    saveProjectAction->setIcon(KIcon("document-save"));
-    saveProjectAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("saveProject", saveProjectAction);
-    connect(saveProjectAction, SIGNAL(triggered(bool)),
-    this, SLOT(saveProject()));
-    fileTB->addAction(saveProjectAction);
+    createAction("Save", "document-save", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Save"], SIGNAL(triggered(bool)),this, SLOT(saveProject()));
+    fileTB->addAction(ashActions["Save"]);
 
-    KAction* saveasProjectAction = new KAction(this);
-    saveasProjectAction->setText(i18n("Save As"));
-    saveasProjectAction->setIcon(KIcon("document-save-as"));
-    saveasProjectAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("saveasProject", saveasProjectAction);
-    connect(saveasProjectAction, SIGNAL(triggered(bool)),
-    this, SLOT(saveProjectAs()));
-    fileTB->addAction(saveasProjectAction);
+    createAction("Save As", "document-save-as", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Save As"], SIGNAL(triggered(bool)), this, SLOT(saveProjectAs()));
+    fileTB->addAction(ashActions["Save As"]);
 
     fileTB->addSeparator();
 
-    KAction* printProjectAction = new KAction(this);
-    printProjectAction->setText(i18n("Print"));
-    printProjectAction->setIcon(KIcon("document-print"));
-    printProjectAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("saveasProject", printProjectAction);
-    connect(printProjectAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    fileTB->addAction(printProjectAction);
+    createAction("Print", "document-print", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Print"], SIGNAL(triggered(bool)),this, SLOT(quit()));
+    fileTB->addAction(ashActions["Print"]);
 
-    KAction* printPreviewProjectAction = new KAction(this);
-    printPreviewProjectAction->setText(i18n("Print Preview"));
-    printPreviewProjectAction->setIcon(KIcon("document-print-preview"));
-    printPreviewProjectAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("saveasProject", printPreviewProjectAction);
-    connect(printPreviewProjectAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    fileTB->addAction(printPreviewProjectAction);
+    createAction("Print Preview", "document-print-preview", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Print Preview"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    fileTB->addAction(ashActions["Print Preview"]);
 
     fileTB->addSeparator();
 
-    KAction* quitAction = new KAction(this);
-    quitAction->setText(i18n("Quit"));
-    quitAction->setIcon(KIcon("application-exit"));
-    quitAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("quit", quitAction);
-    connect(quitAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    fileTB->addAction(quitAction);
-    
-    
+    createAction("Quit", "application-exit", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Quit"], SIGNAL(triggered(bool)),this, SLOT(quit()));
+    fileTB->addAction(ashActions["Quit"]);
 
     menuEdit = new QWidget();
-    //menuEdit->setStyleSheet("margin:0px;spacing:0px;padding:0px;");
     menuEdit->setObjectName(QString::fromUtf8("menuEdit"));
-    //menuEdit->setGeometry(QRect(0, 0, 1000, 81));
     horizontalLayout_14 = new QHBoxLayout(menuEdit);
     horizontalLayout_14->setObjectName(QString::fromUtf8("horizontalLayout_14"));
     horizontalLayout_14->setContentsMargins(0,0,0,0);
     editTB = new KToolBar(menuEdit);
     editTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
     horizontalLayout_14->addWidget(editTB);
-    
-    KAction* undoAction = new KAction(this);
-    undoAction->setText(i18n("Undo"));
-    undoAction->setIcon(KIcon("edit-undo"));
-    undoAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("Undo", undoAction);
-    connect(undoAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    editTB->addAction(undoAction);
 
-    KAction* redoAction = new KAction(this);
-    redoAction->setText(i18n("Redo"));
-    redoAction->setIcon(KIcon("edit-redo"));
-    redoAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("redo", redoAction);
-    connect(redoAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    editTB->addAction(redoAction);
+    createAction("Undo", "edit-undo", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Undo"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    editTB->addAction(ashActions["Undo"]);
+
+    createAction("Redo", "edit-redo", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Redo"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    editTB->addAction(ashActions["Redo"]);
 
     editTB->addSeparator();
 
-    KAction* copyAction = new KAction(this);
-    copyAction->setText(i18n("Copy"));
-    copyAction->setIcon(KIcon("edit-copy"));
-    copyAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("copy", copyAction);
-    connect(copyAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    editTB->addAction(copyAction);
+    createAction("Copy", "edit-copy", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Copy"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    editTB->addAction(ashActions["Copy"]);
 
-    KAction* cutAction = new KAction(this);
-    cutAction->setText(i18n("Cut"));
-    cutAction->setIcon(KIcon("edit-cut"));
-    cutAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("cut", cutAction);
-    connect(cutAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    editTB->addAction(cutAction);
+    createAction("Cut", "edit-cut", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Cut"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    editTB->addAction(ashActions["Cut"]);
 
-    KAction* pasteAction = new KAction(this);
-    pasteAction->setText(i18n("Paste"));
-    pasteAction->setIcon(KIcon("edit-paste"));
-    pasteAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("Paste", pasteAction);
-    connect(pasteAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    editTB->addAction(pasteAction);
+    createAction("Paste", "edit-paste", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Paste"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    editTB->addAction(ashActions["Paste"]);
 
     editTB->addSeparator();
 
-    KAction* findAction = new KAction(this);
-    findAction->setText(i18n("Find"));
-    findAction->setIcon(KIcon("edit-find"));
-    findAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("find", findAction);
-    connect(findAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    editTB->addAction(findAction);
+    createAction("Find", "edit-find", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Find"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    editTB->addAction(ashActions["Find"]);
 
     editTB->addSeparator();
 
@@ -416,9 +349,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
 
     hlTextAtributeButton->addItem(horizontalSpacer_2);
 
-
     vlTextAtribute->addLayout(hlTextAtributeButton);
-
 
     horizontalLayout_14->addLayout(vlTextAtribute);
 
@@ -480,9 +411,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     
     hlOther->addWidget(btnList);
 
-
     vlOther->addLayout(hlOther);
-
 
     horizontalLayout_14->addLayout(vlOther);
 
@@ -534,95 +463,53 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     
     menuView = new QWidget();
     menuView->setObjectName(QString::fromUtf8("menuview"));
-    //menuView->setGeometry(QRect(0, 0, 1000, 81));
     tabWMenu->addTab(menuView, QString());
 
     viewTB = new KToolBar(menuView);
     viewTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
 
+    createAction("Project", "text-x-katefilelist", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Project"], SIGNAL(triggered(bool)), this, SLOT(showPageList(bool)));
+    viewTB->addAction(ashActions["Project"]);
 
-    KAction* viewPageList = new KAction(this);
-    viewPageList->setCheckable(true);
-    viewPageList->setText(i18n("Project"));
-    viewPageList->setIcon(KIcon("text-x-katefilelist"));
-    viewPageList->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("viewPageList", viewPageList);
-    connect(viewPageList, SIGNAL(triggered(bool)),
-    this, SLOT(showPageList(bool)));
-    viewTB->addAction(viewPageList);
+    createAction("CSS Class", "text-x-katefilelist", Qt::CTRL + Qt::Key_W, true);
+    connect(ashActions["CSS Class"], SIGNAL(triggered(bool)), this, SLOT(showCSS(bool)));
+    viewTB->addAction(ashActions["CSS Class"]);
+
+    createAction("HTML Tree", "text-x-katefilelist", Qt::CTRL + Qt::Key_W, true);
+    connect(ashActions["HTML Tree"], SIGNAL(triggered(bool)), this, SLOT(showHtml(bool)));
+    viewTB->addAction(ashActions["HTML Tree"]);
+
+    createAction("Debugger", "text-x-katefilelist", Qt::CTRL + Qt::Key_W, true);
+    connect(ashActions["Debugger"], SIGNAL(triggered(bool)), this, SLOT(showDebugger(bool)));
+    viewTB->addAction(ashActions["Debugger"]);
     
-    KAction* viewCSSClass = new KAction(this);
-    viewCSSClass->setCheckable(true);
-    viewCSSClass->setText(i18n("CSS Class"));
-    viewCSSClass->setIcon(KIcon("text-x-katefilelist"));
-    viewCSSClass->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("viewCSSClass", viewPageList);
-    connect(viewCSSClass, SIGNAL(triggered(bool)),
-    this, SLOT(showCSS(bool)));
-    viewTB->addAction(viewCSSClass);
-    
-    KAction* viewHtml = new KAction(this);
-    viewHtml->setCheckable(true);
-    viewHtml->setText(i18n("HTML Tree"));
-    viewHtml->setIcon(KIcon("text-x-katefilelist"));
-    viewHtml->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("viewCSSClass", viewHtml);
-    connect(viewHtml, SIGNAL(triggered(bool)),
-    this, SLOT(showHtml(bool)));
-    viewTB->addAction(viewHtml);
-    
-    KAction* viewDebugger = new KAction(this);
-    viewDebugger->setCheckable(true);
-    viewDebugger->setText(i18n("Debugger"));
-    viewDebugger->setIcon(KIcon("text-x-katefilelist"));
-    viewDebugger->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("viewDebugger", viewPageList);
-    connect(viewDebugger, SIGNAL(triggered(bool)),
-    this, SLOT(showDebugger(bool)));
-    viewTB->addAction(viewDebugger);
+    createAction("Inspector", "text-x-katefilelist", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Inspector"], SIGNAL(triggered(bool)), this, SLOT(showInspector(bool)));
+    viewTB->addAction(ashActions["Inspector"]);
     
     viewTB->addSeparator();
-      
-    KAction* zoomInAction = new KAction(this);
-    zoomInAction->setText(i18n("Zoom In"));
-    zoomInAction->setIcon(KIcon("zoom-in"));
-    zoomInAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("zoomin", zoomInAction);
-    connect(zoomInAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    viewTB->addAction(zoomInAction);
+ 
+    createAction("Zoom In", "zoom-in", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Zoom In"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    viewTB->addAction(ashActions["Zoom In"]);
 
-    KAction* zoomOutAction = new KAction(this);
-    zoomOutAction->setText(i18n("Zoom Out"));
-    zoomOutAction->setIcon(KIcon("zoom-out"));
-    zoomOutAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("zoomout", zoomOutAction);
-    connect(zoomOutAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    viewTB->addAction(zoomOutAction);
+    createAction("Zoom Out", "zoom-out", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Zoom Out"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    viewTB->addAction(ashActions["Zoom Out"]);
 
-    KAction* zoomOriAction = new KAction(this);
-    zoomOriAction->setText(i18n("Zoom 1:1"));
-    zoomOriAction->setIcon(KIcon("zoom-original"));
-    zoomOriAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("zoomnormal", zoomOriAction);
-    connect(zoomOutAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    viewTB->addAction(zoomOriAction);
+    createAction("Zoom 1:1", "zoom-original", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Zoom 1:1"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    viewTB->addAction(ashActions["Zoom 1:1"]);
 
-
-    
-    
     menuInsert = new QWidget();
     menuInsert->setStyleSheet("margin:0px;spacing:0px;padding:0px;");
     menuInsert->setObjectName(QString::fromUtf8("menuInsert"));
-    //menuInsert->setGeometry(QRect(0, 0, 1000, 81));
     tabWMenu->addTab(menuInsert, QString());
     hlInsert = new QHBoxLayout(menuInsert);
     hlInsert->setContentsMargins(0,0,0,0);
     hlInsert->setObjectName(QString::fromUtf8("hlInsert"));
     hlInsert->setSpacing(0);
-    //hlInsert->setSizeConstraint(QLayout::SetMinimumSize);
     horizontalSpacer_3 = new QSpacerItem(0, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
     horizontalLayout_14->addItem(horizontalSpacer_3);
@@ -632,81 +519,41 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     insertTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
     hlInsert->addWidget(insertTB);
 
-    KAction* addPageAction = new KAction(this);
-    addPageAction->setText(i18n("New Page"));
-    addPageAction->setIcon(KIcon("document-new"));
-    addPageAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("addpage", addPageAction);
-    connect(addPageAction, SIGNAL(triggered(bool)),
-    this, SLOT(addHtmlPage()));
-    insertTB->addAction(addPageAction);
+    createAction("New Page", "document-new", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["New Page"], SIGNAL(triggered(bool)), this, SLOT(addHtmlPage()));
+    insertTB->addAction(ashActions["New Page"]);
 
-    KAction* addScriptAction = new KAction(this);
-    addScriptAction->setText(i18n("New Script"));
-    addScriptAction->setIcon(KIcon("application-add"));
-    addScriptAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("addscript", addScriptAction);
-    connect(addScriptAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    insertTB->addAction(addScriptAction);
+    createAction("New Script", "application-add", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["New Script"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    insertTB->addAction(ashActions["New Script"]);
 
     insertTB->addSeparator();
 
-    KAction* addImageAction = new KAction(this);
-    addImageAction->setText(i18n("Add Image"));
-    addImageAction->setIcon(KIcon("insert-image"));
-    addImageAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("addimage", addImageAction);
-    connect(addImageAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    insertTB->addAction(addImageAction);
+    createAction("Add Image", "insert-image", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Add Image"], SIGNAL(triggered(bool)), this, SLOT(insertImage()));
+    insertTB->addAction(ashActions["Add Image"]);
 
-    KAction* addTableAction = new KAction(this);
-    addTableAction->setText(i18n("Add Table"));
-    addTableAction->setIcon(KIcon("insert-table"));
-    addTableAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("addtable", addTableAction);
-    connect(addTableAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    insertTB->addAction(addTableAction);
+    createAction("Add Table", "insert-table", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Add Table"], SIGNAL(triggered(bool)), this, SLOT(insertTable()));
+    insertTB->addAction(ashActions["Add Table"]);
 
-    KAction* addLinkAction = new KAction(this);
-    addLinkAction->setText(i18n("Add Link"));
-    addLinkAction->setIcon(KIcon("insert-link"));
-    addLinkAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("addlink", addLinkAction);
-    connect(addLinkAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    insertTB->addAction(addLinkAction);
+    createAction("Add Link", "insert-link", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Add Link"], SIGNAL(triggered(bool)), this, SLOT(insertLink()));
+    insertTB->addAction(ashActions["Add Link"]);
 
-    KAction* addTextAction = new KAction(this);
-    addTextAction->setText(i18n("Add Text"));
-    addTextAction->setIcon(KIcon("insert-text"));
-    addTextAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("addtext", addTextAction);
-    connect(addTextAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    insertTB->addAction(addTextAction);
+    createAction("Add Text", "insert-text", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Add Text"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    insertTB->addAction(ashActions["Add Text"]);
 
     insertTB->addSeparator();
 
-    KAction* addCharAction = new KAction(this);
-    addCharAction->setText(i18n("Insert Special Character"));
-    addCharAction->setIcon(KIcon("list-add-font"));
-    addCharAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("addchar", addCharAction);
-    connect(addCharAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    insertTB->addAction(addCharAction);
+    createAction("Special Character", "list-add-font", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Special Character"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    insertTB->addAction(ashActions["Special Character"]);
 
-    KAction* addColorAction = new KAction(this);
-    addColorAction->setText(i18n("Get Color Code"));
-    addColorAction->setIcon(KIcon("fill-color"));
-    addColorAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("addcolor", addColorAction);
-    connect(addColorAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    insertTB->addAction(addColorAction);
+    createAction("Get Color Code", "fill-color", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Get Color Code"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    insertTB->addAction(ashActions["Get Color Code"]);
 
     QSpacerItem* horizontalSpacer8 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
     hlInsert->addItem(horizontalSpacer8);
@@ -752,72 +599,36 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
 
     toolsTB = new KToolBar(menuTools);
     toolsTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
-    //menuTools->addWidget(toolsTB);
 
-    KAction* parseAction = new KAction(this);
-    parseAction->setText(i18n("Parse"));
-    parseAction->setIcon(KIcon("format-indent-more"));
-    parseAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("parse", parseAction);
-    connect(parseAction, SIGNAL(triggered(bool)),
-    this, SLOT(reParse()));
-    toolsTB->addAction(parseAction);
+    createAction("Parse", "format-indent-more", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Parse"], SIGNAL(triggered(bool)), this, SLOT(reParse()));
+    toolsTB->addAction(ashActions["Parse"]);
 
-    KAction* templaterizeAction = new KAction(this);
-    templaterizeAction->setText(i18n("Templaterize"));
-    templaterizeAction->setIcon(KIcon("view-pim-tasks"));
-    templaterizeAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("templaterize", templaterizeAction);
-    connect(templaterizeAction, SIGNAL(triggered(bool)),
-    this, SLOT(templaterize()));
-    toolsTB->addAction(templaterizeAction);
+    createAction("Templaterize", "view-pim-tasks", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Templaterize"], SIGNAL(triggered(bool)), this, SLOT(templaterize()));
+    toolsTB->addAction(ashActions["Templaterize"]);
 
-    KAction* translateAction = new KAction(this);
-    translateAction->setText(i18n("Translate"));
-    translateAction->setIcon(KIcon("application-x-marble"));
-    translateAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("translate", translateAction);
-    connect(translateAction, SIGNAL(triggered(bool)),
-    this, SLOT(translate()));
-    toolsTB->addAction(translateAction);
+    createAction("Translate", "application-x-marble", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Translate"], SIGNAL(triggered(bool)), this, SLOT(translate()));
+    toolsTB->addAction(ashActions["Translate"]);
 
-    KAction* debugAction = new KAction(this);
-    debugAction->setText(i18n("Debug"));
-    debugAction->setIcon(KIcon("tools-report-bug"));
-    debugAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("debug", debugAction);
-    connect(debugAction, SIGNAL(triggered(bool)),
-    this, SLOT(debugHtml()));
-    toolsTB->addAction(debugAction);
+    createAction("Debug", "tools-report-bug", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Debug"], SIGNAL(triggered(bool)), this, SLOT(debugHtml()));
+    toolsTB->addAction(ashActions["Debug"]);
 
     toolsTB->addSeparator();
 
-    KAction* matchTagAction = new KAction(this);
-    matchTagAction->setText(i18n("Match Tag"));
-    matchTagAction->setIcon(KIcon("application-xml"));
-    matchTagAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("matchtag", matchTagAction);
-    connect(matchTagAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    toolsTB->addAction(matchTagAction);
+    createAction("Match Tag", "application-xml", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Match Tag"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    toolsTB->addAction(ashActions["Match Tag"]);
 
-    KAction* spellCheckAction = new KAction(this);
-    spellCheckAction->setText(i18n("Spelling"));
-    spellCheckAction->setIcon(KIcon("tools-check-spelling"));
-    spellCheckAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("spellcheck", spellCheckAction);
-    connect(spellCheckAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    toolsTB->addAction(spellCheckAction);
+    createAction("Spelling", "tools-check-spelling", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Spelling"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    toolsTB->addAction(ashActions["Spelling"]);
 
-    KAction* checkLinkAction = new KAction(this);
-    checkLinkAction->setText(i18n("Check Link"));
-    checkLinkAction->setIcon(KIcon("network-connect"));
-    checkLinkAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("checklink", checkLinkAction);
-    connect(checkLinkAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    toolsTB->addAction(checkLinkAction);
+    createAction("Check Link", "network-connect", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Check Link"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    toolsTB->addAction(ashActions["Check Link"]);
 
     menuOptions = new QWidget();
     menuOptions->setObjectName(QString::fromUtf8("menuOptions"));
@@ -827,32 +638,17 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     optionsTB = new KToolBar(menuOptions);
     optionsTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
 
-    KAction* configureWebKreatorAction = new KAction(this);
-    configureWebKreatorAction->setText(i18n("Configure WebKreator"));
-    configureWebKreatorAction->setIcon(KIcon("configure"));
-    configureWebKreatorAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("configure", configureWebKreatorAction);
-    connect(configureWebKreatorAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    optionsTB->addAction(configureWebKreatorAction);
+    createAction("Configure WebKreator", "configure", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Configure WebKreator"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    optionsTB->addAction(ashActions["Configure WebKreator"]);
 
-    KAction* configureToolBarAction = new KAction(this);
-    configureToolBarAction->setText(i18n("Configure ToolBars"));
-    configureToolBarAction->setIcon(KIcon("configure-toolbars"));
-    configureToolBarAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("configuretoolbar", configureToolBarAction);
-    connect(configureToolBarAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    optionsTB->addAction(configureToolBarAction);
+    createAction("Configure ToolBars", "configure-toolbars", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Configure ToolBars"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    optionsTB->addAction(ashActions["Configure ToolBars"]);
 
-    KAction* configureShortcutsAction = new KAction(this);
-    configureShortcutsAction->setText(i18n("Configure Shortcuts"));
-    configureShortcutsAction->setIcon(KIcon("configure-shortcuts"));
-    configureShortcutsAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("configuretoolbar", configureShortcutsAction);
-    connect(configureShortcutsAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    optionsTB->addAction(configureShortcutsAction);
+    createAction("Configure Shortcuts", "configure-shortcuts", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Configure Shortcuts"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    optionsTB->addAction(ashActions["Configure Shortcuts"]);
 
     menuHelp = new QWidget();
     menuHelp->setObjectName(QString::fromUtf8("menuHelp"));
@@ -862,37 +658,21 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     helpTB = new KToolBar(menuHelp);
     helpTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
 
-    KAction* manualAction = new KAction(this);
-    manualAction->setText(i18n("Manual"));
-    manualAction->setIcon(KIcon("help-contents"));
-    manualAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("manual", manualAction);
-    connect(manualAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    helpTB->addAction(manualAction);
+    createAction("Manual", "help-contents", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Manual"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    helpTB->addAction(ashActions["Manual"]);
 
-    KAction* aboutAction = new KAction(this);
-    aboutAction->setText(i18n("About"));
-    aboutAction->setIcon(KIcon("help-about"));
-    aboutAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("about", aboutAction);
-    connect(aboutAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    helpTB->addAction(aboutAction);
+    createAction("About", "help-about", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["About"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    helpTB->addAction(ashActions["About"]);
 
     helpTB->addSeparator();
 
-    KAction* reportBugAction = new KAction(this);
-    reportBugAction->setText(i18n("Report A Bug"));
-    reportBugAction->setIcon(KIcon("tools-report-bug"));
-    reportBugAction->setShortcut(Qt::CTRL + Qt::Key_W);
-    actionCollection()->addAction("reportBug", reportBugAction);
-    connect(reportBugAction, SIGNAL(triggered(bool)),
-    this, SLOT(quit()));
-    helpTB->addAction(reportBugAction);
+    createAction("Report A Bug", "tools-report-bug", Qt::CTRL + Qt::Key_W);
+    connect(ashActions["Report A Bug"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    helpTB->addAction(ashActions["Report A Bug"]);
 
-
-    setMenuWidget(tabWMenu);
+    setMenuWidget(tabWMenu); //BUG
 
     dockHtmlTree = new QDockWidget(this);
     treeHtml = new QTreeWidget(this);
@@ -1613,60 +1393,60 @@ void MainWindow::fillCSSAdvMode() {
       color =color1;
   }
 }
+MainWindow::~MainWindow() {
+  QDir aDir;
+  aDir.rmdir(QDir::tempPath()+"/kimberlite");
+}
 
 void MainWindow::reParse() {
-    QString aFile = aParser->compressString(rtfHTMLEditor->toPlainText());
-    updateHtmlTree(aFile);
-    rtfHTMLEditor->setPlainText(aParser->getParsedHtml(aFile));
+  QString aFile = aParser->compressString(rtfHTMLEditor->toPlainText());
+  updateHtmlTree(aFile);
+  rtfHTMLEditor->setPlainText(aParser->getParsedHtml(aFile));
 }
 
 void MainWindow::templaterize() {
-    StringConverter* aStringConverter = new StringConverter(this);
-    aStringConverter->toTemplate(aParser->compressString(rtfHTMLEditor->toPlainText()));
+  StringConverter* aStringConverter = new StringConverter(this);
+  aStringConverter->toTemplate(aParser->compressString(rtfHTMLEditor->toPlainText()));
 }
 
 void MainWindow::translate() {
-    StringConverter* aStringConverter = new StringConverter(this);
-    aStringConverter->translate(aParser->compressString(rtfHTMLEditor->toPlainText()));
+  StringConverter* aStringConverter = new StringConverter(this);
+  aStringConverter->translate(aParser->compressString(rtfHTMLEditor->toPlainText()));
 }
 
 void MainWindow::newProject(){
-      fileName.clear();
-      rtfHTMLEditor->clear();
+  fileName.clear();
+  rtfHTMLEditor->clear();
 }
  
 void MainWindow::saveProjectAs(const QString &outputFileName, QString input){
-      KSaveFile file(outputFileName);
-      file.open();
-      QByteArray outputByteArray;
-      outputByteArray.append(input.toUtf8());
-      file.write(outputByteArray);
-      file.finalize();
-      file.close();
+  KSaveFile file(outputFileName);
+  file.open();
+  QByteArray outputByteArray;
+  outputByteArray.append(input.toUtf8());
+  file.write(outputByteArray);
+  file.finalize();
+  file.close();
 
-      fileName = outputFileName;
+  fileName = outputFileName;
 }
  
 void MainWindow::saveProjectAs(){
-      saveProjectAs(KFileDialog::getSaveFileName(), rtfHTMLEditor->toPlainText());
+  saveProjectAs(KFileDialog::getSaveFileName(), rtfHTMLEditor->toPlainText());
 }
  
 void MainWindow::saveProject(){
-      if(!fileName.isEmpty()) {
-	    saveProjectAs(fileName, rtfHTMLEditor->toPlainText());
-      }
-      else {
-	    saveProjectAs();
-      }
+  if(!fileName.isEmpty()) 
+    saveProjectAs(fileName, rtfHTMLEditor->toPlainText());
+  else 
+    saveProjectAs();
 }
 
 void MainWindow::saveFile(){ 
-      if(!pageName.isEmpty()) {
-            saveProjectAs(pageName, rtfHTMLEditor->toPlainText());
-      }
-      else {
-            saveProjectAs();
-      }
+  if(!pageName.isEmpty()) 
+    saveProjectAs(pageName, rtfHTMLEditor->toPlainText());
+  else
+    saveProjectAs();
 }
 
  
@@ -1721,29 +1501,27 @@ void MainWindow::openProject() {
 }
 
 void MainWindow::showPageList(bool state) {
-  if (state == true ) {
+  if (state == true ) 
     tableDock->setHidden(false);
-  }
-  else {
+  else 
     tableDock->setHidden(true);
-  }
 }
 void MainWindow::showCSS(bool state) {
-  if (state == true ) {
+  if (state == true ) 
     treeDock->setHidden(false);
-  }
-  else {
+  else
     treeDock->setHidden(true);
-  }
 }
 
 void MainWindow::showDebugger(bool state) {
-  if (state == true ) {
+  if (state == true )
     dockDebug->setHidden(false);
-  }
-  else {
+  else
     dockDebug->setHidden(true);
-  }
+}
+void MainWindow::showInspector(bool state) {
+  QWebSettings::globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
+  webPreview->triggerPageAction(QWebPage::InspectElement);
 }
 
 void MainWindow::showHtml(bool state) {
@@ -1796,10 +1574,6 @@ void MainWindow::loadPage(QTableWidgetItem* anItem) {
 }
 
 void MainWindow::loadPage(QTreeWidgetItem* item, QString text) {
-  printf("\nI am in mainwindow::loadPage text:%s \n",text.toStdString().c_str());
-  /*if ((isModified == true) && (currentHTMLPage != NULL)) {
-    
-  }*/
   isModified = false;
   QString aFile = aParser->compressString(text.trimmed());
   rtfHTMLEditor->setPlainText(aParser->getParsedHtml(aFile));
@@ -1811,15 +1585,15 @@ void MainWindow::setModified() {
 }
 
 void MainWindow::addHtmlPage() {
-     bool ok;
-     QString text = QInputDialog::getText(this, tr("QInputDialog::getText()"),
-                                          tr("User name:"), QLineEdit::Normal,
-                                          QDir::home().dirName(), &ok);
-     if (ok && !text.isEmpty()) {
-         tableView->setRowCount(tableView->rowCount()+1);
-	 QTableWidgetItem* aTableWidget = new QTableWidgetItem(text);
-	 tableView->setItem(tableView->rowCount()-1, 0, aTableWidget);
-     }
+  bool ok;
+  QString text = QInputDialog::getText(this, tr("QInputDialog::getText()"),
+				      tr("User name:"), QLineEdit::Normal,
+				      QDir::home().dirName(), &ok);
+  if (ok && !text.isEmpty()) {
+      tableView->setRowCount(tableView->rowCount()+1);
+      QTableWidgetItem* aTableWidget = new QTableWidgetItem(text);
+      tableView->setItem(tableView->rowCount()-1, 0, aTableWidget);
+  }
 }
 
 
@@ -1978,15 +1752,29 @@ void MainWindow::loadCss(QString text) {
 
 void MainWindow::modeChanged(int index) {
   switch (index) {
-    case 0:
-      webPreview->setHtml(rtfHTMLEditor->toPlainText());
+    case 0: { //Don't ask me about this {, I don't even understant it myself
+      QString path2;
+      QDir aDir;
+      path2 = QDir::tempPath() + "/kimberlite/project/";
+      aDir.mkpath(path2);
+      QFile aFile(path2+"StyleSheet.css");
+      aFile.open(QIODevice::WriteOnly);
+      aFile.write(CssParser::parseCSS().toStdString().c_str());
+      aFile.close();
+      webPreview->setHtml(rtfHTMLEditor->toPlainText(),path2);
       #if QT_VERSION >= 0x040500
       webPreview->page()->setContentEditable(true);
       #endif
+      disableWysiwyg(false);
       break;
+    }
     case 1:
+      
       rtfHTMLEditor->setPlainText(aParser->getParsedHtml(webPreview->page()->mainFrame()->toHtml()));
+      disableWysiwyg(false);
       break;
+    default:
+      disableWysiwyg(true);
   }
 }
 
@@ -2195,4 +1983,75 @@ void MainWindow::setBackgroundColor() {
   rtfHTMLEditor->setPlainText(aParser->getParsedHtml(pageData));
   if (tabWEditor->currentIndex() == 0)
     webPreview->setHtml(rtfHTMLEditor->toPlainText());
+}
+
+void MainWindow::insertImage() {
+  /*QString filters;
+  filters += tr("Common Graphics (*.png *.jpg *.jpeg *.gif);;");
+  filters += tr("Portable Network Graphics (PNG) (*.png);;");
+  filters += tr("JPEG (*.jpg *.jpeg);;");
+  filters += tr("Graphics Interchange Format (*.gif);;");
+  filters += tr("All Files (*)");*/
+  QString fn = KFileDialog::getOpenFileName();
+  if (fn.isEmpty())
+    return;
+  if (!QFile::exists(fn))
+    return;
+  QUrl url = QUrl::fromLocalFile(fn);
+  addTag("<img src=\""+url.toString()+"\" \\>","","insertImage", url.toString());
+}
+
+void MainWindow::insertTable() {
+  NewTable* aNewTable = new NewTable(this);
+  aNewTable->show();
+  QWebFrame *frame = webPreview->page()->mainFrame();
+  QString js;
+  js = QString("document.write(\"%1\")").arg("<b><table><tr><td>test</td><td>test2</td></tr><tr><td>test3</td><td>test4</td></tr></table></b>");
+  /*js = QString("\
+  newdiv = document.createElement(\"table\");\
+  newdiv.innerHTML(\"<tr><td>test4</td></tr>\");\
+  document.appendChild(newdiv);");*/
+  frame->evaluateJavaScript(js);
+}
+
+void MainWindow::insertLink() {
+  RessrourceManager* aRessounrceManager = new RessrourceManager(this);
+  aRessounrceManager->show();
+}
+
+void MainWindow::disableWysiwyg(bool value) {
+  cbbFont->setDisabled(value);
+  cbbFontSize->setDisabled(value);
+  btnBold->setDisabled(value);
+  btnUnderline->setDisabled(value);
+  btnItalic->setDisabled(value);
+  btnAlignLeft->setDisabled(value);
+  btnAlignCenter->setDisabled(value);
+  btnAlignRight->setDisabled(value);
+  btnJustify->setDisabled(value);
+  cbbHeader->setDisabled(value);
+  btnLink->setDisabled(value);
+  btnChar->setDisabled(value);
+  btnTable->setDisabled(value);
+  btnList->setDisabled(value);
+  lblTextColor->setDisabled(value);
+  kcbbTextColor->setDisabled(value);
+  lblHighlightColor->setDisabled(value);
+  cbbHighlightColor->setDisabled(value);
+  lblBackgroundColor->setDisabled(value);
+  cbbBackgroundColor->setDisabled(value);
+  btnNewLine->setDisabled(value);
+  btnNewTab->setDisabled(value);
+  btnNewSpace->setDisabled(value);
+}
+
+KAction* MainWindow::createAction(QString name, QString icon, QKeySequence shortcut, bool checkable) {
+  KAction* newAction = new KAction(this);
+  newAction->setText(i18n(name.toStdString().c_str()));
+  newAction->setIcon(KIcon(icon));
+  newAction->setShortcut(shortcut);
+  newAction->setCheckable(checkable);
+  actionCollection()->addAction(name, newAction);
+  ashActions[name] = newAction;
+  return newAction;
 }

@@ -16,6 +16,8 @@
       src/rtfCssEditor.cpp
       src/rtfHtmlEditor.cpp
       src/template.cpp
+      src/ressourcesManager.cpp
+      src/newTable.cpp
       )
 
       kde4_add_executable(kimberlite ${kimberlite_SRCS})

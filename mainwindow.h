@@ -74,6 +74,7 @@
 #include <QString>
 #include <QCompleter>
 #include <QHash>
+#include <QAction>
 
 #include "src/CSSbeginnerWidget.h"
 #include "src/rtfCssEditor.h"
@@ -96,6 +97,7 @@ class MainWindow  : public KXmlGuiWindow {
    Q_OBJECT
 public:
     MainWindow(QWidget* parent);
+    ~MainWindow();
     void retranslateUi();
     QString readCSSFile(QString path);
     void fillCSSBegMode(QString className);
@@ -232,6 +234,7 @@ public:
     QSqlDatabase* db;
     QStringList cssBegTagList;
     QHash<QString, CSSBeginnerWidget*> ashCssBeg;
+    QHash<QString, QAction*> ashActions;
     ProjectManager2* aProjectManager;
     QTreeWidgetItem* currentScript;
 
@@ -250,6 +253,8 @@ public:
     int previousCssMode;
     QTreeWidgetItem* currentHTMLPage;
     void debug();
+    void disableWysiwyg(bool value);
+    KAction* createAction(QString name, QString icon, QKeySequence shortcut, bool checkable = false);
 
   private slots:
     void setupToolTip();
@@ -274,6 +279,7 @@ public:
     void showCSS(bool);
     void showHtml(bool state);
     void showDebugger(bool);
+    void showInspector(bool state);
     void addHtmlPage();
     void modeChanged(int index);
     
@@ -294,6 +300,9 @@ public:
     void setHighlightColor();
     void setTextColor();
     void setUList();
+    void insertImage();
+    void insertTable();
+    void insertLink();
     
   public slots:
     void loadPage(QTreeWidgetItem* item, QString text);
