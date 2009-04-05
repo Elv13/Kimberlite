@@ -281,6 +281,9 @@ public:
     void showDebugger(bool);
     void showInspector(bool state);
     void addHtmlPage();
+    void zoomIn();
+    void zoomOut();
+    void zoomDefault();
     void modeChanged(int index);
     
     void setBold();
@@ -303,6 +306,7 @@ public:
     void insertImage();
     void insertTable();
     void insertLink();
+    void insertChar();
     
   public slots:
     void loadPage(QTreeWidgetItem* item, QString text);

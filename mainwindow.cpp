@@ -51,6 +51,7 @@
 #include <QWebFrame>
 #include <QTextCursor>
 #include <QDir>
+#include <KCharSelect>
 #include "src/CSSbeginnerWidget.h"
 #include "src/addProprietyWidget.h"
 #include "src/stringToTemplate.h"
@@ -468,7 +469,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     viewTB = new KToolBar(menuView);
     viewTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
 
-    createAction("Project", "text-x-katefilelist", Qt::CTRL + Qt::Key_W);
+    createAction("Project", "text-x-katefilelist", Qt::CTRL + Qt::Key_W,true);
     connect(ashActions["Project"], SIGNAL(triggered(bool)), this, SLOT(showPageList(bool)));
     viewTB->addAction(ashActions["Project"]);
 
@@ -491,15 +492,15 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     viewTB->addSeparator();
  
     createAction("Zoom In", "zoom-in", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Zoom In"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    connect(ashActions["Zoom In"], SIGNAL(triggered(bool)), this, SLOT(zoomIn()));
     viewTB->addAction(ashActions["Zoom In"]);
 
     createAction("Zoom Out", "zoom-out", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Zoom Out"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    connect(ashActions["Zoom Out"], SIGNAL(triggered(bool)), this, SLOT(zoomOut()));
     viewTB->addAction(ashActions["Zoom Out"]);
 
     createAction("Zoom 1:1", "zoom-original", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Zoom 1:1"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    connect(ashActions["Zoom 1:1"], SIGNAL(triggered(bool)), this, SLOT(zoomDefault()));
     viewTB->addAction(ashActions["Zoom 1:1"]);
 
     menuInsert = new QWidget();
@@ -544,16 +545,19 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     createAction("Add Text", "insert-text", Qt::CTRL + Qt::Key_W);
     connect(ashActions["Add Text"], SIGNAL(triggered(bool)), this, SLOT(quit()));
     insertTB->addAction(ashActions["Add Text"]);
+    ashActions["Add Text"]->setDisabled(true);
 
     insertTB->addSeparator();
 
     createAction("Special Character", "list-add-font", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Special Character"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    connect(ashActions["Special Character"], SIGNAL(triggered(bool)), this, SLOT(insertChar()));
     insertTB->addAction(ashActions["Special Character"]);
+    //ashActions["Special Character"]->setDisabled(true);
 
     createAction("Get Color Code", "fill-color", Qt::CTRL + Qt::Key_W);
     connect(ashActions["Get Color Code"], SIGNAL(triggered(bool)), this, SLOT(quit()));
     insertTB->addAction(ashActions["Get Color Code"]);
+    ashActions["Get Color Code"]->setDisabled(true);
 
     QSpacerItem* horizontalSpacer8 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
     hlInsert->addItem(horizontalSpacer8);
@@ -621,14 +625,17 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     createAction("Match Tag", "application-xml", Qt::CTRL + Qt::Key_W);
     connect(ashActions["Match Tag"], SIGNAL(triggered(bool)), this, SLOT(quit()));
     toolsTB->addAction(ashActions["Match Tag"]);
+    ashActions["Match Tag"]->setDisabled(true);
 
     createAction("Spelling", "tools-check-spelling", Qt::CTRL + Qt::Key_W);
     connect(ashActions["Spelling"], SIGNAL(triggered(bool)), this, SLOT(quit()));
     toolsTB->addAction(ashActions["Spelling"]);
+    ashActions["Spelling"]->setDisabled(true);
 
     createAction("Check Link", "network-connect", Qt::CTRL + Qt::Key_W);
     connect(ashActions["Check Link"], SIGNAL(triggered(bool)), this, SLOT(quit()));
     toolsTB->addAction(ashActions["Check Link"]);
+    ashActions["Check Link"]->setDisabled(true);
 
     menuOptions = new QWidget();
     menuOptions->setObjectName(QString::fromUtf8("menuOptions"));
@@ -641,6 +648,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     createAction("Configure WebKreator", "configure", Qt::CTRL + Qt::Key_W);
     connect(ashActions["Configure WebKreator"], SIGNAL(triggered(bool)), this, SLOT(quit()));
     optionsTB->addAction(ashActions["Configure WebKreator"]);
+    ashActions["Configure WebKreator"]->setDisabled(true);
 
     createAction("Configure ToolBars", "configure-toolbars", Qt::CTRL + Qt::Key_W);
     connect(ashActions["Configure ToolBars"], SIGNAL(triggered(bool)), this, SLOT(quit()));
@@ -1525,12 +1533,34 @@ void MainWindow::showInspector(bool state) {
 }
 
 void MainWindow::showHtml(bool state) {
-  if (state == true ) {
+  if (state == true )
     dockHtmlTree->setHidden(false);
-  }
-  else {
+  else 
     dockHtmlTree->setHidden(true);
+}
+
+void MainWindow::zoomIn() {
+  switch (tabWEditor->currentIndex()) {
+    case 0:
+      webPreview->setZoomFactor(webPreview->zoomFactor()+1);
+      break;
+    case 1:
+      rtfHTMLEditor->zoomIn(1);
   }
+}
+
+void MainWindow::zoomOut() {
+  switch (tabWEditor->currentIndex()) {
+    case 0:
+      webPreview->setZoomFactor(webPreview->zoomFactor()-1);
+      break;
+    case 1:
+      rtfHTMLEditor->zoomOut(1);
+  }
+}
+
+void MainWindow::zoomDefault() {
+  webPreview->setZoomFactor(1);
 }
 
 void MainWindow::setupToolTip() {
@@ -1766,15 +1796,21 @@ void MainWindow::modeChanged(int index) {
       webPreview->page()->setContentEditable(true);
       #endif
       disableWysiwyg(false);
+      ashActions["Zoom 1:1"]->setEnabled(true);
       break;
     }
     case 1:
-      
       rtfHTMLEditor->setPlainText(aParser->getParsedHtml(webPreview->page()->mainFrame()->toHtml()));
       disableWysiwyg(false);
+      ashActions["Zoom 1:1"]->setEnabled(true);
+      break;
+    case 2:
+      ashActions["Zoom 1:1"]->setEnabled(true);
+      disableWysiwyg(true);
       break;
     default:
       disableWysiwyg(true);
+      ashActions["Zoom 1:1"]->setEnabled(false);
   }
 }
 
@@ -2019,6 +2055,12 @@ void MainWindow::insertLink() {
   aRessounrceManager->show();
 }
 
+void MainWindow::insertChar() {
+  KDialog* aDialog = new KDialog(this);
+  aDialog->setMainWidget(new KCharSelect(aDialog));
+  aDialog->show();
+}
+
 void MainWindow::disableWysiwyg(bool value) {
   cbbFont->setDisabled(value);
   cbbFontSize->setDisabled(value);
@@ -2043,6 +2085,11 @@ void MainWindow::disableWysiwyg(bool value) {
   btnNewLine->setDisabled(value);
   btnNewTab->setDisabled(value);
   btnNewSpace->setDisabled(value);
+  ashActions["Add Image"]->setDisabled(value);
+  ashActions["Add Table"]->setDisabled(value);
+  ashActions["Add Link"]->setDisabled(value);
+  ashActions["Special Character"]->setDisabled(value);
+
 }
 
 KAction* MainWindow::createAction(QString name, QString icon, QKeySequence shortcut, bool checkable) {
