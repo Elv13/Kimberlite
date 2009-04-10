@@ -156,7 +156,7 @@ public:
     QDockWidget *tableDock;
     QWidget *tableDockCentral;
     QVBoxLayout *verticalLayout_4;
-    QTableWidget *tableView;
+    //QTableWidget *tableView;
     QHBoxLayout *hlButton;
     KPushButton *btnTableAdd;
     KPushButton *btnTableRemove;
@@ -216,9 +216,9 @@ public:
     QVBoxLayout *verticalLayout_17;
     RtfCssEditor *rtfCSSEditor;
     QCompleter* cssCompleter;
-    QWidget *tabValidator;
-    QVBoxLayout *verticalLayout_16;
-    QWebView *webValidator;
+    //QWidget *tabValidator;
+    //QVBoxLayout *verticalLayout_16;
+    //QWebView *webValidator;
     QTreeWidgetItem* styleSheetName;
     QStatusBar *statusbar;
     QTextEdit* txtOtherTags;

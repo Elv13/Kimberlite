@@ -1065,7 +1065,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     verticalLayout_6->addWidget(tabWCSSLevel);
 
     tabWEditor->addTab(tabCSS, QString());
-    tabValidator = new QWidget();
+    /*tabValidator = new QWidget();
     tabValidator->setObjectName(QString::fromUtf8("tabValidator"));
     verticalLayout_16 = new QVBoxLayout(tabValidator);
     verticalLayout_16->setObjectName(QString::fromUtf8("verticalLayout_16"));
@@ -1073,7 +1073,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     webValidator->setObjectName(QString::fromUtf8("webValidator"));
     webValidator->setUrl(QUrl("about:blank"));
 
-    verticalLayout_16->addWidget(webValidator);
+    verticalLayout_16->addWidget(webValidator);*/
     
     tableDock->setWidget(aProjectManager);
     connect(aProjectManager, SIGNAL(htmlPageChanged(QTreeWidgetItem*, QString)), this, SLOT(loadPage(QTreeWidgetItem*, QString)));
@@ -1093,7 +1093,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
       aProjectManager->read(&file);
     aProjectManager->expandAll();
 
-    tabWEditor->addTab(tabValidator, QString());
+    //tabWEditor->addTab(tabValidator, QString());
     
     setCentralWidget(tabWEditor);
 
@@ -1156,7 +1156,7 @@ void MainWindow::retranslateUi()
     tabWCSSLevel->setTabText(tabWCSSLevel->indexOf(tabAdvanced), QApplication::translate("this", "Advanced", 0, QApplication::UnicodeUTF8));
     tabWCSSLevel->setTabText(tabWCSSLevel->indexOf(tabexpert), QApplication::translate("this", "Expert", 0, QApplication::UnicodeUTF8));
     tabWEditor->setTabText(tabWEditor->indexOf(tabCSS), QApplication::translate("this", "CSS", 0, QApplication::UnicodeUTF8));
-    tabWEditor->setTabText(tabWEditor->indexOf(tabValidator), QApplication::translate("this", "Validator", 0, QApplication::UnicodeUTF8));
+    //tabWEditor->setTabText(tabWEditor->indexOf(tabValidator), QApplication::translate("this", "Validator", 0, QApplication::UnicodeUTF8));
     Q_UNUSED(this);
     tabWEditor->setCurrentIndex(3);
     } // retranslateUi
@@ -1437,7 +1437,7 @@ void MainWindow::saveProjectAs(const QString &outputFileName, QString input){
   KSaveFile file(outputFileName);
   file.open();
   QByteArray outputByteArray;
-  outputByteArray.append(input.toUtf8());
+  outputByteArray.append(aProjectManager->getDomDocument()->toString());
   file.write(outputByteArray);
   file.finalize();
   file.close();
@@ -1451,7 +1451,7 @@ void MainWindow::saveProjectAs(){
  
 void MainWindow::saveProject(){
   if(!fileName.isEmpty()) 
-    saveProjectAs(fileName, rtfHTMLEditor->toPlainText());
+    saveProjectAs(fileName, aProjectManager->getDomDocument()->toString());
   else 
     saveProjectAs();
 }
@@ -1465,7 +1465,7 @@ void MainWindow::saveFile(){
 
  
 void MainWindow::openProject() {
-      QString fileNameFromDialog = KFileDialog::getOpenFileName();
+      /*QString fileNameFromDialog = KFileDialog::getOpenFileName();
       
       QString tmpFile;
       if(KIO::NetAccess::download(fileNameFromDialog, tmpFile,this)) {
@@ -1501,17 +1501,17 @@ void MainWindow::openProject() {
 	      //currentClassName = classList[0];
 	      //CssParser::getClass(classList[0]);
 	      fillCSSBegMode(classList[0]);
-	    }
+	    }*/
             /*for (int j = 0; j < classList.count(); j++) {
               QTreeWidgetItem* aTreeViewWidgetItem = new  QTreeWidgetItem(styleSheetName);
               aTreeViewWidgetItem->setText(0,classList[j]);
             }*/
             
-	disableWidget(true);
+	/*disableWidget(true);
       }
       else {
 	    KMessageBox::error(this,KIO::NetAccess::lastErrorString());
-      }
+      }*/
 }
 
 void MainWindow::showPageList(bool state) {
@@ -1610,10 +1610,16 @@ void MainWindow::loadPage(QTableWidgetItem* anItem) {
 }
 
 void MainWindow::loadPage(QTreeWidgetItem* item, QString text) {
-  isModified = false;
-  QString aFile = aParser->compressString(text.trimmed());
-  rtfHTMLEditor->setPlainText(aParser->getParsedHtml(aFile));
-  aParser->getParsedHtml(aFile);
+  if (item != currentHTMLPage) {
+    isModified = false;
+    if (currentHTMLPage != NULL) {
+      aProjectManager->updateDomElement(currentHTMLPage,rtfHTMLEditor->toPlainText());
+    }
+    currentHTMLPage = item;
+    QString aFile = aParser->compressString(text.trimmed());
+    rtfHTMLEditor->setPlainText(aParser->getParsedHtml(aFile));
+    updateHtmlTree(aFile);
+  }
 }
 
 void MainWindow::setModified() {
@@ -1623,12 +1629,10 @@ void MainWindow::setModified() {
 void MainWindow::addHtmlPage() {
   bool ok;
   QString text = QInputDialog::getText(this, tr("QInputDialog::getText()"),
-				      tr("User name:"), QLineEdit::Normal,
+				      tr("Page name:"), QLineEdit::Normal,
 				      QDir::home().dirName(), &ok);
   if (ok && !text.isEmpty()) {
-      tableView->setRowCount(tableView->rowCount()+1);
-      QTableWidgetItem* aTableWidget = new QTableWidgetItem(text);
-      tableView->setItem(tableView->rowCount()-1, 0, aTableWidget);
+      aProjectManager->addHtmlPage(text, text, aProjectManager->htmlPage);
   }
 }
 
@@ -1757,20 +1761,14 @@ KIcon MainWindow::getRightIcon(QString text) {
 }
 
 void MainWindow::loadScript(QTreeWidgetItem* anItem, QString text) {
-  printf("Load script\n");
-  if ((currentScript != NULL) && (anItem != currentScript)) {
-    QDomElement currentElement = aProjectManager->getDomElement(currentScript);
-    printf("Old text= %s, new text = %s\n",aProjectManager->getDomElement(currentScript).firstChildElement().text().toStdString().c_str(),rtfScriptEditor->toPlainText().toStdString().c_str());
-    QDomElement oldTitleElement = currentElement.firstChildElement();
-    QDomText newTitleText = aProjectManager->getDomDocument()->createTextNode(rtfScriptEditor->toPlainText());
-    //aProjectManager->getDomElement(currentScript).replaceChild(newTitleText, oldTitleElement);
-    aProjectManager->getDomElement(currentScript).removeChild(oldTitleElement);
-    aProjectManager->getDomElement(currentScript).appendChild(newTitleText);
+  if (anItem != currentScript) {
+    if (currentScript != NULL) {
+      aProjectManager->updateDomElement(currentHTMLPage,rtfHTMLEditor->toPlainText());
+      isModified = false;
+    }
+    rtfScriptEditor->setPlainText(text.trimmed());
+    currentScript = anItem;
   }
-  rtfScriptEditor->setPlainText(text.trimmed());
-  currentScript = anItem;
-  /*rtfScriptEditor->setPlainText(text.trimmed());
-  currentScript = anItem;*/
 }
 
 void MainWindow::loadCss(QString text) {

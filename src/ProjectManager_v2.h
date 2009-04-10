@@ -16,9 +16,11 @@ class ProjectManager2 : public QTreeWidget {
     bool write(QIODevice *device);
     QDomElement getDomElement(QTreeWidgetItem* anItem);
     QDomDocument* getDomDocument();
+    QTreeWidgetItem* htmlPage;
+    void addHtmlPage(QString title, QString name, QTreeWidgetItem* parent);
 
-  private slots:
-    void updateDomElement(QTreeWidgetItem *item, int column);
+  public slots:
+    void updateDomElement(QTreeWidgetItem *item, QString html);
     //void test(QTreeWidgetItem* item, QString text);
     void loadPage(QTreeWidgetItem* anItem, int useless);
 

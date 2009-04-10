@@ -3,6 +3,7 @@
 #include <QMessageBox>
 #include <QTextStream>
 #include <KIcon>
+#include <QDebug>
 
 ProjectManager2::ProjectManager2(QWidget *parent) : QTreeWidget(parent) {
     QStringList labels;
@@ -75,22 +76,17 @@ bool ProjectManager2::write(QIODevice *device) {
     return true;
 }
 
-void ProjectManager2::updateDomElement(QTreeWidgetItem *item, int column) {
-    QDomElement element = domElementForItem.value(item);
-    if (!element.isNull()) {
-        if (column == 0) {
-            QDomElement oldTitleElement = element.firstChildElement("title");
-            QDomElement newTitleElement = domDocument.createElement("title");
+void ProjectManager2::updateDomElement(QTreeWidgetItem *item, QString html) {
+  QDomElement element = domElementForItem.value(item);
+  if (!element.isNull()) {
+    QDomElement oldTitleElement = element.firstChildElement("content");
+    QDomElement newTitleElement = domDocument.createElement("content");
 
-            QDomText newTitleText = domDocument.createTextNode(item->text(0));
-            newTitleElement.appendChild(newTitleText);
+    QDomText newTitleText = domDocument.createTextNode(fromHTML(html));
+    newTitleElement.appendChild(newTitleText);
 
-            element.replaceChild(newTitleElement, oldTitleElement);
-        } else {
-            if (element.tagName() == "bookmark")
-                element.setAttribute("href", item->text(1));
-        }
-    }
+    element.replaceChild(newTitleElement, oldTitleElement);
+  }
 }
 
 void ProjectManager2::parseProjectElement(const QDomElement &element, QTreeWidgetItem *parentItem) {
@@ -149,27 +145,27 @@ void ProjectManager2::parseFolderElement(const QDomElement &element, QTreeWidget
             parseFolderElement(child, item);
         } 
         else if (child.tagName() == "page") {
-          QTreeWidgetItem *item2 = createItem(element, item);
+          QTreeWidgetItem *item2 = createItem(child, item);
           item2->setIcon(0,KIcon("application-xhtml+xml"));
           item2->setText(0, child.attribute("name"));
         }
         else if (child.tagName() == "image") {
-            QTreeWidgetItem *item2 = createItem(element, item);
+            QTreeWidgetItem *item2 = createItem(child, item);
             item2->setText(0, child.attribute("name"));
             item2->setIcon(0,KIcon("image-gif"));
         } 
         else if (child.tagName() == "swf") {
-            QTreeWidgetItem *item2 = createItem(element, item);
+            QTreeWidgetItem *item2 = createItem(child, item);
             item2->setText(0, child.attribute("name"));
             item2->setIcon(0,KIcon("x-kde-nsplugin-generated"));
         }
         else if (child.tagName() == "flv") {
-           QTreeWidgetItem *item2 = createItem(element, item);
+           QTreeWidgetItem *item2 = createItem(child, item);
            item2->setText(0, child.attribute("name"));
            item2->setIcon(0,KIcon("video-mpeg"));
         }
         else if (child.tagName() == "file") {
-            QTreeWidgetItem *item2 = createItem(element, item);
+            QTreeWidgetItem *item2 = createItem(child, item);
             item2->setText(0, child.attribute("name"));
             item2->setIcon(0,KIcon("application-javascript"));
         }
@@ -180,7 +176,7 @@ void ProjectManager2::parseFolderElement(const QDomElement &element, QTreeWidget
 
 void ProjectManager2::parseHtmlElement(const QDomElement &element, QTreeWidgetItem *parentItem) {
     QTreeWidgetItem *item = createItem(element, parentItem);
-
+    htmlPage = item;
     QString title = "HTML document";
     if (title.isEmpty())
         title = QObject::tr("Folder");
@@ -198,7 +194,7 @@ void ProjectManager2::parseHtmlElement(const QDomElement &element, QTreeWidgetIt
             parseFolderElement(child, item);
         } 
         else if (child.tagName() == "page") {
-            QTreeWidgetItem* item2 = createItem(element, item);
+            QTreeWidgetItem* item2 = createItem(child, item);
 	    //connect (item2, SIGNAL(clicked(QTreeWidgetItem *)), this, SLOT(loadPage(QTreeWidgetItem *)));
             item2->setText(0, child.attribute("name"));
             item2->setIcon(0,KIcon("application-xhtml+xml"));
@@ -235,7 +231,7 @@ void ProjectManager2::parseScriptElement(const QDomElement &element, QTreeWidget
             parseFolderElement(child, item);
         } 
         else if (child.tagName() == "file") {
-            QTreeWidgetItem *item2 = createItem(element, item);
+            QTreeWidgetItem *item2 = createItem(child, item);
             item2->setText(0, child.attribute("name"));
             item2->setIcon(0,KIcon("application-javascript"));
         } 
@@ -263,22 +259,22 @@ void ProjectManager2::parseRessourcesElement(const QDomElement &element, QTreeWi
             parseFolderElement(child, item);
         } 
         else if (child.tagName() == "image") {
-            QTreeWidgetItem *item2 = createItem(element, item);
+            QTreeWidgetItem *item2 = createItem(child, item);
             item2->setText(0, child.attribute("name"));
             item2->setIcon(0,KIcon("image-gif"));
         } 
         else if (child.tagName() == "swf") {
-            QTreeWidgetItem *item2 = createItem(element, item);
+            QTreeWidgetItem *item2 = createItem(child, item);
             item2->setText(0, child.attribute("name"));
             item2->setIcon(0,KIcon("x-kde-nsplugin-generated"));
         }
         else if (child.tagName() == "flv") {
-           QTreeWidgetItem *item2 = createItem(element, item);
+           QTreeWidgetItem *item2 = createItem(child, item);
            item2->setText(0, child.attribute("name"));
            item2->setIcon(0,KIcon("video-mpeg"));
         }
         else if (child.tagName() == "file") {
-            QTreeWidgetItem *item2 = createItem(element, item);
+            QTreeWidgetItem *item2 = createItem(child, item);
             item2->setText(0, child.attribute("name"));
         }
         child = child.nextSiblingElement();
@@ -317,11 +313,14 @@ QString ProjectManager2::fromHTML(QString input) {
 }
 
 void ProjectManager2::loadPage(QTreeWidgetItem* anItem, int useless) {
-  printf("I am here !!! Name:%s\n",domElementForItem.value(anItem).firstChildElement().attribute("name").toStdString().c_str());
-  if (domElementForItem.value(anItem).firstChildElement().attribute("name").indexOf(".htm") != -1)
-    emit htmlPageChanged(anItem, toHTML(domElementForItem.value(anItem).firstChildElement().text()));
-  else if (domElementForItem.value(anItem).firstChildElement().attribute("name").indexOf(".js") != -1)
-    emit javaScriptChanged(anItem, domElementForItem.value(anItem).firstChildElement().text());
+  printf("I am goinf to show page!!! Name:%s\n",domElementForItem.value(anItem).firstChildElement().attribute("name").toStdString().c_str());
+  if (domElementForItem.value(anItem).attribute("name").indexOf(".htm") != -1) {
+    qDebug() << "tree Pointer:" << anItem << " dom element:" << &domElementForItem.value(anItem);
+    emit htmlPageChanged(anItem, toHTML(domElementForItem.value(anItem).text()));
+  }
+  else if (domElementForItem.value(anItem).attribute("name").indexOf(".js") != -1) {
+    emit javaScriptChanged(anItem, domElementForItem.value(anItem).text());
+  }
 }
 
 QDomElement ProjectManager2::getDomElement(QTreeWidgetItem* anItem) {
@@ -330,4 +329,20 @@ QDomElement ProjectManager2::getDomElement(QTreeWidgetItem* anItem) {
 
 QDomDocument* ProjectManager2::getDomDocument() {
   return &domDocument;
+}
+
+void ProjectManager2::addHtmlPage(QString title, QString name, QTreeWidgetItem* parent) {
+  QDomElement anElement = domDocument.createElement("page");
+  anElement.setAttribute("title", title);
+  anElement.setAttribute("name", name);
+  QDomElement newContentElement = domDocument.createElement("content");
+  QDomText newContentText = domDocument.createTextNode(fromHTML("<html><head></head><body></body></html>"));
+  newContentElement.appendChild(newContentText);
+  anElement.appendChild(newContentElement);
+  QDomElement element2 = domElementForItem.value(parent);
+  element2.appendChild(anElement);
+  QTreeWidgetItem* anItem = createItem(anElement,parent);
+  anItem->setText(0,name);
+  anItem->setIcon(0, KIcon("application-xhtml+xml"));
+  qDebug() << "XML data: \n" << domDocument.toString();
 }
