@@ -213,7 +213,7 @@ void ProjectManager2::parseHtmlElement(const QDomElement &element, QTreeWidgetIt
 
 void ProjectManager2::parseScriptElement(const QDomElement &element, QTreeWidgetItem *parentItem) {
     QTreeWidgetItem *item = createItem(element, parentItem);
-
+    script = item;
     QString title = "JavaScripts";
     if (title.isEmpty())
         title = QObject::tr("Folder");
@@ -331,18 +331,56 @@ QDomDocument* ProjectManager2::getDomDocument() {
   return &domDocument;
 }
 
-void ProjectManager2::addHtmlPage(QString title, QString name, QTreeWidgetItem* parent) {
+void ProjectManager2::addHtmlPage(QString title, QString name, QString body, QString foldeName) {
   QDomElement anElement = domDocument.createElement("page");
   anElement.setAttribute("title", title);
   anElement.setAttribute("name", name);
   QDomElement newContentElement = domDocument.createElement("content");
-  QDomText newContentText = domDocument.createTextNode(fromHTML("<html><head></head><body></body></html>"));
+  QDomText newContentText;
+  if (body.isEmpty())
+    newContentText= domDocument.createTextNode(fromHTML("<html><head><title>"+title+"</title></head><body></body></html>"));
+  else
+    newContentText= domDocument.createTextNode(fromHTML(body));
   newContentElement.appendChild(newContentText);
   anElement.appendChild(newContentElement);
-  QDomElement element2 = domElementForItem.value(parent);
+  QDomElement element2 = domElementForItem.value(getFolder(foldeName));
   element2.appendChild(anElement);
-  QTreeWidgetItem* anItem = createItem(anElement,parent);
+  QTreeWidgetItem* anItem = createItem(anElement,getFolder(foldeName));
   anItem->setText(0,name);
   anItem->setIcon(0, KIcon("application-xhtml+xml"));
   qDebug() << "XML data: \n" << domDocument.toString();
+  setCurrentItem(anItem);
+}
+
+void ProjectManager2::addFolder(QString title, QTreeWidgetItem* parent) {
+  QDomElement anElement = domDocument.createElement("folder");
+  anElement.setAttribute("title", title);
+  QDomElement parentElement = domElementForItem.value(parent);
+  parentElement.appendChild(anElement);
+  QTreeWidgetItem* anItem = createItem(anElement,parent);
+  anItem->setText(0,title);
+  anItem->setIcon(0, folderIcon);
+}
+
+QDomNode ProjectManager2::getElement(QDomNode &aNode, QString tagName, QString attribute, QString value) {
+  QDomNodeList aList = aNode.childNodes();
+  for (int i =0; i < aList.count();i++) {
+    if (aList.item(i).toElement().tagName() == tagName) {
+      if (aList.item(i).toElement().attribute(attribute) == value)
+	return aList.item(i);
+    }
+  }
+  return domElementForItem.value(htmlPage);
+}
+
+QTreeWidgetItem* ProjectManager2::getFolder(QString title/*, QTreeWidgetItem* base*/) {
+  if (title == "@@@ROOT")
+    return htmlPage;
+  
+  foreach(QDomElement item, domElementForItem) {
+     if (item.toElement().tagName() == "folder") {
+      if (item.toElement().attribute("title") == title)
+	return domElementForItem.key(item);
+    }
+  }
 }

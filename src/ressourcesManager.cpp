@@ -51,7 +51,7 @@ RessrourceManager::RessrourceManager(QWidget* parent) : KDialog(parent) {
 
   //verticalLayout->addWidget(grbRessources);
 
-
+  setModal(true);
   QObject::connect(rbCurerent, SIGNAL(toggled(bool)), tvCurrentRessources, SLOT(setEnabled(bool)));
   QObject::connect(rbNew, SIGNAL(toggled(bool)), txtNewRessources, SLOT(setEnabled(bool)));
   QObject::connect(rbUrl, SIGNAL(toggled(bool)), txtUrl, SLOT(setEnabled(bool)));

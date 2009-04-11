@@ -17,12 +17,13 @@ class ProjectManager2 : public QTreeWidget {
     QDomElement getDomElement(QTreeWidgetItem* anItem);
     QDomDocument* getDomDocument();
     QTreeWidgetItem* htmlPage;
-    void addHtmlPage(QString title, QString name, QTreeWidgetItem* parent);
+    QTreeWidgetItem* script;
 
   public slots:
     void updateDomElement(QTreeWidgetItem *item, QString html);
-    //void test(QTreeWidgetItem* item, QString text);
     void loadPage(QTreeWidgetItem* anItem, int useless);
+    void addHtmlPage(QString title, QString name, QString body = "", QString foldeName = "");
+    void addFolder(QString title, QTreeWidgetItem* parent);
 
   private:
     void parseFolderElement(const QDomElement &element, QTreeWidgetItem *parentItem = 0);
@@ -33,6 +34,8 @@ class ProjectManager2 : public QTreeWidget {
     void parseRessourcesElement(const QDomElement &element, QTreeWidgetItem *parentItem = 0);
     QString toHTML(QString input); /*Those method are used to prevent damaging the project file with invalid HTML*/
     QString fromHTML(QString input);/*Those method are used to prevent damaging the project file with invalid HTML*/
+    QDomNode getElement(QDomNode &aNode, QString tagName, QString attribute, QString value);
+    QTreeWidgetItem* getFolder(QString title);
     
     QDomDocument domDocument;
     QHash<QTreeWidgetItem *, QDomElement> domElementForItem;

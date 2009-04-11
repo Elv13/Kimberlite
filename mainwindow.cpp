@@ -36,7 +36,6 @@
 #include <QStringList>
 #include <QSqlDriver>
 #include <KIO/NetAccess>
-#include <KMessageBox>
 #include <KFileDialog>
 #include <KMessageBox>
 #include <KIO/NetAccess>
@@ -64,6 +63,8 @@
 #include "src/template.h"
 #include "src/ressourcesManager.h"
 #include "src/newTable.h"
+#include "src/newPage.h"
+#include "src/newScript.h"
 #include <ktip.h>
 
 MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage(NULL),currentScript(NULL) {
@@ -530,7 +531,7 @@ MainWindow::MainWindow(QWidget* parent)  : KXmlGuiWindow(parent),currentHTMLPage
     insertTB->addAction(ashActions["New Page"]);
 
     createAction("New Script", "application-add", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["New Script"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    connect(ashActions["New Script"], SIGNAL(triggered(bool)), this, SLOT(addScript()));
     insertTB->addAction(ashActions["New Script"]);
 
     insertTB->addSeparator();
@@ -1628,14 +1629,16 @@ void MainWindow::setModified() {
 
 void MainWindow::addHtmlPage() {
   bool ok;
-  QString text = QInputDialog::getText(this, tr("QInputDialog::getText()"),
-				      tr("Page name:"), QLineEdit::Normal,
-				      QDir::home().dirName(), &ok);
-  if (ok && !text.isEmpty()) {
-      aProjectManager->addHtmlPage(text, text, aProjectManager->htmlPage);
-  }
+  NewWebPage* aDialog = new NewWebPage(this,aProjectManager->htmlPage);
+  aDialog->show();
+  connect(aDialog, SIGNAL(addFolder(QString,QTreeWidgetItem*)), aProjectManager, SLOT(addFolder(QString,QTreeWidgetItem*)));
+  connect(aDialog, SIGNAL(addHtmlPage(QString,QString,QString,QString)), aProjectManager, SLOT(addHtmlPage(QString,QString,QString,QString)));
 }
 
+void MainWindow::addScript() {
+  NewScript* aScript = new NewScript(this,aProjectManager->script);
+  aScript->show();
+}
 
 QString MainWindow::clearCssBeg() {
   QString currentClass;

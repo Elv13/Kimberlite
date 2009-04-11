@@ -18,6 +18,8 @@
       src/template.cpp
       src/ressourcesManager.cpp
       src/newTable.cpp
+      src/newPage.cpp
+      src/newScript.cpp
       )
 
       kde4_add_executable(kimberlite ${kimberlite_SRCS})

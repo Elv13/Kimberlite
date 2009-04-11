@@ -2,8 +2,10 @@
 -D_BSD_SOURCE
 */
 #include "moc_addProprietyWidget.cpp"
+#include "moc_newPage.cpp"
 #include "moc_template.cpp"
 #include "moc_stringToTemplate.cpp"
+#include "moc_newScript.cpp"
 #include "moc_CSSbeginnerWidget.cpp"
 #include "moc_rtfHtmlEditor.cpp"
 #include "moc_mainwindow.cpp"

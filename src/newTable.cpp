@@ -54,4 +54,5 @@ NewTable::NewTable(QWidget* parent) : KDialog(parent) {
   lblBorder->setText(QApplication::translate("NewTable", "Border:", 0, QApplication::UnicodeUTF8));
   ckbAddHeader->setText(QApplication::translate("NewTable", "Add header", 0, QApplication::UnicodeUTF8));
   Q_UNUSED(this);
+  setModal(true);
 }

@@ -281,6 +281,7 @@ public:
     void showDebugger(bool);
     void showInspector(bool state);
     void addHtmlPage();
+    void addScript();
     void zoomIn();
     void zoomOut();
     void zoomDefault();
