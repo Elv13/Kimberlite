@@ -5,21 +5,21 @@
 #include <KIcon>
 #include <QDebug>
 
-ProjectManager2::ProjectManager2(QWidget *parent) : QTreeWidget(parent) {
-    QStringList labels;
-    labels << tr("Project");
-    this->setColumnCount(1);
+ProjectManager2::ProjectManager2(QWidget *parent) : QTreeWidget(parent),firstPage(true) {
+  setHeaderHidden(true);
+  QStringList labels;
+  labels << tr("Project");
+  this->setColumnCount(1);
 
-    header()->setResizeMode(QHeaderView::Stretch);
-    setHeaderLabels(labels);
+  header()->setResizeMode(QHeaderView::Stretch);
+  setHeaderLabels(labels);
 
-    folderIcon.addPixmap(style()->standardPixmap(QStyle::SP_DirClosedIcon),
-                         QIcon::Normal, QIcon::Off);
-    folderIcon.addPixmap(style()->standardPixmap(QStyle::SP_DirOpenIcon),
-                         QIcon::Normal, QIcon::On);
-    bookmarkIcon.addPixmap(style()->standardPixmap(QStyle::SP_FileIcon));
-    connect(this, SIGNAL(htmlPageChanged(QTreeWidgetItem*, QString)), this, SLOT(test(QTreeWidgetItem*, QString)));
-    connect(this, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this, SLOT(loadPage(QTreeWidgetItem *, int)));
+  folderIcon.addPixmap(style()->standardPixmap(QStyle::SP_DirClosedIcon),
+			QIcon::Normal, QIcon::Off);
+  folderIcon.addPixmap(style()->standardPixmap(QStyle::SP_DirOpenIcon),
+			QIcon::Normal, QIcon::On);
+  bookmarkIcon.addPixmap(style()->standardPixmap(QStyle::SP_FileIcon));
+  connect(this, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this, SLOT(loadPage(QTreeWidgetItem *, int)));
 }
 
 bool ProjectManager2::read(QIODevice *device) {
@@ -93,6 +93,7 @@ void ProjectManager2::parseProjectElement(const QDomElement &element, QTreeWidge
     QTreeWidgetItem *item = createItem(element, parentItem);
 
     QString title = element.attribute("title");
+    projectTitle = title;
     if (title.isEmpty())
         title = QObject::tr("Folder");
 
@@ -198,18 +199,15 @@ void ProjectManager2::parseHtmlElement(const QDomElement &element, QTreeWidgetIt
 	    //connect (item2, SIGNAL(clicked(QTreeWidgetItem *)), this, SLOT(loadPage(QTreeWidgetItem *)));
             item2->setText(0, child.attribute("name"));
             item2->setIcon(0,KIcon("application-xhtml+xml"));
-            if (child.attribute("name") == "page1.htm") {
-              emit htmlPageChanged(item2, toHTML(child.text()));
-              printf("\nThis is it: %s \n", toHTML(child.text()).toStdString().c_str());
-            }
+            if (firstPage == true) {
+	      item2->setSelected(true);
+	      htmlPageChanged(item2, toHTML(domElementForItem.value(item2).text()));
+	      firstPage = false;
+	    }
         } 
         child = child.nextSiblingElement();
     }
 }
-
-/*void ProjectManager2::test(QTreeWidgetItem* item, QString text) {
-  printf("\nWork %s\n",text.toStdString().c_str());
-}*/
 
 void ProjectManager2::parseScriptElement(const QDomElement &element, QTreeWidgetItem *parentItem) {
     QTreeWidgetItem *item = createItem(element, parentItem);

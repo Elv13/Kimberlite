@@ -18,6 +18,7 @@ class ProjectManager2 : public QTreeWidget {
     QDomDocument* getDomDocument();
     QTreeWidgetItem* htmlPage;
     QTreeWidgetItem* script;
+    QString projectTitle;
 
   public slots:
     void updateDomElement(QTreeWidgetItem *item, QString html);
@@ -36,6 +37,7 @@ class ProjectManager2 : public QTreeWidget {
     QString fromHTML(QString input);/*Those method are used to prevent damaging the project file with invalid HTML*/
     QDomNode getElement(QDomNode &aNode, QString tagName, QString attribute, QString value);
     QTreeWidgetItem* getFolder(QString title);
+    bool firstPage;
     
     QDomDocument domDocument;
     QHash<QTreeWidgetItem *, QDomElement> domElementForItem;

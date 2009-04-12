@@ -75,11 +75,11 @@
 #include <QCompleter>
 #include <QHash>
 #include <QAction>
+#include <KActionCollection>
 
 #include "src/CSSbeginnerWidget.h"
 #include "src/rtfCssEditor.h"
 #include "src/rtfHtmlEditor.h"
-#include "src/ProjectManager.h"
 #include "src/ProjectManager_v2.h"
 
 QT_BEGIN_NAMESPACE
@@ -93,7 +93,7 @@ class IndexedTreeWidgetItem : public QTreeWidgetItem {
     uint index;
 };
 
-class MainWindow  : public KXmlGuiWindow {
+class MainWindow  : public KMainWindow {
    Q_OBJECT
 public:
     MainWindow(QWidget* parent);
@@ -102,7 +102,7 @@ public:
     QString readCSSFile(QString path);
     void fillCSSBegMode(QString className);
     void fillCSSAdvMode();
-    ProjectManager* aProject;
+    KActionCollection* actionCollection;
     QWidget *centralwidget;
     KTabWidget *tabWMenu;
     QWidget *menufile;
@@ -142,7 +142,7 @@ public:
     QLabel *lblBackgroundColor;
     KColorCombo *cbbBackgroundColor;
     QWidget *menuInsert;
-    QHBoxLayout* hlInsert;
+    QGridLayout* hlInsert;
     KPushButton* btnNewLine;
     KPushButton* btnNewTab;
     KPushButton* btnNewSpace;
@@ -250,9 +250,9 @@ public:
     void splitSubClass(QString name, QTreeWidgetItem* parent);
     KIcon getRightIcon(QString text);
     void updateHtmlTree(QString &file);
+    void updateHtmlTree(HtmlData &pageData);
     int previousCssMode;
     QTreeWidgetItem* currentHTMLPage;
-    void debug();
     void disableWysiwyg(bool value);
     KAction* createAction(QString name, QString icon, QKeySequence shortcut, bool checkable = false);
 
@@ -268,7 +268,6 @@ public:
     void saveProjectAs(const QString &outputFileName, QString input);
     void saveFile();
     void loadCSSClass(QTreeWidgetItem* anItem);
-    void loadPage(QTableWidgetItem* anItem);
     void setHtmlCursor(QTreeWidgetItem* item, int column);
     void setModified();
     void changeCssMode(int mode);
