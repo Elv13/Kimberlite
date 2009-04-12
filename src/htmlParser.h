@@ -46,33 +46,21 @@ struct W3Cinfo {
   QStringList needNewLineOnOpen;
 };
 
-class debugItem {
-  public:
-    debugItem(int _line, int _icon, QString _message) : line(_line), icon(_icon), message(_message) {}
-    debugItem() {};
-    int line;
-    int icon; /*0 = warning, 1 = error, 3 = information*/
-    int character;
-    QString message;
-};
-W3Cinfo load();
-
 class HtmlParser{
   public:
     HtmlParser();
-    static QString compressFile(QString path);
     static QString compressString(QString file);
     static QString getTag(QString aTag);
-    QVector<QString> listTag(QString inputFile);
-    HtmlData getHtmlData(QString inputFile);
-    QString getParsedHtml(HtmlData &pageData);
-    QString getParsedHtml(QString inputFile);
-    W3Cinfo htmlInfo;
+    static QVector<QString> listTag(QString inputFile);
+    static HtmlData getHtmlData(QString inputFile);
+    static QString getParsedHtml(HtmlData &pageData);
+    static QString getParsedHtml(QString inputFile);
+    static W3Cinfo htmlInfo;
     static void setAttribute(HtmlData &pageData, QString tag, uint index, QString attribute, QString value);
     static QString getAttribute(QString tag, QString attribute);
   private:
-    QStringList markerList;
-    QVector<uint> htmlParser(QVector<QString> tagList);
+    //QStringList markerList;
+    static QVector<uint> htmlParser(QVector<QString> tagList);
 };
 
 /*class ParserThread : public QThread {
