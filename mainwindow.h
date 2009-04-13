@@ -255,8 +255,19 @@ public:
     QTreeWidgetItem* currentHTMLPage;
     void disableWysiwyg(bool value);
     KAction* createAction(QString name, QString icon, QKeySequence shortcut, bool checkable = false);
-
+    QString getClassName(QTreeWidgetItem* anItem);
+    void setCssCursor(QString className);
+    void loadCSSClass(QTreeWidgetItem* anItem);
+  
   private slots:
+    void quit();
+    void print();
+    void cut();
+    void copy();
+    void paste();
+    void undo();
+    void redo();
+    void printPreview();
     void setupToolTip();
     void reParse();
     void templaterize();
@@ -267,7 +278,8 @@ public:
     void saveProjectAs();
     void saveProjectAs(const QString &outputFileName, QString input);
     void saveFile();
-    void loadCSSClass(QTreeWidgetItem* anItem);
+    
+    void cssClassClicked(QTreeWidgetItem* anItem);
     void setHtmlCursor(QTreeWidgetItem* item, int column);
     void setModified();
     void changeCssMode(int mode);
