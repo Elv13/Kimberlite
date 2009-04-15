@@ -46,6 +46,15 @@ struct W3Cinfo {
   QStringList needNewLineOnOpen;
 };
 
+class IndexedTreeWidgetItem : public QTreeWidgetItem {
+  public:
+    IndexedTreeWidgetItem(QTreeWidget* parent, uint id) :QTreeWidgetItem(parent),index(id) {}
+    IndexedTreeWidgetItem(QTreeWidgetItem* parent, const QStringList &strings, uint id) :QTreeWidgetItem(parent,strings),index(id){}
+    IndexedTreeWidgetItem(QTreeWidget* parent, const QStringList &strings, uint id) :QTreeWidgetItem(parent,strings),index(id){}
+    IndexedTreeWidgetItem(const QStringList &strings, uint id) :QTreeWidgetItem (strings),index(id) {}
+    uint index;
+};
+
 class HtmlParser{
   public:
     HtmlParser();
@@ -62,21 +71,4 @@ class HtmlParser{
     //QStringList markerList;
     static QVector<uint> htmlParser(QVector<QString> tagList);
 };
-
-/*class ParserThread : public QThread {
-    Q_OBJECT
-
-    public:
-        ParserThread(QObject *parent = 0) : QThread(parent) {
-	  aParser = new HtmlParser();
-	}
-	~ParserThread() {delete aParser;}
-        void run() {
-	  //aParser->analyseCommand(aCommand.toStdString());
-        }
-      HtmlParser* aParser;
-    //private:
-      //QString aCommand;
-
-};*/
 #endif //HTML_PARSER
