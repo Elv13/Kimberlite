@@ -81,17 +81,9 @@
 #include "src/rtfCssEditor.h"
 #include "src/rtfHtmlEditor.h"
 #include "src/ProjectManager_v2.h"
+#include "src/htmlThread.h"
 
 QT_BEGIN_NAMESPACE
-
-class IndexedTreeWidgetItem : public QTreeWidgetItem {
-  public:
-    IndexedTreeWidgetItem(QTreeWidget* parent, uint id) :QTreeWidgetItem(parent),index(id) {}
-    IndexedTreeWidgetItem(QTreeWidgetItem* parent, const QStringList &strings, uint id) :QTreeWidgetItem(parent,strings),index(id){}
-    IndexedTreeWidgetItem(QTreeWidget* parent, const QStringList &strings, uint id) :QTreeWidgetItem(parent,strings),index(id){}
-    IndexedTreeWidgetItem(const QStringList &strings, uint id) :QTreeWidgetItem (strings),index(id) {}
-    uint index;
-};
 
 class MainWindow  : public KMainWindow {
    Q_OBJECT
@@ -244,6 +236,9 @@ public:
     bool isModified;
     QString pageName;
     QString currentClassName;
+    ParserThread* aHtmlThread;
+    int previousCssMode;
+    QTreeWidgetItem* currentHTMLPage;
     //QString setClass(QString className, QString content);
     QString clearCssBeg();
     void disableWidget(bool value);
@@ -251,13 +246,14 @@ public:
     KIcon getRightIcon(QString text);
     void updateHtmlTree(QString &file);
     void updateHtmlTree(HtmlData &pageData);
-    int previousCssMode;
-    QTreeWidgetItem* currentHTMLPage;
     void disableWysiwyg(bool value);
     KAction* createAction(QString name, QString icon, QKeySequence shortcut, bool checkable = false);
     QString getClassName(QTreeWidgetItem* anItem);
     void setCssCursor(QString className);
     void loadCSSClass(QTreeWidgetItem* anItem);
+    QString loadRecentProjectList();
+    void saveRecentProject(QString filePath);
+    void loadDefaultPage();
   
   private slots:
     void quit();

@@ -737,7 +737,8 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
     horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
     webPreview = new QWebView(tabPreview);
     webPreview->setObjectName(QString::fromUtf8("webPreview"));
-    webPreview->setUrl(QUrl("about:blank"));
+    //webPreview->setUrl(QUrl("about:blank"));
+    loadDefaultPage();
 
     horizontalLayout_2->addWidget(webPreview);
 
@@ -1078,6 +1079,13 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
     ashActions["Print"]->setDisabled(true);
     ashActions["Print Preview"]->setDisabled(true);
     rtfHTMLEditor->clear();
+    
+    /*aHtmlThread = new ParserThread(this);
+    aHtmlThread->rtfHtml = rtfHTMLEditor;
+    aHtmlThread->treeHtml = treeHtml;
+    connect(rtfHTMLEditor, SIGNAL(textChanged()), aHtmlThread, SLOT(getReady()));
+    aHtmlThread->start();*/
+    
     retranslateUi();
 }
 
@@ -1461,6 +1469,7 @@ void MainWindow::openProject() {
     ashActions["Print"]->setDisabled(false);
     ashActions["Print Preview"]->setDisabled(false);
     tableDock->setVisible(true);
+    saveRecentProject(fileName);
   }
 }
 
@@ -2201,4 +2210,65 @@ void MainWindow::paste() {
     case 3:
       rtfCSSEditor->paste();
   }
+}
+
+QString MainWindow::loadRecentProjectList() {
+  QString toReturn;
+  QString path = KStandardDirs::locateLocal( "appdata", "recent.txt" );
+  QFile file(path);
+  file.open(QIODevice::ReadOnly);
+  while (!file.atEnd()) {
+    toReturn += QString(file.readLine()).toAscii() + "<br>";
+  }
+  file.close();
+  return toReturn;
+}
+
+void MainWindow::saveRecentProject(QString filePath) {
+  QStringList recentProjectList;
+  QString path2 = KStandardDirs::locateLocal( "appdata", "recent.txt" );
+  QFile file2(path2);
+  file2.open(QIODevice::ReadOnly);
+  while (!file2.atEnd()) {
+    recentProjectList << QString(file2.readLine()).toAscii();
+  }
+  file2.close();
+  
+  if (recentProjectList.indexOf(filePath) != -1)
+    return;
+  
+  if (recentProjectList.count() >= 5)
+    recentProjectList.removeAt(0);
+  
+  recentProjectList << filePath;
+  
+  QString toSave;
+  for (int i =0; i < recentProjectList.count();i++) {
+    toSave += recentProjectList[i].trimmed() + "\n";
+  }
+  
+  QString path = KStandardDirs::locateLocal( "appdata", "recent.txt" );
+  KSaveFile file(path);
+  file.open();
+  QByteArray outputByteArray;
+  outputByteArray.append(toSave);
+  file.write(outputByteArray);
+  file.finalize();
+  file.close();
+}
+
+void MainWindow::loadDefaultPage() {
+  QString page;
+  page = "<html><head></head><body bgcolor=#ff0000><font color=white>\
+  <div style=\"height:5%\">Hi! Welcome to Kimberlite!\
+  <br>Kimberlite is a WYSIWYG HTML editor for KDE based on WebKit<div>\
+  <div style=\"position:absolute;top: 8%;right:3%;width:45%;height:56%;border 3px;border-color:white\">\
+    To use kimberlite, you have to load a project. You can either open an existing one or create a new one from a template or from scratch:<br><br>\
+    Create a new project<br><br>\
+    Open an existing project</div>\
+  <div style=\"position:absolute;top: 8%;left:3%;width:45%;height:90%;border-style:solid;border 3px;border-color:white\"><b>News:</b><br></div>\
+  <div style=\"position:absolute;bottom: 15px;right:3%;width:45%;height:30%;border-style:solid;border 3px;border-color:white\"><b>Recent project:</b><br>";
+  page += loadRecentProjectList();
+  page += "</div></font></body></html>";
+  webPreview->setHtml(page);
 }
