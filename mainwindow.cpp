@@ -2212,14 +2212,16 @@ void MainWindow::paste() {
   }
 }
 
-QString MainWindow::loadRecentProjectList() {
-  QString toReturn;
+QStringList MainWindow::loadRecentProjectList() {
+  QStringList toReturn;
   QString path = KStandardDirs::locateLocal( "appdata", "recent.txt" );
   QFile file(path);
   file.open(QIODevice::ReadOnly);
   while (!file.atEnd()) {
-    toReturn += QString(file.readLine()).toAscii() + "<br>";
+    toReturn << "<a href=\"load:" + QString(file.readLine()).toAscii()+"\">" + QString(file.readLine()).toAscii() + "</a>";
   }
+  while (toReturn.count() < 5)
+    toReturn << "";
   file.close();
   return toReturn;
 }
@@ -2258,8 +2260,40 @@ void MainWindow::saveRecentProject(QString filePath) {
 }
 
 void MainWindow::loadDefaultPage() {
+  KIconLoader *iconloader = KIconLoader::global();
+  int iconSize = iconloader->currentSize(KIconLoader::Desktop);
+  QString new_path = iconloader->iconPath("document-new", KIconLoader::Desktop );
+  QString open_path = iconloader->iconPath("document-open", KIconLoader::Desktop );
+  QStringList recentProject = loadRecentProjectList();
+  QString path = "/home/lepagee/dev/myproject/kimberlite/homePage/home.htm";//KStandardDirs::locate("data", "konqueror/about/launch.html");
+  QFile file2(path);
+  file2.open(QIODevice::ReadOnly);
   QString page;
-  page = "<html><head></head><body bgcolor=#ff0000><font color=white>\
+  page = file2.readAll();
+  page = page.arg( KStandardDirs::locate( "data", "kdeui/about/" ) );
+  page = page.arg(new_path);
+  page = page.arg(open_path);
+  page = page.arg("Kimberlite");
+  page = page.arg("Master the web");
+  page = page.arg("Kimberlite is a WYSIWYG HTML editor for KDE based on WebKit");
+  page = page.arg("To use kimberlite, you have to load a project. You can either open an existing one or create a new one from a template or from scratch:");
+  page = page.arg("Create a new project");
+  page = page.arg("Open an existing project");
+  page = page.arg("News:");
+  page = page.arg("Recent project:");
+  page = page.arg(recentProject[0]);
+  page = page.arg(recentProject[1]);
+  page = page.arg(recentProject[2]);
+  page = page.arg(recentProject[3]);
+  page = page.arg(recentProject[4]);
+  page = page.arg("Kimberlite 0.1 realised (2009/06/12)<br>The first official version of Kimberlite is now availible. Test, use it, crash it and report bugs!<br>Good Luck ;)");
+  
+  /*//page = page.arg( KStandardDirs::locate( "data", "kdeui/about/konq.css" ) );
+  page = page.arg("Kimberlite");
+  page = page.arg( i18nc("KDE 4 tag line, see http://kde.org/img/kde40.png", "Be free.") )*/
+  qDebug() << page;
+  file2.close();
+  /*page += "<html><head></head><body bgcolor=#ff0000><font color=white>\
   <div style=\"height:5%\">Hi! Welcome to Kimberlite!\
   <br>Kimberlite is a WYSIWYG HTML editor for KDE based on WebKit<div>\
   <div style=\"position:absolute;top: 8%;right:3%;width:45%;height:56%;border 3px;border-color:white\">\
@@ -2269,6 +2303,7 @@ void MainWindow::loadDefaultPage() {
   <div style=\"position:absolute;top: 8%;left:3%;width:45%;height:90%;border-style:solid;border 3px;border-color:white\"><b>News:</b><br></div>\
   <div style=\"position:absolute;bottom: 15px;right:3%;width:45%;height:30%;border-style:solid;border 3px;border-color:white\"><b>Recent project:</b><br>";
   page += loadRecentProjectList();
-  page += "</div></font></body></html>";
+  page += "</div></font></body></html>";*/
   webPreview->setHtml(page);
+  qDebug() << page;
 }

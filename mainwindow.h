@@ -251,7 +251,7 @@ public:
     QString getClassName(QTreeWidgetItem* anItem);
     void setCssCursor(QString className);
     void loadCSSClass(QTreeWidgetItem* anItem);
-    QString loadRecentProjectList();
+    QStringList loadRecentProjectList();
     void saveRecentProject(QString filePath);
     void loadDefaultPage();
   
