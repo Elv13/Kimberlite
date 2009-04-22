@@ -14,16 +14,12 @@ HtmlParser::HtmlParser()  {
   }
 }
 
-QString HtmlParser::compressString(QString file) { //TODO manage scripts
-  return file.split(0x0A).join("");
-}
-
 QString HtmlParser::getTag(QString aTag) {
   QString tag;
   if (aTag.left(3) == "!--") 
     return "!--";
   tag = aTag.remove(0,(aTag[1] == '/')?2:1).trimmed(); //Remove < or </
-  tag.chop((tag.indexOf(" ") == -1)?1:tag.size()-tag.indexOf(" ")); //Remove > and attribute
+  tag.chop((tag.indexOf(" ") == -1)?1:tag.size()-tag.indexOf(" ")); //Remove > and attribute //BUG fait with tag like <br/>
   return tag.toUpper();
 }
 
@@ -56,7 +52,7 @@ QVector<QString> HtmlParser::listTag(QString inputFile) {
   return tagList;
 }
 
-QVector<uint> HtmlParser::htmlParser(QVector<QString> tagList){
+QVector<uint> HtmlParser::levelParser(QVector<QString> tagList){
   QVector<uint> levelList;
   QString tag;
   for (int i=0; i < tagList.size();i++) {
@@ -85,7 +81,7 @@ QVector<uint> HtmlParser::htmlParser(QVector<QString> tagList){
 HtmlData HtmlParser::getHtmlData(QString inputFile) {
   HtmlData pageData;
   pageData.tagList = listTag(inputFile);
-  pageData.levelList = htmlParser(pageData.tagList);
+  pageData.levelList = levelParser(pageData.tagList);
   return pageData;
 }
 
@@ -139,8 +135,8 @@ void HtmlParser::setAttribute(HtmlData &pageData, QString tag, uint index, QStri
 
 QString HtmlParser::getAttribute(QString tag, QString attribute) {
   int position = tag.toLower().indexOf(attribute.toLower());
-  if (position == -1)
-    return NULL;
-  else if (tag[position+attribute.count()] == '=')
-    return tag.mid(tag.indexOf("=",position)+2,tag.indexOf((tag.indexOf(" ",position) != -1)?" ":">",position)-2 - (position+1+attribute.count()));
+  if (tag[position+attribute.count()] == '=')
+    return (position == -1)?NULL:tag.mid(tag.indexOf("=",position)+2,tag.indexOf((tag.indexOf(" ",position) != -1)?" ":">",position)-2 - (position+1+attribute.count()));
+  else
+    return NULL; //It is just safer than checking position == -1 in if
 }

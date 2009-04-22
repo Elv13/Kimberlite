@@ -4,6 +4,7 @@
 #include <KMessageBox>
 #include <KIO/NetAccess>
 #include <QTextStream>
+#include <QDebug>
 
 NewWebPage::NewWebPage(QWidget* parent, QTreeWidgetItem* root) : KPageDialog(parent),parentRoot(root) {
   setWindowTitle("New Page");
@@ -42,7 +43,8 @@ void NewWebPage::setupFolder(QTreeWidget* aTreeWidget, QTreeWidgetItem* rootItem
   aTreeWidget->setCurrentItem(root);
   (*root) = (*rootItem);
   for (int i =0; i < rootItem->childCount();i++) {
-    if (rootItem->child(i)->child(0) != NULL) {
+    qDebug() << "setupFolder" << rootItem->child(i)->text(0);
+    if ((rootItem->child(i)->child(0) != NULL) || (rootItem->child(i)->child(0)->icon(0) == KIcon("document-open-folder"))) {
       QTreeWidgetItem* child = new QTreeWidgetItem(root);
       (*child) = (*rootItem->child(i));
     }
@@ -55,6 +57,18 @@ void NewWebPage::addFolder() {
   QString text = QInputDialog::getText(this, tr("QInputDialog::getText()"), tr("Folder name:"), QLineEdit::Normal,"", &ok);
   if (ok && !text.isEmpty()) {
       emit addFolder(text,parentRoot);
+       QTreeWidgetItem* child;
+      if (currentPage() == pageEmpty) {
+	child = new QTreeWidgetItem(newPage->tvFolder->topLevelItem(0));
+      }
+      else if (currentPage() == pageTemplate) {
+	child = new QTreeWidgetItem(newTemple->tvFolder->topLevelItem(0));
+      }
+      else {
+	child = new QTreeWidgetItem(newImport->tvFolder->topLevelItem(0));
+      }
+      child->setText(0,text);
+      child->setIcon(0,KIcon("document-open-folder"));
   }
 }
   
@@ -78,7 +92,7 @@ void NewWebPage::addHtmlPage() {
     emit addHtmlPage(newPage->txtPageTitle->text(), fileName, "", newPage->tvFolder->currentItem()->text(0));
   }
   else if (currentPage() == pageTemplate) {
-    
+    //TODO Incoming feature
   }
   else {
     QString content;

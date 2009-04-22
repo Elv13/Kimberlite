@@ -61,6 +61,7 @@
 #include "src/newTable.h"
 #include "src/newPage.h"
 #include "src/newScript.h"
+#include "src/newProject.h"
 #include "src/debugger.h"
 #include <ktip.h>
 #include <QPrintDialog>
@@ -72,7 +73,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   actionCollection = new KActionCollection(this);
   setWindowTitle("Kimberlite");
   setupToolTip(); 
-  cout << "This: " <<   KStandardDirs::locate( "appdata", "kimberlite.db" ).toStdString() << endl;
+  qDebug() << "This: " <<   KStandardDirs::locate( "appdata", "kimberlite.db" ) << endl;
     db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE"));
     db->setDatabaseName( KStandardDirs::locate( "appdata", "kimberlite.db" ));
     if ( db->open()) {
@@ -207,7 +208,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
     editTB->addSeparator();
 
     createAction("Find", "edit-find", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Find"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+    connect(ashActions["Find"], SIGNAL(triggered(bool)), this, SLOT(find()));
     editTB->addAction(ashActions["Find"]);
 
     editTB->addSeparator();
@@ -739,6 +740,8 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
     webPreview->setObjectName(QString::fromUtf8("webPreview"));
     //webPreview->setUrl(QUrl("about:blank"));
     loadDefaultPage();
+    webPreview->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+    connect(webPreview,SIGNAL(linkClicked(QUrl)), this, SLOT(defaultPageLinkClicked(QUrl)));
 
     horizontalLayout_2->addWidget(webPreview);
 
@@ -1386,24 +1389,33 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::reParse() {
-  QString aFile = aParser->compressString(rtfHTMLEditor->toPlainText());
-  updateHtmlTree(aFile);
-  rtfHTMLEditor->setPlainText(aParser->getParsedHtml(aFile));
+  HtmlData data = HtmlParser::getHtmlData(rtfHTMLEditor->toPlainText());
+  updateHtmlTree(data);
+  rtfHTMLEditor->setPlainText(aParser->getParsedHtml(data));
 }
 
 void MainWindow::templaterize() {
   StringConverter* aStringConverter = new StringConverter(this);
-  aStringConverter->toTemplate(aParser->compressString(rtfHTMLEditor->toPlainText()));
+  aStringConverter->toTemplate(rtfHTMLEditor->toPlainText());
 }
 
 void MainWindow::translate() {
   StringConverter* aStringConverter = new StringConverter(this);
-  aStringConverter->translate(aParser->compressString(rtfHTMLEditor->toPlainText()));
+  aStringConverter->translate(rtfHTMLEditor->toPlainText());
 }
 
 void MainWindow::newProject(){
+  NewProject* aNewProject = new NewProject(this);
+  aNewProject->show();
+  /*openProject("/home/lepagee/dev/myproject/kimberlite/template/default.wkp");
+  fileName.clear();*/
+  connect(aNewProject,SIGNAL(createProject(QString, QString)),this,SLOT(newProject(QString,QString)));
+}
+
+void MainWindow::newProject(QString name, QString filePath) {
+  openProject(filePath);
   fileName.clear();
-  rtfHTMLEditor->clear();
+  aProjectManager->setProjectName(name);
 }
  
 void MainWindow::saveProjectAs(const QString &outputFileName, QString input){
@@ -1436,9 +1448,14 @@ void MainWindow::saveFile(){
     saveProjectAs();
 }
 
- 
+
 void MainWindow::openProject() {
   QString fileName = KFileDialog::getOpenFileName();
+  openProject(fileName);
+}
+ 
+void MainWindow::openProject(QString fileName) {
+  qDebug() << "Load: " << fileName;
   if (!fileName.isEmpty()) {
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
@@ -1565,7 +1582,7 @@ void MainWindow::loadCSSClass(QTreeWidgetItem* anItem) {
   QString className = getClassName(anItem);
   currentClassName = className;
   fillCSSBegMode(currentClassName);
-  cout << newStyle.toStdString() <<endl;
+  qDebug() << newStyle;
   CssParser::cssFile = newStyle;
   //saveProjectAs(aProject->cssPage , newStyle);
   rtfCSSEditor->setText(CssParser::parseCSS());
@@ -1593,13 +1610,29 @@ void MainWindow::loadPage(QTreeWidgetItem* item, QString text) {
   if (item != currentHTMLPage) {
     isModified = false;
     if (currentHTMLPage != NULL) {
-      aProjectManager->updateDomElement(currentHTMLPage,rtfHTMLEditor->toPlainText());
+      switch (tabWEditor->currentIndex()) {
+	case 0:
+	  aProjectManager->updateDomElement(currentHTMLPage,webPreview->page()->mainFrame()->toHtml());
+	  break;
+	case 1:
+	  aProjectManager->updateDomElement(currentHTMLPage,rtfHTMLEditor->toPlainText());
+	  break;
+      }
     }
     currentHTMLPage = item;
-    QString aFile = aParser->compressString(text.trimmed());
-    qDebug() << "Going to load :" << aFile;
-    rtfHTMLEditor->setPlainText(aParser->getParsedHtml(aFile));
-    updateHtmlTree(aFile);
+    HtmlData data = HtmlParser::getHtmlData(text);
+    switch (tabWEditor->currentIndex()) {
+      case 0:
+	webPreview->setHtml(HtmlParser::getParsedHtml(data));
+	break;
+      case 1:
+	rtfHTMLEditor->setPlainText(HtmlParser::getParsedHtml(data));
+	break;
+      default:
+	tabWEditor->setCurrentIndex(1);
+	rtfHTMLEditor->setPlainText(HtmlParser::getParsedHtml(data));
+    }
+    updateHtmlTree(data);
     
     QString completeName;
     QTreeWidgetItem* parent = item->parent();
@@ -1856,8 +1889,7 @@ void MainWindow::setHtmlCursor(QTreeWidgetItem* item, int column) {
 void MainWindow::debugHtml() {
   showDebugger(true);
   lstDebug->clear();
-  QString aFile = HtmlParser::compressString(rtfHTMLEditor->toPlainText());
-  HtmlData pageData = aParser->getHtmlData(aFile);
+  HtmlData pageData = HtmlParser::getHtmlData(rtfHTMLEditor->toPlainText());
   updateHtmlTree(pageData);
   QVector<debugItem> debugVector = HtmlDebugger::debug(pageData);
   for (int i =0; i < debugVector.size(); i++) {
@@ -2212,13 +2244,31 @@ void MainWindow::paste() {
   }
 }
 
+void MainWindow::find() {
+  switch (tabWEditor->currentIndex()) {
+    case 0:
+      //webPreview->page()->triggerAction(QWebPage::Paste,true);
+      break;
+    case 1:
+      rtfHTMLEditor->findText();
+      break;
+    case 2:
+      //rtfScriptEditor->paste();
+      break;
+    case 3:
+      //rtfCSSEditor->paste();
+      break;
+  }
+}
+
 QStringList MainWindow::loadRecentProjectList() {
   QStringList toReturn;
   QString path = KStandardDirs::locateLocal( "appdata", "recent.txt" );
   QFile file(path);
   file.open(QIODevice::ReadOnly);
   while (!file.atEnd()) {
-    toReturn << "<a href=\"load:" + QString(file.readLine()).toAscii()+"\">" + QString(file.readLine()).toAscii() + "</a>";
+    QString line = file.readLine();
+    toReturn << "<a href=\"load:" + line + "\">" + line + "</a>";
   }
   while (toReturn.count() < 5)
     toReturn << "";
@@ -2236,7 +2286,7 @@ void MainWindow::saveRecentProject(QString filePath) {
   }
   file2.close();
   
-  if (recentProjectList.indexOf(filePath) != -1)
+  if (recentProjectList.indexOf(filePath+"\n") != -1)
     return;
   
   if (recentProjectList.count() >= 5)
@@ -2288,22 +2338,15 @@ void MainWindow::loadDefaultPage() {
   page = page.arg(recentProject[4]);
   page = page.arg("Kimberlite 0.1 realised (2009/06/12)<br>The first official version of Kimberlite is now availible. Test, use it, crash it and report bugs!<br>Good Luck ;)");
   
-  /*//page = page.arg( KStandardDirs::locate( "data", "kdeui/about/konq.css" ) );
-  page = page.arg("Kimberlite");
-  page = page.arg( i18nc("KDE 4 tag line, see http://kde.org/img/kde40.png", "Be free.") )*/
-  qDebug() << page;
   file2.close();
-  /*page += "<html><head></head><body bgcolor=#ff0000><font color=white>\
-  <div style=\"height:5%\">Hi! Welcome to Kimberlite!\
-  <br>Kimberlite is a WYSIWYG HTML editor for KDE based on WebKit<div>\
-  <div style=\"position:absolute;top: 8%;right:3%;width:45%;height:56%;border 3px;border-color:white\">\
-    To use kimberlite, you have to load a project. You can either open an existing one or create a new one from a template or from scratch:<br><br>\
-    Create a new project<br><br>\
-    Open an existing project</div>\
-  <div style=\"position:absolute;top: 8%;left:3%;width:45%;height:90%;border-style:solid;border 3px;border-color:white\"><b>News:</b><br></div>\
-  <div style=\"position:absolute;bottom: 15px;right:3%;width:45%;height:30%;border-style:solid;border 3px;border-color:white\"><b>Recent project:</b><br>";
-  page += loadRecentProjectList();
-  page += "</div></font></body></html>";*/
   webPreview->setHtml(page);
-  qDebug() << page;
+}
+
+void MainWindow::defaultPageLinkClicked(const QUrl & url) {
+  if (url.toString() == "new")
+    newProject();
+  else if (url.toString() == "open")
+    openProject();
+  else if (url.toString().left(5) == "load:")
+    openProject(url.toString().remove(0,5));
 }

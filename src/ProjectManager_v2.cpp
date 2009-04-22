@@ -27,33 +27,23 @@ bool ProjectManager2::read(QIODevice *device) {
     int errorLine;
     int errorColumn;
 
-    if (!domDocument.setContent(device, true, &errorStr, &errorLine,
-                                &errorColumn)) {
-        QMessageBox::information(window(), tr("DOM Bookmarks"),
-                                 tr("Parse error at line %1, column %2:\n%3")
-                                 .arg(errorLine)
-                                 .arg(errorColumn)
-                                 .arg(errorStr));
+    if (!domDocument.setContent(device, true, &errorStr, &errorLine,&errorColumn)) {
+        QMessageBox::information(window(), tr("DOM Bookmarks"),tr("Parse error at line %1, column %2:\n%3").arg(errorLine).arg(errorColumn).arg(errorStr));
         return false;
     }
 
     QDomElement root = domDocument.documentElement();
     if (root.tagName() != "xbel") {
-        QMessageBox::information(window(), tr("DOM Bookmarks"),
-                                 tr("The file is not an XBEL file."));
+        QMessageBox::information(window(), tr("DOM Bookmarks"),tr("The file is not an XBEL file."));
         return false;
-    } else if (root.hasAttribute("version")
-               && root.attribute("version") != "1.0") {
-        QMessageBox::information(window(), tr("DOM Bookmarks"),
-                                 tr("The file is not an XBEL version 1.0 "
-                                    "file."));
+    } else if (root.hasAttribute("version")&& root.attribute("version") != "1.0") {
+        QMessageBox::information(window(), tr("DOM Bookmarks"), tr("The file is not an XBEL version 1.0 file."));
         return false;
     }
 
     clear();
 
-    disconnect(this, SIGNAL(itemChanged(QTreeWidgetItem *, int)),
-               this, SLOT(updateDomElement(QTreeWidgetItem *, int)));
+    disconnect(this, SIGNAL(itemChanged(QTreeWidgetItem *, int)),this, SLOT(updateDomElement(QTreeWidgetItem *, int)));
 
     QDomElement child = root.firstChildElement("project");
     while (!child.isNull()) {
@@ -61,8 +51,7 @@ bool ProjectManager2::read(QIODevice *device) {
         child = child.nextSiblingElement("project");
     }
 
-    connect(this, SIGNAL(itemChanged(QTreeWidgetItem *, int)),
-            this, SLOT(updateDomElement(QTreeWidgetItem *, int)));
+    connect(this, SIGNAL(itemChanged(QTreeWidgetItem *, int)), this, SLOT(updateDomElement(QTreeWidgetItem *, int)));
 
     return true;
 
@@ -374,11 +363,24 @@ QDomNode ProjectManager2::getElement(QDomNode &aNode, QString tagName, QString a
 QTreeWidgetItem* ProjectManager2::getFolder(QString title/*, QTreeWidgetItem* base*/) {
   if (title == "@@@ROOT")
     return htmlPage;
-  
+  qDebug() << "I am looking for: " << title;
   foreach(QDomElement item, domElementForItem) {
+    qDebug() << "I am looping" << item.toElement().tagName();
      if (item.toElement().tagName() == "folder") {
-      if (item.toElement().attribute("title") == title)
+       qDebug() << "this element is a folder: " << item.toElement().attribute("title");
+      if (item.toElement().attribute("title") == title) {
+	qDebug() << "I am going to return:" << domElementForItem.key(item)->text(0);
 	return domElementForItem.key(item);
+      }
     }
   }
+}
+
+void ProjectManager2::setProjectName(QString name) {
+  QDomElement root = domDocument.documentElement();
+  QDomElement child = root.firstChildElement("project");
+  child.setAttribute("title",name);
+  QTreeWidgetItem* anItem = domElementForItem.key(child);
+  if (anItem != NULL)
+    anItem->setText(0,name);
 }

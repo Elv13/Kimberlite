@@ -23,7 +23,7 @@
         @date 13 August 2008
         @version 0.1-pre-alpah0
 */
-#ifndef UI_UNTITLED_H
+/*#ifndef UI_UNTITLED_H
 #define UI_UNTITLED_H
 
 #include <iostream>
@@ -65,10 +65,7 @@ private slots:
     void replaceString();
 };
 
-/*namespace Ui {
-    class Dialog: public Ui_Dialog {};
-} // namespace Ui*/
 
-QT_END_NAMESPACE
+//QT_END_NAMESPACE
 
-#endif // UI_UNTITLED_H
+//#endif // UI_UNTITLED_H*/

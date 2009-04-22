@@ -454,4 +454,6 @@ void RtfHtmlEditor::keyPressEvent(QKeyEvent *e) {
     QTextEdit::keyPressEvent(e);
 }
  
- 
+void RtfHtmlEditor::findText() {
+ slotFind(); 
+}

@@ -18,6 +18,7 @@
       src/ressourcesManager.cpp
       src/newTable.cpp
       src/newPage.cpp
+      src/newProject.cpp
       src/newScript.cpp
       src/debugger.cpp
       src/htmlThread.cpp

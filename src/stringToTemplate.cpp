@@ -23,7 +23,7 @@
         @date 13 August 2008
         @version 0.1-pre-alpah0
 */
-#include "stringToTemplate.h"
+/*#include "stringToTemplate.h"
 
 StringToMarker::StringToMarker(QVector<QString> *tagList2, int index2, QString* comment2, QWidget* parent, QStringList* markerList2) : QDialog( parent )
     {
@@ -94,4 +94,4 @@ void StringToMarker::replaceString() {
       markerList->append(txtNewText->text());
       accept();
    }
-}
+}*/

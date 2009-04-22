@@ -546,11 +546,6 @@ namespace Ui {
 
 QT_END_NAMESPACE
 
-#endif // IMPORTFILELG9921_H
-
-
-
-
 
 class NewWebPage : public KPageDialog {
   Q_OBJECT

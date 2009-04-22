@@ -30,6 +30,8 @@
      void insertCompletion(const QString &completion);
       void insertTabulation();
     QString getCurrentAtribute();
+ public slots:
+     void findText();
  private:
     QWidget* parent;
     QString textUnderCursor() const;

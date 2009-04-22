@@ -15,7 +15,7 @@ void ParserThread::run() {
     if ((timeOver == true) && (needUpdate == true)) {
       needUpdate = false;
       timeOver = false;
-      HtmlData someData = HtmlParser::getHtmlData(HtmlParser::compressString(rtfHtml->toPlainText()));
+      HtmlData someData = HtmlParser::getHtmlData(rtfHtml->toPlainText());
       updateHtmlTree(someData);
       treeHtml->expandAll();
     }

@@ -16,6 +16,7 @@ class ProjectManager2 : public QTreeWidget {
     bool write(QIODevice *device);
     QDomElement getDomElement(QTreeWidgetItem* anItem);
     QDomDocument* getDomDocument();
+    void setProjectName(QString name);
     QTreeWidgetItem* htmlPage;
     QTreeWidgetItem* script;
     QString projectTitle;

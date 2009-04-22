@@ -256,6 +256,7 @@ public:
     void loadDefaultPage();
   
   private slots:
+    void defaultPageLinkClicked(const QUrl& url);
     void quit();
     void print();
     void cut();
@@ -263,13 +264,16 @@ public:
     void paste();
     void undo();
     void redo();
+    void find();
     void printPreview();
     void setupToolTip();
     void reParse();
     void templaterize();
     void translate();
     void newProject(); 
+    void newProject(QString name, QString filePath);
     void openProject();
+    void openProject(QString fileName);
     void saveProject();
     void saveProjectAs();
     void saveProjectAs(const QString &outputFileName, QString input);

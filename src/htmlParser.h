@@ -26,13 +26,10 @@
 #ifndef HTML_PARSER
 #define HTML_PARSER
 #include <QStringList>
-#include <QThread>
-#include <QSyntaxHighlighter>
 #include <QTreeWidgetItem>
 #include <QVector>
-#include <QString>
-#include <QFile>
 #include <QtSql>
+#include <QRegExp>
 
 struct HtmlData {
   QVector<QString> tagList;
@@ -58,9 +55,7 @@ class IndexedTreeWidgetItem : public QTreeWidgetItem {
 class HtmlParser{
   public:
     HtmlParser();
-    static QString compressString(QString file);
     static QString getTag(QString aTag);
-    static QVector<QString> listTag(QString inputFile);
     static HtmlData getHtmlData(QString inputFile);
     static QString getParsedHtml(HtmlData &pageData);
     static QString getParsedHtml(QString inputFile);
@@ -68,7 +63,8 @@ class HtmlParser{
     static void setAttribute(HtmlData &pageData, QString tag, uint index, QString attribute, QString value);
     static QString getAttribute(QString tag, QString attribute);
   private:
-    //QStringList markerList;
-    static QVector<uint> htmlParser(QVector<QString> tagList);
+    static QVector<uint> levelParser(QVector<QString> tagList);
+    static QVector<QString> listTag(QString inputFile);
+    
 };
 #endif //HTML_PARSER
