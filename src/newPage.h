@@ -1,7 +1,8 @@
-#ifndef NEW_PAGE
-#define NEW_PAGE
+#ifndef NEW_PAGE2
+#define NEW_PAGE2
 #include <KPageDialog>
 #include <KPageWidgetItem>
+#include "miniClasses.h"
 
 /********************************************************************************
 ** Form generated from reading ui file 'FromTemplatePs9921.ui'
@@ -12,8 +13,6 @@
 ** WARNING! All changes made in this file will be lost when recompiling ui file!
 ********************************************************************************/
 
-#ifndef FROMTEMPLATEPS9921_H
-#define FROMTEMPLATEPS9921_H
 
 #include <QtCore/QVariant>
 #include <QtGui/QAction>
@@ -175,8 +174,6 @@ namespace Ui {
 
 QT_END_NAMESPACE
 
-#endif // FROMTEMPLATEPS9921_H
-
 
 
 /********************************************************************************
@@ -187,9 +184,6 @@ QT_END_NAMESPACE
 **
 ** WARNING! All changes made in this file will be lost when recompiling ui file!
 ********************************************************************************/
-
-#ifndef NEWPAGEZM9921_H
-#define NEWPAGEZM9921_H
 
 #include <QtCore/QVariant>
 #include <QtGui/QAction>
@@ -355,11 +349,6 @@ namespace Ui {
 
 QT_END_NAMESPACE
 
-#endif // NEWPAGEZM9921_H
-
-
-
-
 /********************************************************************************
 ** Form generated from reading ui file 'importFilelG9921.ui'
 **
@@ -368,9 +357,6 @@ QT_END_NAMESPACE
 **
 ** WARNING! All changes made in this file will be lost when recompiling ui file!
 ********************************************************************************/
-
-#ifndef IMPORTFILELG9921_H
-#define IMPORTFILELG9921_H
 
 #include <QtCore/QVariant>
 #include <QtGui/QAction>
@@ -550,7 +536,7 @@ QT_END_NAMESPACE
 class NewWebPage : public KPageDialog {
   Q_OBJECT
   public:
-    NewWebPage(QWidget* parent, QTreeWidgetItem* root);
+    NewWebPage(QWidget* parent, TreeItem* root);
   private:
     Ui_NewPageFromTemplate* newTemple;
     Ui_NewPage* newPage;
@@ -558,7 +544,7 @@ class NewWebPage : public KPageDialog {
     KPageWidgetItem* pageEmpty;
     KPageWidgetItem* pageTemplate;
     KPageWidgetItem* pageImport;
-    void setupFolder(QTreeWidget* aTreeWidget, QTreeWidgetItem* rootItem);
+    void setupFolder(QTreeWidget* aTreeWidget, TreeItem* rootItem);
     QTreeWidgetItem* parentRoot;
   private slots:
     void addFolder();

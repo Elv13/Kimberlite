@@ -5,6 +5,7 @@
 #include <QHash>
 #include <QIcon>
 #include <QTreeWidget>
+#include "miniClasses.h"
 
 QT_BEGIN_NAMESPACE
 class ProjectManager2 : public QTreeWidget {
@@ -17,8 +18,8 @@ class ProjectManager2 : public QTreeWidget {
     QDomElement getDomElement(QTreeWidgetItem* anItem);
     QDomDocument* getDomDocument();
     void setProjectName(QString name);
-    QTreeWidgetItem* htmlPage;
-    QTreeWidgetItem* script;
+    TreeItem* htmlPage;
+    TreeItem* script;
     QString projectTitle;
 
   public slots:
@@ -29,7 +30,7 @@ class ProjectManager2 : public QTreeWidget {
 
   private:
     void parseFolderElement(const QDomElement &element, QTreeWidgetItem *parentItem = 0);
-    QTreeWidgetItem* createItem(const QDomElement &element, QTreeWidgetItem *parentItem = 0);
+    TreeItem* createItem(const QDomElement &element, QTreeWidgetItem *parentItem = 0);
     void parseProjectElement(const QDomElement &element, QTreeWidgetItem *parentItem = 0);
     void parseHtmlElement(const QDomElement &element, QTreeWidgetItem *parentItem = 0);
     void parseScriptElement(const QDomElement &element, QTreeWidgetItem *parentItem = 0);

@@ -5,8 +5,9 @@
 #include <KIO/NetAccess>
 #include <QTextStream>
 #include <QDebug>
+#include "miniClasses.h"
 
-NewWebPage::NewWebPage(QWidget* parent, QTreeWidgetItem* root) : KPageDialog(parent),parentRoot(root) {
+NewWebPage::NewWebPage(QWidget* parent, TreeItem* root) : KPageDialog(parent),parentRoot(root) {
   setWindowTitle("New Page");
   
   QWidget* wdgNewPage = new QWidget(this);
@@ -38,13 +39,13 @@ NewWebPage::NewWebPage(QWidget* parent, QTreeWidgetItem* root) : KPageDialog(par
   connect(this,SIGNAL(okClicked()),this,SLOT(addHtmlPage()));
 }
 
-void NewWebPage::setupFolder(QTreeWidget* aTreeWidget, QTreeWidgetItem* rootItem) {
+void NewWebPage::setupFolder(QTreeWidget* aTreeWidget, TreeItem* rootItem) {
   QTreeWidgetItem* root = new QTreeWidgetItem(aTreeWidget);
   aTreeWidget->setCurrentItem(root);
   (*root) = (*rootItem);
   for (int i =0; i < rootItem->childCount();i++) {
     qDebug() << "setupFolder" << rootItem->child(i)->text(0);
-    if ((rootItem->child(i)->child(0) != NULL) || (rootItem->child(i)->child(0)->icon(0) == KIcon("document-open-folder"))) {
+    if (((TreeItem*) rootItem->child(i))->type == 1) {
       QTreeWidgetItem* child = new QTreeWidgetItem(root);
       (*child) = (*rootItem->child(i));
     }
@@ -89,7 +90,10 @@ void NewWebPage::addHtmlPage() {
     QString fileName = newPage->txtFileName->text();
     if ((fileName.right(4).toLower() != ".htm") || (fileName.right(5).toLower() != ".html"))
       fileName += ".htm";
-    emit addHtmlPage(newPage->txtPageTitle->text(), fileName, "", newPage->tvFolder->currentItem()->text(0));
+    if (newPage->tvFolder->currentItem() != newPage->tvFolder->topLevelItem(0))
+      emit addHtmlPage(newPage->txtPageTitle->text(), fileName, "", newPage->tvFolder->currentItem()->text(0));
+    else
+      emit addHtmlPage("", fileName, "", "@@@ROOT");
   }
   else if (currentPage() == pageTemplate) {
     //TODO Incoming feature
@@ -114,6 +118,9 @@ void NewWebPage::addHtmlPage() {
     QString fileName = newImport->txtFileName->text();
     if ((fileName.right(4).toLower() != ".htm") || (fileName.right(5).toLower() != ".html"))
       fileName += ".htm";
-    emit addHtmlPage("", fileName, content, newImport->tvFolder->currentItem()->text(0));
+    if (newImport->tvFolder->currentItem() != newImport->tvFolder->topLevelItem(0))
+      emit addHtmlPage("", fileName, content, newImport->tvFolder->currentItem()->text(0));
+    else
+      emit addHtmlPage("", fileName, content, "@@@ROOT");
   }
 }

@@ -22,6 +22,7 @@
       src/newScript.cpp
       src/debugger.cpp
       src/htmlThread.cpp
+      src/miniClasses.h
       )
 
       kde4_add_executable(kimberlite ${kimberlite_SRCS})

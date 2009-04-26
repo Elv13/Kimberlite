@@ -1092,8 +1092,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
     retranslateUi();
 }
 
-void MainWindow::retranslateUi()
-    {
+void MainWindow::retranslateUi() {
     setWindowTitle(QApplication::translate("this", "Kimberlite", 0, QApplication::UnicodeUTF8));
     tabWMenu->setTabText(tabWMenu->indexOf(menufile), QApplication::translate("this", "File", 0, QApplication::UnicodeUTF8));
     //lblTextColor->setText(QApplication::translate("this", "Text:", 0, QApplication::UnicodeUTF8));
@@ -1104,7 +1103,7 @@ void MainWindow::retranslateUi()
     treeWidget->headerItem()->setText(0, QApplication::translate("this", "1", 0, QApplication::UnicodeUTF8));
     btnTreeAdd->setText(QApplication::translate("this", "Add", 0, QApplication::UnicodeUTF8));
     btnTreeRemove->setText(QApplication::translate("this", "Remove", 0, QApplication::UnicodeUTF8));
-    tabWEditor->setTabText(tabWEditor->indexOf(tabPreview), QApplication::translate("this", "Preview", 0, QApplication::UnicodeUTF8));
+    tabWEditor->setTabText(tabWEditor->indexOf(tabPreview), QApplication::translate("this", "WYSIWYG", 0, QApplication::UnicodeUTF8));
     //btnParse->setText(QApplication::translate("this", "PushButton", 0, QApplication::UnicodeUTF8));
     tabWEditor->setTabText(tabWEditor->indexOf(tabHTML), QApplication::translate("this", "HTML", 0, QApplication::UnicodeUTF8));
     tabWEditor->setTabText(tabWEditor->indexOf(tabScripts), QApplication::translate("this", "Scripts", 0, QApplication::UnicodeUTF8));
@@ -1135,7 +1134,7 @@ void MainWindow::retranslateUi()
     tabWEditor->setTabText(tabWEditor->indexOf(tabCSS), QApplication::translate("this", "CSS", 0, QApplication::UnicodeUTF8));
     //tabWEditor->setTabText(tabWEditor->indexOf(tabValidator), QApplication::translate("this", "Validator", 0, QApplication::UnicodeUTF8));
     Q_UNUSED(this);
-    } // retranslateUi
+} // retranslateUi
 
 QString MainWindow::readCSSFile(QString path) {
     QString inputFileName = path;
@@ -1487,6 +1486,8 @@ void MainWindow::openProject(QString fileName) {
     ashActions["Print Preview"]->setDisabled(false);
     tableDock->setVisible(true);
     saveRecentProject(fileName);
+    
+    this->fileName = fileName;
   }
 }
 
