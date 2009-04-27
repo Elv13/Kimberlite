@@ -52,6 +52,8 @@
 #include <KAboutApplicationDialog>
 #include <KBugReport>
 #include <KAboutData>
+#include <KStatusBar>
+#include <QProgressBar>
 #include "src/CSSbeginnerWidget.h"
 #include "src/addProprietyWidget.h"
 #include "src/stringToTemplate.h"
@@ -86,54 +88,6 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
     tabWMenu = new KTabWidget(this);
     tabWMenu->setMinimumSize(QSize(0, 90));
     tabWMenu->setMaximumSize(QSize(9999999, 90));
-    /*tabWMenu->setStyleSheet(QString::fromUtf8("QTabWidget::tab-bar {\n"
-"	border-radius: 5px;\n"
-"}\n"
-"QTabWidget::pane {\n"
-"	margin-top:2px;"
-"	border:0px;\n"
-"	margin-bottom:0px;"
-"	padding-bottom:0px;"
-"	spacing:0px;"
-"}\n"
-"\n"
-"QTabWidget {\n"
-"	margin-bottom:0px;"
-"	padding-bottom:0px;"
-"}\n"
-"\n"
-"QTabBar::tab:selected {\n"
-"	background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,\n"
-"                                               stop:0 darkgray, stop:1 lightgray);\n"
-"	border-radius: 5px;\n"
-"	margin-top:5px;\n"
-"	margin-bottom:5px;\n"
-"	color:black;\n"
-"}\n"
-"\n"
-"QTabBar {\n"
-"background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
-"                                         stop: 0 #111111, stop: 0.4 #444444,\n"
-"                                         stop: 0.5 #444444, stop: 1.0 #111111);\n"
-"border-radius: 5px;\n"
-"padding-left:15px;\n"
-"padding-right:15px;\n"
-"margin-bottom:3px;\n"
-"margin-left:2px;\n"
-"border: 2px solid grey;\n"
-"width:100%;\n"
-"}\n"
-"\n"
-"QTabBar:tab {\n"
-"border-top:0px;\n"
-"border-bottom:0px;\n"
-"padding-left:4px;\n"
-"padding-right:4px;\n"
-"margin-left:5px;\n"
-"margin-right:5px;\n"
-"color:#B4B4B4;\n"
-"}"));*/
-    
 
     fileTB = new KToolBar(this);
     tabWMenu->addTab(fileTB, "Files");
@@ -716,6 +670,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
     hlButton2->setObjectName(QString::fromUtf8("hlButton2"));
     btnTreeAdd = new KPushButton(treeDockCentral);
     btnTreeAdd->setObjectName(QString::fromUtf8("btnTreeAdd"));
+    connect(btnTreeAdd, SIGNAL(clicked()), this, SLOT(addClasses()));
 
     hlButton2->addWidget(btnTreeAdd);
 
@@ -742,6 +697,8 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
     loadDefaultPage();
     webPreview->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
     connect(webPreview,SIGNAL(linkClicked(QUrl)), this, SLOT(defaultPageLinkClicked(QUrl)));
+    connect(webPreview->page(),SIGNAL(loadProgress(int)), this, SLOT(loading(int)));
+    connect(webPreview->page(),SIGNAL(linkHovered(QString,QString,QString)), this, SLOT(linkHovered(QString)));
 
     horizontalLayout_2->addWidget(webPreview);
 
@@ -753,11 +710,12 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
     rtfHTMLEditor = new RtfHtmlEditor(tabHTML);
     rtfHTMLEditor->setObjectName(QString::fromUtf8("rtfHTMLEditor"));
     rtfHTMLEditor->setAcceptRichText(false);
-    HtmlSyntaxHighlighter* htmlHighlighter = new HtmlSyntaxHighlighter(rtfHTMLEditor);
+    new HtmlSyntaxHighlighter(rtfHTMLEditor);
     rtfHTMLEditor->setLineWrapMode(QTextEdit::NoWrap);
     rtfHTMLEditor->setWordWrapMode(QTextOption::NoWrap);
     rtfHTMLEditor->setWordWrapMode(QTextOption::NoWrap);
     connect(rtfHTMLEditor, SIGNAL(textChanged()), this, SLOT(setModified()));
+    connect(rtfHTMLEditor, SIGNAL(cursorPositionChanged()), this, SLOT(cursorChanged()));
 
     verticalLayout_3->addWidget(rtfHTMLEditor);
 
@@ -788,6 +746,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
     verticalLayout_7->setObjectName(QString::fromUtf8("verticalLayout_7"));
     rtfScriptEditor = new KTextEdit(tabScripts);
     rtfScriptEditor->setObjectName(QString::fromUtf8("rtfScriptEditor"));
+    connect(rtfScriptEditor, SIGNAL(cursorPositionChanged()), this, SLOT(cursorChanged()));
 
     verticalLayout_7->addWidget(rtfScriptEditor);
 
@@ -797,10 +756,9 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
     verticalLayout_6 = new QVBoxLayout(tabCSS);
     verticalLayout_6->setObjectName(QString::fromUtf8("verticalLayout_6"));
     tabWCSSLevel = new QTabWidget(tabCSS);
-    connect(tabWCSSLevel, SIGNAL(currentChanged(int)),
-    this, SLOT(changeCssMode(int)));
+    connect(tabWCSSLevel, SIGNAL(currentChanged(int)), this, SLOT(changeCssMode(int)));
     tabWCSSLevel->setObjectName(QString::fromUtf8("tabWCSSLevel"));
-    tabWCSSLevel->setStyleSheet(QString::fromUtf8("QTabWidget::tab-bar {\n"
+    /*tabWCSSLevel->setStyleSheet(QString::fromUtf8("QTabWidget::tab-bar {\n"
 "	border-radius: 5px;\n"
 "    alignment: center;\n"
 "}\n"
@@ -840,7 +798,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
 "	spacing:0px;\n"
 "	margin:0px;\n"
 "	padding:0px\n"
-"}"));
+"}"));*/
     tabWCSSLevel->setTabShape(QTabWidget::Triangular);
     
     /***************************************************************
@@ -991,6 +949,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
     hbButton2->setObjectName(QString::fromUtf8("hbButton2"));
     btnaddClass = new QPushButton(tabAdvanced);
     btnaddClass->setObjectName(QString::fromUtf8("btnaddClass"));
+    connect(btnaddClass, SIGNAL(clicked()), this, SLOT(addClasses()));
 
     hbButton2->addWidget(btnaddClass);
 
@@ -1018,7 +977,8 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
     verticalLayout_17->setObjectName(QString::fromUtf8("verticalLayout_17"));
     rtfCSSEditor = new RtfCssEditor(tabexpert);
     rtfCSSEditor->setObjectName(QString::fromUtf8("rtfCSSEditor"));
-    CssSyntaxHighlighter* cssHighlighter = new CssSyntaxHighlighter(rtfCSSEditor);
+    new CssSyntaxHighlighter(rtfCSSEditor);
+    connect(rtfCSSEditor, SIGNAL(cursorPositionChanged()), this, SLOT(cursorChanged()));
     
     QStringList wordList;
     QSqlQuery query22;
@@ -1061,10 +1021,35 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
     
     setCentralWidget(tabWEditor);
 
-    statusbar = new QStatusBar(this);
+    statusbar = new KStatusBar(this);
     statusbar->setObjectName(QString::fromUtf8("statusbar"));
     //statusbar->setGeometry(QRect(0, 696, 1008, 21));
     this->setStatusBar(statusbar);
+    
+    lblStatusBar3 = new QLabel();
+    lblStatusBar3->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding);
+    statusBar()->addWidget(lblStatusBar3,100);
+    
+    lblStatusBar1 = new QLabel();
+    lblStatusBar1->setText("");
+    lblStatusBar1->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum);
+    lblStatusBar1->setFrameShape(QFrame::StyledPanel);
+    lblStatusBar1->setFrameShadow(QFrame::Sunken);
+    statusBar()->addWidget(lblStatusBar1);
+    
+    lblStatusBar2 = new QLabel();
+    lblStatusBar2->setText("HTMLv4");
+    lblStatusBar2->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum);
+    lblStatusBar2->setFrameShape(QFrame::StyledPanel);
+    lblStatusBar2->setFrameShadow(QFrame::Sunken);
+    statusBar()->addWidget(lblStatusBar2);
+    
+    pbStatusBar = new QProgressBar();
+    pbStatusBar->setMaximumSize(100,999);
+    statusBar()->addWidget(pbStatusBar);
+    
+    //statusBar()->insertItem(new QSpacerItem(40, 20, QSizePolicy::Minimum, QSizePolicy::Minimum),2);
+    
     //this->setStandardToolBarMenuEnabled(false);
     //this->toolBarArea()->setHidden(true);
 //toolBars()[0]->setHidden(true);
@@ -1121,7 +1106,7 @@ void MainWindow::retranslateUi() {
     tblCSSPage->horizontalHeaderItem(4)->setText(QApplication::translate("this", "remove", 0, QApplication::UnicodeUTF8));
     tblCSSPage->verticalHeaderItem(0)->setText(QApplication::translate("this", "New Row", 0, QApplication::UnicodeUTF8));*/
 
-    const bool __sortingEnabled = tblCSSPage->isSortingEnabled();
+    //const bool __sortingEnabled = tblCSSPage->isSortingEnabled();
     tblCSSPage->setSortingEnabled(false);
     //tblCSSPage->item(0, 0)->setText(QApplication::translate("this", "fdtgdfgdgdfgdgdfgdfgdfgdfgdgg", 0, QApplication::UnicodeUTF8));
 
@@ -1130,54 +1115,55 @@ void MainWindow::retranslateUi() {
     btnAddPClass->setText(QApplication::translate("this", "Add pseudo class", 0, QApplication::UnicodeUTF8));
     btnRemoveClass->setText(QApplication::translate("this", "Remove class", 0, QApplication::UnicodeUTF8));
     tabWCSSLevel->setTabText(tabWCSSLevel->indexOf(tabAdvanced), QApplication::translate("this", "Advanced", 0, QApplication::UnicodeUTF8));
+    tabWCSSLevel->setTabEnabled(1,false);
     tabWCSSLevel->setTabText(tabWCSSLevel->indexOf(tabexpert), QApplication::translate("this", "Expert", 0, QApplication::UnicodeUTF8));
     tabWEditor->setTabText(tabWEditor->indexOf(tabCSS), QApplication::translate("this", "CSS", 0, QApplication::UnicodeUTF8));
     //tabWEditor->setTabText(tabWEditor->indexOf(tabValidator), QApplication::translate("this", "Validator", 0, QApplication::UnicodeUTF8));
     Q_UNUSED(this);
 } // retranslateUi
 
-QString MainWindow::readCSSFile(QString path) {
-    QString inputFileName = path;
-    QString tmpFile;
-    //path = "/home/lepagee/dev/webkreator/StyleSheet.css";
-    //if(KIO::NetAccess::download(inputFileName, tmpFile, this)) {
-      QString line;
-      bool inComment = false;
-      QFile file(path);
-      file.open(QIODevice::ReadOnly);
-      while (!file.atEnd()) {
-	  line = QString(file.readLine()).toAscii();
-	  printf("%s",line.toStdString().c_str());
-	  if (line.indexOf("/*") != -1) {
-	    inComment = true;
-	  }
-	  if (line.indexOf("*/") != -1) {
-	    inComment = false;
-	  }
-
-	  if (inComment == false) {
-	    //printf("\n This is what you are looking for: %d,%d",line.right(2).left(1).toStdString().c_str(),line.right(1).toStdString().c_str());
-	    //line = line.remove(line.count() -2,2); //Remove UNICODE linefeed
-	  }
-
-	  CssParser::cssFile += line;
-      }
-
-      KIO::NetAccess::removeTempFile(tmpFile);
-    /*}
-    else
-    {
-      KMessageBox::error(this,
-      KIO::NetAccess::lastErrorString());
-    }*/
-
-
-    while (CssParser::cssFile.indexOf("\n") != -1) {
-      CssParser::cssFile.remove(CssParser::cssFile.indexOf("\n"),1);
-    }
-  printf("%s",CssParser::cssFile.toStdString().c_str());
-  return CssParser::cssFile;
-}
+// QString MainWindow::readCSSFile(QString path) {
+//     QString inputFileName = path;
+//     QString tmpFile;
+//     //path = "/home/lepagee/dev/webkreator/StyleSheet.css";
+//     //if(KIO::NetAccess::download(inputFileName, tmpFile, this)) {
+//       QString line;
+//       bool inComment = false;
+//       QFile file(path);
+//       file.open(QIODevice::ReadOnly);
+//       while (!file.atEnd()) {
+// 	line = QString(file.readLine()).toAscii();
+// 	printf("%s",line.toStdString().c_str());
+// 	if (line.indexOf("/*") != -1) {
+// 	  inComment = true;
+// 	}
+// 	if (line.indexOf("*/") != -1) {
+// 	  inComment = false;
+// 	}
+// 
+// 	if (inComment == false) {
+// 	  //printf("\n This is what you are looking for: %d,%d",line.right(2).left(1).toStdString().c_str(),line.right(1).toStdString().c_str());
+// 	  //line = line.remove(line.count() -2,2); //Remove UNICODE linefeed
+// 	}
+// 
+// 	CssParser::cssFile += line;
+//       }
+// 
+//       KIO::NetAccess::removeTempFile(tmpFile);
+//     /*}
+//     else
+//     {
+//       KMessageBox::error(this,
+//       KIO::NetAccess::lastErrorString());
+//     }*/
+// 
+// 
+//     while (CssParser::cssFile.indexOf("\n") != -1) {
+//       CssParser::cssFile.remove(CssParser::cssFile.indexOf("\n"),1);
+//     }
+//   printf("%s",CssParser::cssFile.toStdString().c_str());
+//   return CssParser::cssFile;
+// }
 
 void MainWindow::fillCSSBegMode(QString className) {
   QStringList aClass = CssParser::getClass(className);
@@ -1417,7 +1403,9 @@ void MainWindow::newProject(QString name, QString filePath) {
   aProjectManager->setProjectName(name);
 }
  
-void MainWindow::saveProjectAs(const QString &outputFileName, QString input){
+void MainWindow::saveProjectAs(const QString &outputFileName){
+  changeCssMode(tabWCSSLevel->currentIndex());
+  aProjectManager->saveCss();
   KSaveFile file(outputFileName);
   file.open();
   QByteArray outputByteArray;
@@ -1427,22 +1415,23 @@ void MainWindow::saveProjectAs(const QString &outputFileName, QString input){
   file.close();
 
   fileName = outputFileName;
+  saveRecentProject(fileName);
 }
  
 void MainWindow::saveProjectAs(){
-  saveProjectAs(KFileDialog::getSaveFileName(), rtfHTMLEditor->toPlainText());
+  saveProjectAs(KFileDialog::getSaveFileName());
 }
  
 void MainWindow::saveProject(){
   if(!fileName.isEmpty()) 
-    saveProjectAs(fileName, aProjectManager->getDomDocument()->toString());
+    saveProjectAs(fileName);
   else 
     saveProjectAs();
 }
 
 void MainWindow::saveFile(){ 
   if(!pageName.isEmpty()) 
-    saveProjectAs(pageName, rtfHTMLEditor->toPlainText());
+    saveProjectAs(pageName);
   else
     saveProjectAs();
 }
@@ -1457,12 +1446,8 @@ void MainWindow::openProject(QString fileName) {
   qDebug() << "Load: " << fileName;
   if (!fileName.isEmpty()) {
     QFile file(fileName);
-    if (!file.open(QFile::ReadOnly | QFile::Text)) {
-	QMessageBox::warning(this, tr("SAX Bookmarks"),
-			    tr("Cannot read file %1:\n%2.")
-			    .arg(fileName)
-			    .arg(file.errorString()));
-    }
+    if (!file.open(QFile::ReadOnly | QFile::Text)) 
+      QMessageBox::warning(this, tr("SAX Bookmarks"),tr("Cannot read file %1:\n%2.").arg(fileName).arg(file.errorString()));
     else 
       aProjectManager->read(&file);
     aProjectManager->expandAll();
@@ -1569,6 +1554,33 @@ QString MainWindow::getClassName(QTreeWidgetItem* anItem) {
   return className;
 }
 
+QTreeWidgetItem* MainWindow::getClassWidget(QString className) {
+  QTreeWidgetItem* toReturn;
+  QTreeWidgetItem* currentTop(styleSheetName);
+  QString partialName;
+  while (currentTop->childCount() > 0) {
+    for (int i =0; i < currentTop->childCount();i++) {
+      QString toAdd;
+      if ((currentTop->child(i)->text(0)[0] != ':') && (partialName.count()))
+	    toAdd += " ";
+      QString tmpStr = partialName + toAdd + (currentTop->child(i)->text(0));
+      if (tmpStr == className.left(tmpStr.count()))
+	if (getClassName(currentTop->child(i)) == className)
+	  return currentTop->child(i);
+	else {
+	  if ((currentTop->child(i)->text(0)[0] != ':') && (partialName.count()))
+	    partialName += " ";
+	  partialName += currentTop->child(i)->text(0);
+	  currentTop = currentTop->child(i);
+	  i = currentTop->childCount();
+	}
+      if (i == currentTop->childCount() -1)
+	return NULL;
+    }
+  }
+  return NULL;
+}
+
 void MainWindow::cssClassClicked(QTreeWidgetItem* anItem) {
   if (tabWCSSLevel->currentIndex() == 0)
     loadCSSClass(anItem);
@@ -1652,7 +1664,6 @@ void MainWindow::setModified() {
 }
 
 void MainWindow::addHtmlPage() {
-  bool ok;
   NewWebPage* aDialog = new NewWebPage(this,aProjectManager->htmlPage);
   aDialog->show();
   connect(aDialog, SIGNAL(addFolder(QString,QTreeWidgetItem*)), aProjectManager, SLOT(addFolder(QString,QTreeWidgetItem*)));
@@ -1691,27 +1702,49 @@ void MainWindow::disableWidget(bool value) {
 }
 
 void MainWindow::changeCssMode(int mode) {
+  if (previousCssMode == 2) {
+    CssParser::cssFile = rtfCSSEditor->toPlainText();
+    updateClassTree();
+  }
+  else if (previousCssMode == 0)
+    CssParser::cssFile = CssParser::setClass(currentClassName, clearCssBeg());
+  
   if ((previousCssMode == 0) && (mode ==2) && (treeWidget->currentItem() != NULL)) {
-    loadCSSClass(treeWidget->currentItem());
+    rtfCSSEditor->setPlainText(CssParser::parseCSS());
+    setCssCursor(getClassName(treeWidget->currentItem()));
   }
   else if (mode == 1) {
     
   }
+  else if (mode == 2) {
+    
+  }
+  previousCssMode = mode;
 }
 
 void MainWindow::updateClassTree() {
+  QTreeWidgetItem* anItem =  new QTreeWidgetItem();
+  (*anItem) = (*styleSheetName);
+  treeWidget->clear();
+  treeWidget->addTopLevelItem(anItem);
+  styleSheetName = anItem;
+  
   QStringList classList = CssParser::getClassList();
-  if (classList.count() > 0) {
-    currentClassName = classList[0];
-    //CssParser::getClass(classList[0]);
-    fillCSSBegMode(classList[0]);
-  }
+
   for (int j = 0; j < classList.count(); j++) {
-    /*QTreeWidgetItem* aTreeViewWidgetItem = new  QTreeWidgetItem(styleSheetName);
-    aTreeViewWidgetItem->setText(0,classList[j]);*/
     splitSubClass(classList[j], styleSheetName);
   }
   treeWidget->expandAll();
+  
+  if (classList.count() > 0) {
+    if (currentClassName.isEmpty())
+      currentClassName = classList[0];
+    
+    fillCSSBegMode(currentClassName);
+    QTreeWidgetItem* toSelect = getClassWidget(currentClassName);
+    if (toSelect)
+      treeWidget->setCurrentItem(toSelect);
+  }
 }
 
 void MainWindow::splitSubClass(QString name, QTreeWidgetItem* parent) {
@@ -1799,12 +1832,8 @@ void MainWindow::loadScript(QTreeWidgetItem* anItem, QString text) {
 }
 
 void MainWindow::loadCss(QString text) {
-  printf("Load css\n");
   CssParser::cssFile = text;
-        printf("\nThis1");
   rtfCSSEditor->setPlainText(CssParser::parseCSS());
-        printf("\nThis2");
-  //fillCSSAdvMode();
   styleSheetName = new  QTreeWidgetItem(treeWidget);
   styleSheetName->setText(0,"Style");
   updateClassTree();
@@ -1831,6 +1860,7 @@ void MainWindow::modeChanged(int index) {
       ashActions["Zoom 1:1"]->setEnabled(true);
       treeDock->setVisible(false);
       dockHtmlTree->setVisible(false);
+      pbStatusBar->setEnabled(true);
       break;
     }
     case 1:
@@ -1839,12 +1869,14 @@ void MainWindow::modeChanged(int index) {
       ashActions["Zoom 1:1"]->setEnabled(true);
       dockHtmlTree->setVisible(true);
       treeDock->setVisible(false);
+      pbStatusBar->setEnabled(false);
       break;
     case 2:
       ashActions["Zoom 1:1"]->setEnabled(true);
       disableWysiwyg(true);
       dockHtmlTree->setVisible(false);
       treeDock->setVisible(false);
+      pbStatusBar->setEnabled(false);
       break;
     case 3:
       disableWysiwyg(true);
@@ -1852,6 +1884,7 @@ void MainWindow::modeChanged(int index) {
       dockHtmlTree->setVisible(false);
       tableDock->setVisible(false);
       treeDock->setVisible(true);
+      pbStatusBar->setEnabled(false);
   }
 }
 
@@ -2312,7 +2345,7 @@ void MainWindow::saveRecentProject(QString filePath) {
 
 void MainWindow::loadDefaultPage() {
   KIconLoader *iconloader = KIconLoader::global();
-  int iconSize = iconloader->currentSize(KIconLoader::Desktop);
+  //int iconSize = iconloader->currentSize(KIconLoader::Desktop);
   QString new_path = iconloader->iconPath("document-new", KIconLoader::Desktop );
   QString open_path = iconloader->iconPath("document-open", KIconLoader::Desktop );
   QStringList recentProject = loadRecentProjectList();
@@ -2350,4 +2383,59 @@ void MainWindow::defaultPageLinkClicked(const QUrl & url) {
     openProject();
   else if (url.toString().left(5) == "load:")
     openProject(url.toString().remove(0,5));
+}
+
+void MainWindow::cursorChanged() {
+  QTextCursor tc;
+  switch (tabWEditor->currentIndex()) {
+    case 0:
+      //N/A
+      break;
+    case 1:
+      tc = rtfHTMLEditor->textCursor();
+      break;
+    case 2:
+      tc = rtfScriptEditor->textCursor();
+      break;
+    case 3:
+      tc = rtfCSSEditor->textCursor();
+      tc.select(QTextCursor::LineUnderCursor);
+      QString currentText = tc.selectedText();
+      while ((currentText.indexOf('{') == -1) && (tc.blockNumber() > 0)) {
+	tc.movePosition(QTextCursor::Up);
+	tc.select(QTextCursor::LineUnderCursor);
+	currentText = tc.selectedText();
+      }
+      if (currentText.indexOf('{') != -1) {
+	QTreeWidgetItem* anItem = getClassWidget(currentText.left(currentText.indexOf('{')).trimmed());
+	if ((anItem) && (tabWCSSLevel->currentIndex() != 0)) {
+	  currentClassName = currentText.left(currentText.indexOf('{')).trimmed();
+	  treeWidget->setCurrentItem(anItem);
+	}
+      }
+      break;
+  }
+  lblStatusBar1->setText("Line: " + QString::number(tc.blockNumber()));
+}
+
+void MainWindow::addClasses() {
+  bool ok;
+  QString text = QInputDialog::getText(this, "Add class", "Insert the name of the new class", QLineEdit::Normal, "", &ok);
+  if (ok && !text.isEmpty()) {
+    if (tabWCSSLevel->currentIndex() == 0) {
+      CssParser::cssFile = CssParser::setClass(currentClassName, clearCssBeg());
+    }
+    CssParser::cssFile += text+" {}";
+    currentClassName = text;
+    updateClassTree();
+    fillCSSBegMode(currentClassName);
+  }
+}
+
+void MainWindow::loading(int value) {
+  pbStatusBar->setValue(value);
+}
+
+void MainWindow::linkHovered(QString link) {
+  lblStatusBar3->setText(link);
 }

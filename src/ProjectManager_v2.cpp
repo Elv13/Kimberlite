@@ -4,6 +4,7 @@
 #include <QTextStream>
 #include <KIcon>
 #include <QDebug>
+#include "cssParser.h"
 
 ProjectManager2::ProjectManager2(QWidget *parent) : QTreeWidget(parent),firstPage(true) {
   setHeaderHidden(true);
@@ -19,7 +20,7 @@ ProjectManager2::ProjectManager2(QWidget *parent) : QTreeWidget(parent),firstPag
   folderIcon.addPixmap(style()->standardPixmap(QStyle::SP_DirOpenIcon),
 			QIcon::Normal, QIcon::On);
   bookmarkIcon.addPixmap(style()->standardPixmap(QStyle::SP_FileIcon));
-  connect(this, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this, SLOT(loadPage(QTreeWidgetItem *, int)));
+  connect(this, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this, SLOT(loadPage(QTreeWidgetItem *)));
 }
 
 bool ProjectManager2::read(QIODevice *device) {
@@ -43,7 +44,7 @@ bool ProjectManager2::read(QIODevice *device) {
 
     clear();
 
-    disconnect(this, SIGNAL(itemChanged(QTreeWidgetItem *, int)),this, SLOT(updateDomElement(QTreeWidgetItem *, int)));
+    //disconnect(this, SIGNAL(itemChanged(QTreeWidgetItem *, int)),this, SLOT(updateDomElement(QTreeWidgetItem *, int)));
 
     QDomElement child = root.firstChildElement("project");
     while (!child.isNull()) {
@@ -51,7 +52,7 @@ bool ProjectManager2::read(QIODevice *device) {
         child = child.nextSiblingElement("project");
     }
 
-    connect(this, SIGNAL(itemChanged(QTreeWidgetItem *, int)), this, SLOT(updateDomElement(QTreeWidgetItem *, int)));
+    //connect(this, SIGNAL(itemChanged(QTreeWidgetItem *, int)), this, SLOT(updateDomElement(QTreeWidgetItem *, int)));
 
     return true;
 
@@ -104,6 +105,7 @@ void ProjectManager2::parseProjectElement(const QDomElement &element, QTreeWidge
         else if (child.tagName() == "style") {
             styleSheethName = child.firstChildElement("file").attribute("name");
 	    emit loadCss(child.firstChildElement("file").text().trimmed());
+	    cssPage = child;
         }  
         else if (child.tagName() == "script") {
             parseScriptElement(child, item);
@@ -299,8 +301,8 @@ QString ProjectManager2::fromHTML(QString input) {
   return input;
 }
 
-void ProjectManager2::loadPage(QTreeWidgetItem* anItem, int useless) {
-  printf("I am goinf to show page!!! Name:%s\n",domElementForItem.value(anItem).firstChildElement().attribute("name").toStdString().c_str());
+void ProjectManager2::loadPage(QTreeWidgetItem* anItem) {
+  qDebug() << "I am goinf to show page!!! Name:" << domElementForItem.value(anItem).firstChildElement().attribute("name");
   if (domElementForItem.value(anItem).attribute("name").indexOf(".htm") != -1) {
     qDebug() << "tree Pointer:" << anItem << " dom element:" << &domElementForItem.value(anItem);
     emit htmlPageChanged(anItem, toHTML(domElementForItem.value(anItem).text()));
@@ -384,4 +386,11 @@ void ProjectManager2::setProjectName(QString name) {
   TreeItem* anItem = (TreeItem*) domElementForItem.key(child);
   if (anItem != NULL)
     anItem->setText(0,name);
+}
+
+void ProjectManager2::saveCss() {
+  QDomText newStyle = domDocument.createTextNode(CssParser::cssFile);
+  QDomElement anElement = domDocument.createElement("file");
+  anElement.appendChild(newStyle);
+  cssPage.replaceChild(anElement ,cssPage.firstChildElement("file"));
 }

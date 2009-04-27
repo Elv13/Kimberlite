@@ -24,9 +24,10 @@ class ProjectManager2 : public QTreeWidget {
 
   public slots:
     void updateDomElement(QTreeWidgetItem *item, QString html);
-    void loadPage(QTreeWidgetItem* anItem, int useless);
+    void loadPage(QTreeWidgetItem* anItem);
     void addHtmlPage(QString title, QString name, QString body = "", QString foldeName = "");
     void addFolder(QString title, QTreeWidgetItem* parent);
+    void saveCss();
 
   private:
     void parseFolderElement(const QDomElement &element, QTreeWidgetItem *parentItem = 0);
@@ -46,6 +47,7 @@ class ProjectManager2 : public QTreeWidget {
     QIcon folderIcon;
     QIcon bookmarkIcon;
     QString styleSheethName;
+    QDomElement cssPage;
     
   signals:
     void htmlPageChanged(QTreeWidgetItem*,QString);

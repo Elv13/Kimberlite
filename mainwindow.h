@@ -46,7 +46,7 @@
 #include <QtGui/QPushButton>
 #include <QtGui/QScrollArea>
 #include <QtGui/QSpacerItem>
-#include <QtGui/QStatusBar>
+#include <KStatusBar>
 #include <QtGui/QTabWidget>
 #include <QtGui/QTableWidget>
 #include <QtGui/QTableWidget>
@@ -76,6 +76,7 @@
 #include <QHash>
 #include <QAction>
 #include <KActionCollection>
+#include <QProgressBar>
 
 #include "src/CSSbeginnerWidget.h"
 #include "src/rtfCssEditor.h"
@@ -91,7 +92,7 @@ public:
     MainWindow(QWidget* parent);
     ~MainWindow();
     void retranslateUi();
-    QString readCSSFile(QString path);
+    //QString readCSSFile(QString path);
     void fillCSSBegMode(QString className);
     void fillCSSAdvMode();
     KActionCollection* actionCollection;
@@ -212,7 +213,7 @@ public:
     //QVBoxLayout *verticalLayout_16;
     //QWebView *webValidator;
     QTreeWidgetItem* styleSheetName;
-    QStatusBar *statusbar;
+    KStatusBar *statusbar;
     QTextEdit* txtOtherTags;
     QDockWidget* dockHtmlTree;
     QTreeWidget* treeHtml;
@@ -239,6 +240,10 @@ public:
     ParserThread* aHtmlThread;
     int previousCssMode;
     QTreeWidgetItem* currentHTMLPage;
+    QLabel* lblStatusBar1;
+    QLabel* lblStatusBar2;
+    QLabel* lblStatusBar3;
+    QProgressBar* pbStatusBar;
     //QString setClass(QString className, QString content);
     QString clearCssBeg();
     void disableWidget(bool value);
@@ -249,8 +254,10 @@ public:
     void disableWysiwyg(bool value);
     KAction* createAction(QString name, QString icon, QKeySequence shortcut, bool checkable = false);
     QString getClassName(QTreeWidgetItem* anItem);
+    QTreeWidgetItem* getClassWidget(QString className);
     void setCssCursor(QString className);
     void loadCSSClass(QTreeWidgetItem* anItem);
+
     QStringList loadRecentProjectList();
     void saveRecentProject(QString filePath);
     void loadDefaultPage();
@@ -276,10 +283,11 @@ public:
     void openProject(QString fileName);
     void saveProject();
     void saveProjectAs();
-    void saveProjectAs(const QString &outputFileName, QString input);
+    void saveProjectAs(const QString &outputFileName);
     void saveFile();
     
-    void cssClassClicked(QTreeWidgetItem* anItem);
+    void cssClassClicked(QTreeWidgetItem* anItem);    
+    void addClasses();
     void setHtmlCursor(QTreeWidgetItem* item, int column);
     void setModified();
     void changeCssMode(int mode);
@@ -297,6 +305,8 @@ public:
     void zoomOut();
     void zoomDefault();
     void modeChanged(int index);
+    void loading(int value);
+    void linkHovered(QString link);
     
     void setBold();
     void setItalic();
@@ -324,6 +334,7 @@ public:
     void editShortcut();
     void aboutKimberlite();
     void reportBug();
+    void cursorChanged();
     
   public slots:
     void loadPage(QTreeWidgetItem* item, QString text);
