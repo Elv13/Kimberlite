@@ -1,4 +1,5 @@
 #include "newProject.h"
+#include <KStandardDirs>
 
 NewProject::NewProject(QWidget* parent):KDialog(parent) {
   mainUi = new Ui_NewProject();

@@ -659,7 +659,8 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
     treeWidget = new QTreeWidget(treeDockCentral);
     treeWidget->setHeaderHidden(true);
     treeWidget->setObjectName(QString::fromUtf8("treeWidget"));
-    treeWidget->setIconSize(QSize(32,32));
+    treeWidget->setIconSize(QSize(18,18));
+    treeWidget->setToolTip(QString("<img src=\"%1\" height=22 width=22> Class <br><img src=\"%2\" height=22 width=22> Identifier (ID)<br><img src=\"%3\" height=22 width=22> Tag<br><img src=\"%4\" height=22 width=22> State").arg(KStandardDirs::locate("appdata", "pixmap/class.png")).arg(KStandardDirs::locate("appdata", "pixmap/id.png")).arg(KStandardDirs::locate("appdata", "pixmap/tag.png")).arg(KStandardDirs::locate("appdata", "pixmap/state.png")));
     addDockWidget(Qt::LeftDockWidgetArea,treeDock );
     treeDock->setVisible(false);
     
@@ -1761,6 +1762,7 @@ void MainWindow::splitSubClass(QString name, QTreeWidgetItem* parent) {
       QTreeWidgetItem* aTreeViewWidgetItem = new  QTreeWidgetItem(parent);
       aTreeViewWidgetItem->setText(0,name.left(name.indexOf(":")));
       aTreeViewWidgetItem->setIcon(0,getRightIcon(name.left(name.indexOf(":"))));
+      //aTreeViewWidgetItem->setIconSize(0,QSize(22,22));
       splitSubClass( ":" + name.right(name.count() - name.indexOf(":") -1), aTreeViewWidgetItem);
     }
   }
