@@ -31,8 +31,26 @@
       ${KDE4_KIO_LIBS} ${QT_QTSQL_LIBRARY} ${QT_WEBKIT_LIBRARY}${QT_LIBRARIES} QtWebKit)
 
       install(TARGETS kimberlite DESTINATION ${BIN_INSTALL_DIR})
-      install( FILES tips kimberlite.db
+      install( FILES 
+	tips 
+	kimberlite.db
       DESTINATION ${DATA_INSTALL_DIR}/kimberlite )
 
-      install( FILES tips kimberlite.db
+      install( FILES 
+	tips 
+	kimberlite.db 
+	data/home.htm
       DESTINATION ${DATA_INSTALL_DIR}/kimberlite/data )
+      
+      install( FILES 
+	template/default.wkp
+      DESTINATION ${DATA_INSTALL_DIR}/kimberlite/template )
+      
+      install( FILES 
+	  pixmap/tag.png
+	  pixmap/state.png
+	  pixmap/id.png
+	  pixmap/class.png
+	  pixmap/tag.png
+	  pixmap/logo.png
+      DESTINATION ${DATA_INSTALL_DIR}/kimberlite/pixmap )

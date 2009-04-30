@@ -10,5 +10,5 @@ NewProject::NewProject(QWidget* parent):KDialog(parent) {
 }
 
 void NewProject::newProject() {
-  emit createProject(mainUi->txtName->text(),"/home/lepagee/dev/myproject/kimberlite/template/default.wkp");
+  emit createProject(mainUi->txtName->text(),KStandardDirs::locate("appdata", "template/default.wkp"));
 }

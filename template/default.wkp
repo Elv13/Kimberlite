@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xbel>
+<xbel version="1.0">
+  <project title="%1">
+    <html>
+      <page title="Home Page" name="index.htm">
+        <content>[[@O@]]html[[@C@]][[@O@]]head[[@C@]][[@O@]]/head[[@C@]][[@O@]]body[[@C@]][[@O@]]html[[@C@]][[@O@]]/html[[@C@]][[@O@]]/body[[@C@]][[@O@]]/html[[@C@]]</content>
+      </page>
+    </html>
+    <style>
+      <file name="StyleSheet.css">
+        <content></content>
+      </file>
+    </style>
+    <script>
+    </script>
+    <ressources>
+    </ressources>
+  </project>
+</xbel>

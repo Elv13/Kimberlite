@@ -1711,13 +1711,13 @@ void MainWindow::changeCssMode(int mode) {
   
   if ((previousCssMode == 0) && (mode ==2) && (treeWidget->currentItem() != NULL)) {
     rtfCSSEditor->setPlainText(CssParser::parseCSS());
-    setCssCursor(getClassName(treeWidget->currentItem()));
+    setCssCursor(currentClassName);
   }
   else if (mode == 1) {
     
   }
   else if (mode == 2) {
-    
+    //setCssCursor(currentClassName);
   }
   previousCssMode = mode;
 }
@@ -1802,19 +1802,19 @@ void MainWindow::splitSubClass(QString name, QTreeWidgetItem* parent) {
 KIcon MainWindow::getRightIcon(QString text) {
   KIcon* anIcon = 0;
   if (text[0] == ' ') {
-    anIcon = new KIcon("/home/lepagee/dev/myproject/kimberlite/pixmap/tag.png");
+    anIcon = new KIcon(KStandardDirs::locate("appdata", "pixmap/tag.png"));
   }
   else if (text[0] == ':') {
-    anIcon = new KIcon("/home/lepagee/dev/myproject/kimberlite/pixmap/state.png");
+    anIcon = new KIcon(KStandardDirs::locate("appdata", "pixmap/state.png"));
   }
   else if (text[0] == '#') {
-    anIcon = new KIcon("/home/lepagee/dev/myproject/kimberlite/pixmap/id.png");
+    anIcon = new KIcon(KStandardDirs::locate("appdata", "pixmap/id.png"));
   }
   else if (text[0] == '.') {
-    anIcon = new KIcon("/home/lepagee/dev/myproject/kimberlite/pixmap/class.png");
+    anIcon = new KIcon(KStandardDirs::locate("appdata", "pixmap/class.png"));
   }
   else {
-    anIcon = new KIcon("/home/lepagee/dev/myproject/kimberlite/pixmap/tag.png");
+    anIcon = new KIcon(KStandardDirs::locate("appdata", "pixmap/tag.png"));
   }
   //anIcon->setPixmap(anIcon->pixmap(QSize(16,32)));
   return *anIcon;
@@ -2349,7 +2349,7 @@ void MainWindow::loadDefaultPage() {
   QString new_path = iconloader->iconPath("document-new", KIconLoader::Desktop );
   QString open_path = iconloader->iconPath("document-open", KIconLoader::Desktop );
   QStringList recentProject = loadRecentProjectList();
-  QString path = "/home/lepagee/dev/myproject/kimberlite/homePage/home.htm";//KStandardDirs::locate("data", "konqueror/about/launch.html");
+  QString path = KStandardDirs::locate("appdata", "data/home.htm");//KStandardDirs::locate("data", "konqueror/about/launch.html");
   QFile file2(path);
   file2.open(QIODevice::ReadOnly);
   QString page;
@@ -2371,7 +2371,8 @@ void MainWindow::loadDefaultPage() {
   page = page.arg(recentProject[3]);
   page = page.arg(recentProject[4]);
   page = page.arg("Kimberlite 0.1 realised (2009/06/12)<br>The first official version of Kimberlite is now availible. Test, use it, crash it and report bugs!<br>Good Luck ;)");
-  
+  page = page.arg(KStandardDirs::locate("appdata", "pixmap/logo.png"));
+
   file2.close();
   webPreview->setHtml(page);
 }
