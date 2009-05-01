@@ -31,7 +31,7 @@ void split(QVector<QString> &tagList, QString &inputFile, uint index) {
 QVector<QString> HtmlParser::listTag(QString inputFile) {
   QVector<QString> tagList;
   while (inputFile != "") {
-    while ((inputFile[0] == ' ') || (inputFile[0] == '  ') || (inputFile[0] == 0x0A))
+    while ((inputFile[0] == 0x20/*space*/) || (inputFile[0] == 0x09/*tab*/) || (inputFile[0] == 0x0A/*line break*/))
       inputFile = inputFile.remove(0,1);
     if (inputFile.indexOf("<") == -1) 
       split(tagList, inputFile, inputFile.size());
@@ -93,7 +93,7 @@ QString HtmlParser::getParsedHtml(QString inputFile) {
 QString HtmlParser::getParsedHtml(HtmlData &pageData) {
   QString tab, parsedHTML, tag2, previousTag;
   if (pageData.tagList.size() == 1)
-    return pageData.tagList[0];
+    return pageData.tagList[0].trimmed();
   for (int j=0; j < pageData.tagList.size();j++) {
     tag2 = getTag(pageData.tagList[j]);
     tab.clear();

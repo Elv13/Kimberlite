@@ -1407,6 +1407,7 @@ void MainWindow::newProject(QString name, QString filePath) {
 void MainWindow::saveProjectAs(const QString &outputFileName){
   changeCssMode(tabWCSSLevel->currentIndex());
   aProjectManager->saveCss();
+  loadPage(currentHTMLPage,rtfHTMLEditor->toPlainText(),true);
   KSaveFile file(outputFileName);
   file.open();
   QByteArray outputByteArray;
@@ -1620,8 +1621,8 @@ void MainWindow::setCssCursor(QString className) {
   }
 }
 
-void MainWindow::loadPage(QTreeWidgetItem* item, QString text) {
-  if (item != currentHTMLPage) {
+void MainWindow::loadPage(QTreeWidgetItem* item, QString text, bool force) {
+  if ((item != currentHTMLPage) || (force)) {
     isModified = false;
     if (currentHTMLPage != NULL) {
       switch (tabWEditor->currentIndex()) {

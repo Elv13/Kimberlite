@@ -337,7 +337,7 @@ public:
     void cursorChanged();
     
   public slots:
-    void loadPage(QTreeWidgetItem* item, QString text);
+    void loadPage(QTreeWidgetItem* item, QString text, bool force = false);
     void loadScript(QTreeWidgetItem* anItem, QString text);
     void loadCss(QString text);
 
