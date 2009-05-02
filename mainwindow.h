@@ -84,7 +84,13 @@
 #include "src/ProjectManager_v2.h"
 #include "src/htmlThread.h"
 
+#define MODE_WYSIWYG 0
+#define MODE_HTML 1
+#define MODE_SCRIPT 2
+#define MODE_CSS 3
+
 QT_BEGIN_NAMESPACE
+
 
 class MainWindow  : public KMainWindow {
    Q_OBJECT
@@ -98,9 +104,7 @@ public:
     KActionCollection* actionCollection;
     QWidget *centralwidget;
     KTabWidget *tabWMenu;
-    QWidget *menufile;
     QWidget *menuEdit;
-    QWidget *menuView;
     QHBoxLayout *horizontalLayout_14;
     QSpacerItem *horizontalSpacer_3;
     QVBoxLayout *vlTextAtribute;
@@ -125,13 +129,10 @@ public:
     KPushButton *btnTable;
     KPushButton *btnList;
     QGridLayout *vlColor;
-    //QHBoxLayout *hlTextColor;
     QLabel *lblTextColor;
     KColorCombo *kcbbTextColor;
-    //QHBoxLayout *hlHighlightColor;
     QLabel *lblHighlightColor;
     KColorCombo *cbbHighlightColor;
-    //QHBoxLayout *hlBackgroundColor;
     QLabel *lblBackgroundColor;
     KColorCombo *cbbBackgroundColor;
     QWidget *menuInsert;
@@ -139,32 +140,21 @@ public:
     KPushButton* btnNewLine;
     KPushButton* btnNewTab;
     KPushButton* btnNewSpace;
-    QVBoxLayout* vlSpacing;
     QWidget *menuTools;
-    QWidget *menuOptions;
-    QWidget *menuHelp;
-    QHBoxLayout *mainLayout;
     KTabWidget *ktabwidget_2;
     QWidget *tab_2;
     QDockWidget *tableDock;
-    QWidget *tableDockCentral;
-    QVBoxLayout *verticalLayout_4;
-    //QTableWidget *tableView;
     QHBoxLayout *hlButton;
     KPushButton *btnTableAdd;
     KPushButton *btnTableRemove;
     QDockWidget *treeDock;
     QWidget *treeDockCentral;
-    QVBoxLayout *verticalLayout_5;
+    QGridLayout *verticalLayout_5;
     QTreeWidget *treeWidget;
     QHBoxLayout *hlButton2;
     KPushButton *btnTreeAdd;
     KPushButton *btnTreeRemove;
-    QWidget *centralWidget2;
-    QVBoxLayout *verticalLayout_2;
     QTabWidget *tabWEditor;
-    QWidget *tabPreview;
-    QHBoxLayout *horizontalLayout_2;
     QWebView *webPreview;
     QWidget *tabHTML;
     QVBoxLayout *verticalLayout_3;
@@ -174,11 +164,7 @@ public:
     QListWidget* lstDebug;
     QVBoxLayout *verticalLayout_99;
     QWidget *dockDebugContents;
-    QWidget *tabScripts;
-    QVBoxLayout *verticalLayout_7;
     KTextEdit *rtfScriptEditor;
-    QWidget *tabCSS;
-    QVBoxLayout *verticalLayout_6;
     QTabWidget *tabWCSSLevel;
     QWidget *tabBeginner;
     QVBoxLayout *verticalLayout_8;
@@ -205,13 +191,9 @@ public:
     QPushButton *btnAddPClass;
     QPushButton *btnRemoveClass;
     QSpacerItem *horizontalSpacer;
-    QWidget *tabexpert;
-    QVBoxLayout *verticalLayout_17;
+    //QWidget *tabexpert;
     RtfCssEditor *rtfCSSEditor;
     QCompleter* cssCompleter;
-    //QWidget *tabValidator;
-    //QVBoxLayout *verticalLayout_16;
-    //QWebView *webValidator;
     QTreeWidgetItem* styleSheetName;
     KStatusBar *statusbar;
     QTextEdit* txtOtherTags;
@@ -340,7 +322,15 @@ public:
     void loadPage(QTreeWidgetItem* item, QString text, bool force = false);
     void loadScript(QTreeWidgetItem* anItem, QString text);
     void loadCss(QString text);
-
+    
+  private:
+    /*enum KimberliteMode2 { //TODO make it work
+      WYSIWYG =0,
+      HTML = 1,
+      SCRIPT=2,
+      CSS = 4
+    };*/
+    //static const KimberliteMode2 KimberliteMode;
 };
 
 

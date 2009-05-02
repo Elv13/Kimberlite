@@ -75,1096 +75,984 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   actionCollection = new KActionCollection(this);
   setWindowTitle("Kimberlite");
   setupToolTip(); 
-  qDebug() << "This: " <<   KStandardDirs::locate( "appdata", "kimberlite.db" ) << endl;
-    db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE"));
-    db->setDatabaseName( KStandardDirs::locate( "appdata", "kimberlite.db" ));
-    if ( db->open()) {
-      printf("database corectly opened");
-    }
-    else {
-      printf("ERROR while opening the database, get ready for a crash");
-    }
-    aParser = new HtmlParser();
-    tabWMenu = new KTabWidget(this);
-    tabWMenu->setMinimumSize(QSize(0, 90));
-    tabWMenu->setMaximumSize(QSize(9999999, 90));
-
-    fileTB = new KToolBar(this);
-    tabWMenu->addTab(fileTB, "Files");
-    QPalette aPalette;
-    fileTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
-
-    createAction("New Project", "document-new", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["New Project"], SIGNAL(triggered(bool)),this, SLOT(newProject()));
-    fileTB->addAction(ashActions["New Project"]);
-
-    createAction("Open Project", "document-open", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Open Project"], SIGNAL(triggered(bool)),this, SLOT(openProject()));
-    fileTB->addAction(ashActions["Open Project"]);
-
-    fileTB->addSeparator();
-
-    createAction("Save", "document-save", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Save"], SIGNAL(triggered(bool)),this, SLOT(saveProject()));
-    fileTB->addAction(ashActions["Save"]);
-
-    createAction("Save As", "document-save-as", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Save As"], SIGNAL(triggered(bool)), this, SLOT(saveProjectAs()));
-    fileTB->addAction(ashActions["Save As"]);
-
-    fileTB->addSeparator();
-
-    createAction("Print", "document-print", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Print"], SIGNAL(triggered(bool)),this, SLOT(print()));
-    fileTB->addAction(ashActions["Print"]);
-
-    createAction("Print Preview", "document-print-preview", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Print Preview"], SIGNAL(triggered(bool)), this, SLOT(printPreview()));
-    fileTB->addAction(ashActions["Print Preview"]);
-
-    fileTB->addSeparator();
-
-    createAction("Quit", "application-exit", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Quit"], SIGNAL(triggered(bool)),this, SLOT(quit()));
-    fileTB->addAction(ashActions["Quit"]);
-
-    menuEdit = new QWidget();
-    menuEdit->setObjectName(QString::fromUtf8("menuEdit"));
-    horizontalLayout_14 = new QHBoxLayout(menuEdit);
-    horizontalLayout_14->setObjectName(QString::fromUtf8("horizontalLayout_14"));
-    horizontalLayout_14->setContentsMargins(0,0,0,0);
-    editTB = new KToolBar(this);
-    editTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
-    horizontalLayout_14->addWidget(editTB);
-
-    createAction("Undo", "edit-undo", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Undo"], SIGNAL(triggered(bool)), this, SLOT(undo()));
-    editTB->addAction(ashActions["Undo"]);
-
-    createAction("Redo", "edit-redo", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Redo"], SIGNAL(triggered(bool)), this, SLOT(redo()));
-    editTB->addAction(ashActions["Redo"]);
-
-    editTB->addSeparator();
-
-    createAction("Copy", "edit-copy", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Copy"], SIGNAL(triggered(bool)), this, SLOT(copy()));
-    editTB->addAction(ashActions["Copy"]);
-
-    createAction("Cut", "edit-cut", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Cut"], SIGNAL(triggered(bool)), this, SLOT(cut()));
-    editTB->addAction(ashActions["Cut"]);
-
-    createAction("Paste", "edit-paste", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Paste"], SIGNAL(triggered(bool)), this, SLOT(paste()));
-    editTB->addAction(ashActions["Paste"]);
-
-    editTB->addSeparator();
-
-    createAction("Find", "edit-find", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Find"], SIGNAL(triggered(bool)), this, SLOT(find()));
-    editTB->addAction(ashActions["Find"]);
-
-    editTB->addSeparator();
-
-    vlTextAtribute = new QVBoxLayout();
-    vlTextAtribute->setObjectName(QString::fromUtf8("vlTextAtribute"));
-    vlTextAtribute->setContentsMargins(0,0,0,0);
-    hlFont = new QHBoxLayout();
-    hlFont->setContentsMargins(0,0,0,0);
-    hlFont->setObjectName(QString::fromUtf8("hlFont"));
-    hlFont->setSizeConstraint(QLayout::SetMinimumSize);
-    cbbFont = new QComboBox(menuEdit);
-    cbbFont->setObjectName(QString::fromUtf8("cbbFont"));
-    cbbFont->setMinimumSize(QSize(225, 0));
-    cbbFont->setMaximumSize(QSize(225, 20));
-    cbbFont->addItems(QFontDatabase().families());
-    connect(cbbFont, SIGNAL(currentIndexChanged (QString)),
-    this, SLOT(setFont(QString)));
-
-    hlFont->addWidget(cbbFont);
-
-    cbbFontSize = new KIntSpinBox(menuEdit);
-    
-    cbbFontSize->setObjectName(QString::fromUtf8("cbbFontSize"));
-    cbbFontSize->setMaximumSize(QSize(225, 20));
-    cbbFontSize->setSuffix("px");
-    connect(cbbFontSize, SIGNAL(valueChanged(int)),
-    this, SLOT(setFontSize(int)));
-
-    hlFont->addWidget(cbbFontSize);
-
-
-    vlTextAtribute->addLayout(hlFont);
-
-    hlTextAtributeButton = new QHBoxLayout();
-    hlTextAtributeButton->setObjectName(QString::fromUtf8("hlTextAtributeButton"));
-    btnBold = new KPushButton(menuEdit);
-    btnBold->setObjectName(QString::fromUtf8("btnBold"));
-    btnBold->setMinimumSize(QSize(30, 30));
-    btnBold->setMaximumSize(QSize(30, 30));
-    KIcon* icnBold = new KIcon("format-text-bold");
-    btnBold->setIcon(*icnBold);
-    connect(btnBold, SIGNAL(clicked()),
-    this, SLOT(setBold()));
-
-    hlTextAtributeButton->addWidget(btnBold);
-
-    btnUnderline = new KPushButton(menuEdit);
-    btnUnderline->setObjectName(QString::fromUtf8("btnUnderline"));
-    btnUnderline->setMinimumSize(QSize(30, 30));
-    btnUnderline->setMaximumSize(QSize(30, 16777215));
-    KIcon* icnUnderLine = new KIcon("format-text-underline");
-    btnUnderline->setIcon(*icnUnderLine);
-    connect(btnUnderline, SIGNAL(clicked()),
-    this, SLOT(setUnderline()));
-
-    hlTextAtributeButton->addWidget(btnUnderline);
-
-    btnItalic = new KPushButton(menuEdit);
-    btnItalic->setObjectName(QString::fromUtf8("btnItalic"));
-    btnItalic->setMinimumSize(QSize(30, 30));
-    btnItalic->setMaximumSize(QSize(30, 16777215));
-    KIcon* icnItalic = new KIcon("format-text-italic");
-    btnItalic->setIcon(*icnItalic);
-    connect(btnItalic, SIGNAL(clicked()),
-    this, SLOT(setItalic()));
-
-    hlTextAtributeButton->addWidget(btnItalic);
-
-    line = new QFrame(menuEdit);
-    line->setObjectName(QString::fromUtf8("line"));
-    line->setFrameShape(QFrame::VLine);
-    line->setFrameShadow(QFrame::Sunken);
-
-    hlTextAtributeButton->addWidget(line);
-
-    btnAlignLeft = new KPushButton(menuEdit);
-    btnAlignLeft->setObjectName(QString::fromUtf8("btnAlignLeft"));
-    btnAlignLeft->setMinimumSize(QSize(30, 30));
-    btnAlignLeft->setMaximumSize(QSize(30, 16777215));
-    KIcon* icnAlignLeft = new KIcon("format-justify-left");
-    btnAlignLeft->setIcon(*icnAlignLeft);
-    connect(btnAlignLeft, SIGNAL(clicked()),
-    this, SLOT(setAlignLeft()));
-
-    hlTextAtributeButton->addWidget(btnAlignLeft);
-
-    btnAlignCenter = new KPushButton(menuEdit);
-    btnAlignCenter->setObjectName(QString::fromUtf8("btnAlignCenter"));
-    btnAlignCenter->setMinimumSize(QSize(30, 30));
-    btnAlignCenter->setMaximumSize(QSize(30, 16777215));
-    KIcon* icnAlignCenter = new KIcon("format-justify-center");
-    btnAlignCenter->setIcon(*icnAlignCenter);
-    connect(btnAlignCenter, SIGNAL(clicked()),
-    this, SLOT(setAlignCenter()));
-
-    hlTextAtributeButton->addWidget(btnAlignCenter);
-
-    btnAlignRight = new KPushButton(menuEdit);
-    btnAlignRight->setObjectName(QString::fromUtf8("btnAlignRight"));
-    btnAlignRight->setMinimumSize(QSize(30, 30));
-    btnAlignRight->setMaximumSize(QSize(30, 16777215));
-    KIcon* icnAlignRight = new KIcon("format-justify-right");
-    btnAlignRight->setIcon(*icnAlignRight);
-    connect(btnAlignRight, SIGNAL(clicked()),
-    this, SLOT(setAlignRight()));
-
-    hlTextAtributeButton->addWidget(btnAlignRight);
-
-    btnJustify = new KPushButton(menuEdit);
-    btnJustify->setObjectName(QString::fromUtf8("btnJustify"));
-    btnJustify->setMinimumSize(QSize(30, 30));
-    btnJustify->setMaximumSize(QSize(30, 16777215));
-    KIcon* icnJustify = new KIcon("format-justify-fill");
-    btnJustify->setIcon(*icnJustify);
-    connect(btnJustify, SIGNAL(clicked()),
-    this, SLOT(setJustify()));
-
-    hlTextAtributeButton->addWidget(btnJustify);
-
-    horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Minimum, QSizePolicy::Minimum);
-
-    hlTextAtributeButton->addItem(horizontalSpacer_2);
-
-    vlTextAtribute->addLayout(hlTextAtributeButton);
-
-    horizontalLayout_14->addLayout(vlTextAtribute);
-
-    vlOther = new QVBoxLayout();
-    vlOther->setObjectName(QString::fromUtf8("vlOther"));
-    cbbHeader = new KComboBox(menuEdit);
-    cbbHeader->setMaximumSize(QSize(225, 20));
-    cbbHeader->setObjectName(QString::fromUtf8("cbbHeader"));
-    cbbHeader->addItem("H1");
-    cbbHeader->addItem("H2");
-    cbbHeader->addItem("H3");
-    cbbHeader->addItem("H4");
-    cbbHeader->addItem("H6");
-    connect(cbbHeader, SIGNAL(currentIndexChanged (QString)),
-    this, SLOT(setHeader(QString)));
-
-    vlOther->addWidget(cbbHeader);
-
-    hlOther = new QHBoxLayout();
-    hlOther->setObjectName(QString::fromUtf8("hlOther"));
-    btnLink = new KPushButton(menuEdit);
-    btnLink->setObjectName(QString::fromUtf8("btnLink"));
-    btnLink->setIcon(KIcon("insert-link"));
-    btnLink->setMinimumSize(QSize(30, 30));
-    btnLink->setMaximumSize(QSize(30, 16777215));
-
-    hlOther->addWidget(btnLink);
-
-    btnChar = new KPushButton(menuEdit);
-    btnChar->setObjectName(QString::fromUtf8("btnChar"));
-    btnChar->setIcon(KIcon("draw-text"));
-    btnChar->setMinimumSize(QSize(30, 30));
-    btnChar->setMaximumSize(QSize(30, 16777215));
-
-    hlOther->addWidget(btnChar);
-
-    btnTable = new KPushButton(menuEdit);
-    btnTable->setObjectName(QString::fromUtf8("btnTable"));
-    btnTable->setIcon(KIcon("insert-table"));
-    btnTable->setMinimumSize(QSize(30, 30));
-    btnTable->setMaximumSize(QSize(30, 16777215));
-
-    hlOther->addWidget(btnTable);
-
-    btnList = new KPushButton(menuEdit);
-    btnList->setObjectName(QString::fromUtf8("btnList"));
-    btnList->setIcon(KIcon("format-list-unordered"));
-    btnList->setMinimumSize(QSize(30, 30));
-    btnList->setMaximumSize(QSize(30, 16777215));
-    connect(btnList, SIGNAL(clicked()),
-    this, SLOT(setUList()));
-    
-    hlOther->addWidget(btnList);
-
-    vlOther->addLayout(hlOther);
-
-    horizontalLayout_14->addLayout(vlOther);
-
-    vlColor = new QGridLayout();
-    vlColor->setSpacing(0);
-    vlColor->setObjectName(QString::fromUtf8("vlColor"));
-    
-    lblTextColor = new QLabel(menuEdit);
-    lblTextColor->setObjectName(QString::fromUtf8("lblTextColor"));
-    KIcon* icnTextColor = new KIcon("format-text-color");
-    lblTextColor->setPixmap(icnTextColor->pixmap(16,QIcon::Normal,QIcon::On));
-    vlColor->addWidget(lblTextColor,0,0);
-
-    kcbbTextColor = new KColorCombo(menuEdit);
-    kcbbTextColor->setMaximumSize(QSize(40, 15));
-    kcbbTextColor->setObjectName(QString::fromUtf8("kcbbTextColor"));
-    connect(kcbbTextColor, SIGNAL(currentIndexChanged(int)),
-    this, SLOT(setTextColor()));
-    vlColor->addWidget(kcbbTextColor,0,1);
-
-    lblHighlightColor = new QLabel(menuEdit);
-    lblHighlightColor->setObjectName(QString::fromUtf8("lblHighlightColor"));
-    KIcon* icnHighlightColor = new KIcon("format-stroke-color");
-    lblHighlightColor->setPixmap(icnHighlightColor->pixmap(16,QIcon::Normal,QIcon::On));
-    vlColor->addWidget(lblHighlightColor,1,0);
-
-    cbbHighlightColor = new KColorCombo(menuEdit);
-    cbbHighlightColor->setMaximumSize(QSize(40, 15));
-    cbbHighlightColor->setObjectName(QString::fromUtf8("cbbHighlightColor"));
-    connect(cbbHighlightColor, SIGNAL(currentIndexChanged(int)),
-    this, SLOT(setHighlightColor()));
-    vlColor->addWidget(cbbHighlightColor,1,1);
-
-    lblBackgroundColor = new QLabel(menuEdit);
-    lblBackgroundColor->setObjectName(QString::fromUtf8("lblBackgroundColor"));
-    KIcon* icnBackgroundColor = new KIcon("fill-color");
-    lblBackgroundColor->setPixmap(icnBackgroundColor->pixmap(16,QIcon::Normal,QIcon::On));
-    vlColor->addWidget(lblBackgroundColor,2,0);
-
-    cbbBackgroundColor = new KColorCombo(menuEdit);
-    cbbBackgroundColor->setMaximumSize(QSize(40, 15));
-    cbbBackgroundColor->setObjectName(QString::fromUtf8("cbbBackgroundColor"));
-    connect(cbbBackgroundColor, SIGNAL(currentIndexChanged(int)),
-    this, SLOT(setBackgroundColor()));
-    vlColor->addWidget(cbbBackgroundColor,2,1);
-
-
-    horizontalLayout_14->addLayout(vlColor);
-
-    tabWMenu->addTab(menuEdit, "Edit");
-    
-    
-
-    viewTB = new KToolBar(this);
-    tabWMenu->addTab(viewTB, "File");
-    viewTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
-
-    createAction("Project", "text-x-katefilelist", Qt::CTRL + Qt::Key_W,true);
-    connect(ashActions["Project"], SIGNAL(triggered(bool)), this, SLOT(showPageList(bool)));
-    viewTB->addAction(ashActions["Project"]);
-
-    createAction("CSS Class", "text-x-katefilelist", Qt::CTRL + Qt::Key_W, true);
-    connect(ashActions["CSS Class"], SIGNAL(triggered(bool)), this, SLOT(showCSS(bool)));
-    viewTB->addAction(ashActions["CSS Class"]);
-
-    createAction("HTML Tree", "text-x-katefilelist", Qt::CTRL + Qt::Key_W, true);
-    connect(ashActions["HTML Tree"], SIGNAL(triggered(bool)), this, SLOT(showHtml(bool)));
-    viewTB->addAction(ashActions["HTML Tree"]);
-
-    createAction("Debugger", "text-x-katefilelist", Qt::CTRL + Qt::Key_W, true);
-    connect(ashActions["Debugger"], SIGNAL(triggered(bool)), this, SLOT(showDebugger(bool)));
-    viewTB->addAction(ashActions["Debugger"]);
-    
-    createAction("Inspector", "text-x-katefilelist", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Inspector"], SIGNAL(triggered(bool)), this, SLOT(showInspector(bool)));
-    viewTB->addAction(ashActions["Inspector"]);
-    
-    viewTB->addSeparator();
+  db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE"));
+  db->setDatabaseName( KStandardDirs::locate( "appdata", "kimberlite.db" ));
+  if ( db->open()) 
+    qDebug() << "database corectly opened";
+  else 
+    qDebug() << "ERROR while opening the database, get ready for a crash";
+  
+  aParser = new HtmlParser();
+  tabWMenu = new KTabWidget(this);
+  tabWMenu->setMinimumSize(QSize(0, 90));
+  tabWMenu->setMaximumSize(QSize(9999999, 90));
+  
+  /***************************************************************
+  
+			File toolbar
+  
+  ***************************************************************/
+
+  fileTB = new KToolBar(this);
+  tabWMenu->addTab(fileTB, "Files");
+  QPalette aPalette;
+  fileTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
+
+  createAction("New Project", "document-new", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["New Project"], SIGNAL(triggered(bool)),this, SLOT(newProject()));
+  fileTB->addAction(ashActions["New Project"]);
+
+  createAction("Open Project", "document-open", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Open Project"], SIGNAL(triggered(bool)),this, SLOT(openProject()));
+  fileTB->addAction(ashActions["Open Project"]);
+
+  fileTB->addSeparator();
+
+  createAction("Save", "document-save", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Save"], SIGNAL(triggered(bool)),this, SLOT(saveProject()));
+  fileTB->addAction(ashActions["Save"]);
+
+  createAction("Save As", "document-save-as", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Save As"], SIGNAL(triggered(bool)), this, SLOT(saveProjectAs()));
+  fileTB->addAction(ashActions["Save As"]);
+
+  fileTB->addSeparator();
+
+  createAction("Print", "document-print", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Print"], SIGNAL(triggered(bool)),this, SLOT(print()));
+  fileTB->addAction(ashActions["Print"]);
+
+  createAction("Print Preview", "document-print-preview", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Print Preview"], SIGNAL(triggered(bool)), this, SLOT(printPreview()));
+  fileTB->addAction(ashActions["Print Preview"]);
+
+  fileTB->addSeparator();
+
+  createAction("Quit", "application-exit", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Quit"], SIGNAL(triggered(bool)),this, SLOT(quit()));
+  fileTB->addAction(ashActions["Quit"]);
+  
+  /***************************************************************
+  
+			Edit toolbar
+  
+  ***************************************************************/
+
+  menuEdit = new QWidget();
+  menuEdit->setObjectName(QString::fromUtf8("menuEdit"));
+  horizontalLayout_14 = new QHBoxLayout(menuEdit);
+  horizontalLayout_14->setObjectName(QString::fromUtf8("horizontalLayout_14"));
+  horizontalLayout_14->setContentsMargins(0,0,0,0);
+  editTB = new KToolBar(this);
+  editTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
+  horizontalLayout_14->addWidget(editTB);
+
+  createAction("Undo", "edit-undo", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Undo"], SIGNAL(triggered(bool)), this, SLOT(undo()));
+  editTB->addAction(ashActions["Undo"]);
+
+  createAction("Redo", "edit-redo", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Redo"], SIGNAL(triggered(bool)), this, SLOT(redo()));
+  editTB->addAction(ashActions["Redo"]);
+
+  editTB->addSeparator();
+
+  createAction("Copy", "edit-copy", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Copy"], SIGNAL(triggered(bool)), this, SLOT(copy()));
+  editTB->addAction(ashActions["Copy"]);
+
+  createAction("Cut", "edit-cut", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Cut"], SIGNAL(triggered(bool)), this, SLOT(cut()));
+  editTB->addAction(ashActions["Cut"]);
+
+  createAction("Paste", "edit-paste", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Paste"], SIGNAL(triggered(bool)), this, SLOT(paste()));
+  editTB->addAction(ashActions["Paste"]);
+
+  editTB->addSeparator();
+
+  createAction("Find", "edit-find", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Find"], SIGNAL(triggered(bool)), this, SLOT(find()));
+  editTB->addAction(ashActions["Find"]);
+
+  editTB->addSeparator();
+
+  vlTextAtribute = new QVBoxLayout();
+  vlTextAtribute->setObjectName(QString::fromUtf8("vlTextAtribute"));
+  vlTextAtribute->setContentsMargins(0,0,0,0);
+  hlFont = new QHBoxLayout();
+  hlFont->setContentsMargins(0,0,0,0);
+  hlFont->setObjectName(QString::fromUtf8("hlFont"));
+  hlFont->setSizeConstraint(QLayout::SetMinimumSize);
+  cbbFont = new QComboBox(menuEdit);
+  cbbFont->setObjectName(QString::fromUtf8("cbbFont"));
+  cbbFont->setMinimumSize(QSize(225, 0));
+  cbbFont->setMaximumSize(QSize(225, 20));
+  cbbFont->addItems(QFontDatabase().families());
+  connect(cbbFont, SIGNAL(currentIndexChanged (QString)), this, SLOT(setFont(QString)));
+
+  hlFont->addWidget(cbbFont);
+
+  cbbFontSize = new KIntSpinBox(menuEdit);
+  
+  cbbFontSize->setObjectName(QString::fromUtf8("cbbFontSize"));
+  cbbFontSize->setMaximumSize(QSize(225, 20));
+  cbbFontSize->setSuffix("px");
+  connect(cbbFontSize, SIGNAL(valueChanged(int)), this, SLOT(setFontSize(int)));
+
+  hlFont->addWidget(cbbFontSize);
+
+
+  vlTextAtribute->addLayout(hlFont);
+
+  hlTextAtributeButton = new QHBoxLayout();
+  hlTextAtributeButton->setObjectName(QString::fromUtf8("hlTextAtributeButton"));
+  btnBold = new KPushButton(menuEdit);
+  btnBold->setObjectName(QString::fromUtf8("btnBold"));
+  btnBold->setMinimumSize(QSize(30, 30));
+  btnBold->setMaximumSize(QSize(30, 30));
+  KIcon* icnBold = new KIcon("format-text-bold");
+  btnBold->setIcon(*icnBold);
+  connect(btnBold, SIGNAL(clicked()), this, SLOT(setBold()));
+
+  hlTextAtributeButton->addWidget(btnBold);
+
+  btnUnderline = new KPushButton(menuEdit);
+  btnUnderline->setObjectName(QString::fromUtf8("btnUnderline"));
+  btnUnderline->setMinimumSize(QSize(30, 30));
+  btnUnderline->setMaximumSize(QSize(30, 16777215));
+  KIcon* icnUnderLine = new KIcon("format-text-underline");
+  btnUnderline->setIcon(*icnUnderLine);
+  connect(btnUnderline, SIGNAL(clicked()), this, SLOT(setUnderline()));
+
+  hlTextAtributeButton->addWidget(btnUnderline);
+
+  btnItalic = new KPushButton(menuEdit);
+  btnItalic->setObjectName(QString::fromUtf8("btnItalic"));
+  btnItalic->setMinimumSize(QSize(30, 30));
+  btnItalic->setMaximumSize(QSize(30, 16777215));
+  KIcon* icnItalic = new KIcon("format-text-italic");
+  btnItalic->setIcon(*icnItalic);
+  connect(btnItalic, SIGNAL(clicked()), this, SLOT(setItalic()));
+
+  hlTextAtributeButton->addWidget(btnItalic);
+
+  line = new QFrame(menuEdit);
+  line->setObjectName(QString::fromUtf8("line"));
+  line->setFrameShape(QFrame::VLine);
+  line->setFrameShadow(QFrame::Sunken);
+
+  hlTextAtributeButton->addWidget(line);
+
+  btnAlignLeft = new KPushButton(menuEdit);
+  btnAlignLeft->setObjectName(QString::fromUtf8("btnAlignLeft"));
+  btnAlignLeft->setMinimumSize(QSize(30, 30));
+  btnAlignLeft->setMaximumSize(QSize(30, 16777215));
+  KIcon* icnAlignLeft = new KIcon("format-justify-left");
+  btnAlignLeft->setIcon(*icnAlignLeft);
+  connect(btnAlignLeft, SIGNAL(clicked()), this, SLOT(setAlignLeft()));
+
+  hlTextAtributeButton->addWidget(btnAlignLeft);
+
+  btnAlignCenter = new KPushButton(menuEdit);
+  btnAlignCenter->setObjectName(QString::fromUtf8("btnAlignCenter"));
+  btnAlignCenter->setMinimumSize(QSize(30, 30));
+  btnAlignCenter->setMaximumSize(QSize(30, 16777215));
+  KIcon* icnAlignCenter = new KIcon("format-justify-center");
+  btnAlignCenter->setIcon(*icnAlignCenter);
+  connect(btnAlignCenter, SIGNAL(clicked()), this, SLOT(setAlignCenter()));
+
+  hlTextAtributeButton->addWidget(btnAlignCenter);
+
+  btnAlignRight = new KPushButton(menuEdit);
+  btnAlignRight->setObjectName(QString::fromUtf8("btnAlignRight"));
+  btnAlignRight->setMinimumSize(QSize(30, 30));
+  btnAlignRight->setMaximumSize(QSize(30, 16777215));
+  KIcon* icnAlignRight = new KIcon("format-justify-right");
+  btnAlignRight->setIcon(*icnAlignRight);
+  connect(btnAlignRight, SIGNAL(clicked()), this, SLOT(setAlignRight()));
+
+  hlTextAtributeButton->addWidget(btnAlignRight);
+
+  btnJustify = new KPushButton(menuEdit);
+  btnJustify->setObjectName(QString::fromUtf8("btnJustify"));
+  btnJustify->setMinimumSize(QSize(30, 30));
+  btnJustify->setMaximumSize(QSize(30, 16777215));
+  KIcon* icnJustify = new KIcon("format-justify-fill");
+  btnJustify->setIcon(*icnJustify);
+  connect(btnJustify, SIGNAL(clicked()), this, SLOT(setJustify()));
+
+  hlTextAtributeButton->addWidget(btnJustify);
+  horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Minimum, QSizePolicy::Minimum);
+  hlTextAtributeButton->addItem(horizontalSpacer_2);
+  vlTextAtribute->addLayout(hlTextAtributeButton);
+  horizontalLayout_14->addLayout(vlTextAtribute);
+
+  vlOther = new QVBoxLayout();
+  vlOther->setObjectName(QString::fromUtf8("vlOther"));
+  cbbHeader = new KComboBox(menuEdit);
+  cbbHeader->setMaximumSize(QSize(225, 20));
+  cbbHeader->setObjectName(QString::fromUtf8("cbbHeader"));
+  cbbHeader->addItem("H1");
+  cbbHeader->addItem("H2");
+  cbbHeader->addItem("H3");
+  cbbHeader->addItem("H4");
+  cbbHeader->addItem("H6");
+  connect(cbbHeader, SIGNAL(currentIndexChanged (QString)), this, SLOT(setHeader(QString)));
+
+  vlOther->addWidget(cbbHeader);
+
+  hlOther = new QHBoxLayout();
+  hlOther->setObjectName(QString::fromUtf8("hlOther"));
+  btnLink = new KPushButton(menuEdit);
+  btnLink->setObjectName(QString::fromUtf8("btnLink"));
+  btnLink->setIcon(KIcon("insert-link"));
+  btnLink->setMinimumSize(QSize(30, 30));
+  btnLink->setMaximumSize(QSize(30, 16777215));
+
+  hlOther->addWidget(btnLink);
+
+  btnChar = new KPushButton(menuEdit);
+  btnChar->setObjectName(QString::fromUtf8("btnChar"));
+  btnChar->setIcon(KIcon("draw-text"));
+  btnChar->setMinimumSize(QSize(30, 30));
+  btnChar->setMaximumSize(QSize(30, 16777215));
+
+  hlOther->addWidget(btnChar);
+
+  btnTable = new KPushButton(menuEdit);
+  btnTable->setObjectName(QString::fromUtf8("btnTable"));
+  btnTable->setIcon(KIcon("insert-table"));
+  btnTable->setMinimumSize(QSize(30, 30));
+  btnTable->setMaximumSize(QSize(30, 16777215));
+
+  hlOther->addWidget(btnTable);
+
+  btnList = new KPushButton(menuEdit);
+  btnList->setObjectName(QString::fromUtf8("btnList"));
+  btnList->setIcon(KIcon("format-list-unordered"));
+  btnList->setMinimumSize(QSize(30, 30));
+  btnList->setMaximumSize(QSize(30, 16777215));
+  connect(btnList, SIGNAL(clicked()), this, SLOT(setUList()));
+  
+  hlOther->addWidget(btnList);
+
+  vlOther->addLayout(hlOther);
+
+  horizontalLayout_14->addLayout(vlOther);
+
+  vlColor = new QGridLayout();
+  vlColor->setSpacing(0);
+  vlColor->setObjectName(QString::fromUtf8("vlColor"));
+  
+  lblTextColor = new QLabel(menuEdit);
+  lblTextColor->setObjectName(QString::fromUtf8("lblTextColor"));
+  KIcon* icnTextColor = new KIcon("format-text-color");
+  lblTextColor->setPixmap(icnTextColor->pixmap(16,QIcon::Normal,QIcon::On));
+  vlColor->addWidget(lblTextColor,0,0);
+
+  kcbbTextColor = new KColorCombo(menuEdit);
+  kcbbTextColor->setMaximumSize(QSize(40, 15));
+  kcbbTextColor->setObjectName(QString::fromUtf8("kcbbTextColor"));
+  connect(kcbbTextColor, SIGNAL(currentIndexChanged(int)), this, SLOT(setTextColor()));
+  vlColor->addWidget(kcbbTextColor,0,1);
+
+  lblHighlightColor = new QLabel(menuEdit);
+  lblHighlightColor->setObjectName(QString::fromUtf8("lblHighlightColor"));
+  KIcon* icnHighlightColor = new KIcon("format-stroke-color");
+  lblHighlightColor->setPixmap(icnHighlightColor->pixmap(16,QIcon::Normal,QIcon::On));
+  vlColor->addWidget(lblHighlightColor,1,0);
+
+  cbbHighlightColor = new KColorCombo(menuEdit);
+  cbbHighlightColor->setMaximumSize(QSize(40, 15));
+  cbbHighlightColor->setObjectName(QString::fromUtf8("cbbHighlightColor"));
+  connect(cbbHighlightColor, SIGNAL(currentIndexChanged(int)), this, SLOT(setHighlightColor()));
+  vlColor->addWidget(cbbHighlightColor,1,1);
+
+  lblBackgroundColor = new QLabel(menuEdit);
+  lblBackgroundColor->setObjectName(QString::fromUtf8("lblBackgroundColor"));
+  KIcon* icnBackgroundColor = new KIcon("fill-color");
+  lblBackgroundColor->setPixmap(icnBackgroundColor->pixmap(16,QIcon::Normal,QIcon::On));
+  vlColor->addWidget(lblBackgroundColor,2,0);
+
+  cbbBackgroundColor = new KColorCombo(menuEdit);
+  cbbBackgroundColor->setMaximumSize(QSize(40, 15));
+  cbbBackgroundColor->setObjectName(QString::fromUtf8("cbbBackgroundColor"));
+  connect(cbbBackgroundColor, SIGNAL(currentIndexChanged(int)), this, SLOT(setBackgroundColor()));
+  vlColor->addWidget(cbbBackgroundColor,2,1);
+
+
+  horizontalLayout_14->addLayout(vlColor);
+
+  tabWMenu->addTab(menuEdit, "Edit");
+  
+  /***************************************************************
+  
+			View toolbar
+  
+  ***************************************************************/
+
+  viewTB = new KToolBar(this);
+  tabWMenu->addTab(viewTB, "View");
+  viewTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
+
+  createAction("Project", "text-x-katefilelist", Qt::CTRL + Qt::Key_W,true);
+  connect(ashActions["Project"], SIGNAL(triggered(bool)), this, SLOT(showPageList(bool)));
+  viewTB->addAction(ashActions["Project"]);
+
+  createAction("CSS Class", "text-x-katefilelist", Qt::CTRL + Qt::Key_W, true);
+  connect(ashActions["CSS Class"], SIGNAL(triggered(bool)), this, SLOT(showCSS(bool)));
+  viewTB->addAction(ashActions["CSS Class"]);
+
+  createAction("HTML Tree", "text-x-katefilelist", Qt::CTRL + Qt::Key_W, true);
+  connect(ashActions["HTML Tree"], SIGNAL(triggered(bool)), this, SLOT(showHtml(bool)));
+  viewTB->addAction(ashActions["HTML Tree"]);
+
+  createAction("Debugger", "text-x-katefilelist", Qt::CTRL + Qt::Key_W, true);
+  connect(ashActions["Debugger"], SIGNAL(triggered(bool)), this, SLOT(showDebugger(bool)));
+  viewTB->addAction(ashActions["Debugger"]);
+  
+  createAction("Inspector", "text-x-katefilelist", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Inspector"], SIGNAL(triggered(bool)), this, SLOT(showInspector(bool)));
+  viewTB->addAction(ashActions["Inspector"]);
+  
+  viewTB->addSeparator();
+
+  createAction("Zoom In", "zoom-in", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Zoom In"], SIGNAL(triggered(bool)), this, SLOT(zoomIn()));
+  viewTB->addAction(ashActions["Zoom In"]);
+
+  createAction("Zoom Out", "zoom-out", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Zoom Out"], SIGNAL(triggered(bool)), this, SLOT(zoomOut()));
+  viewTB->addAction(ashActions["Zoom Out"]);
+
+  createAction("Zoom 1:1", "zoom-original", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Zoom 1:1"], SIGNAL(triggered(bool)), this, SLOT(zoomDefault()));
+  viewTB->addAction(ashActions["Zoom 1:1"]);
+
+  /***************************************************************
+  
+			Insert toolbar
+  
+  ***************************************************************/
+  
+  menuInsert = new QWidget();
+  menuInsert->setStyleSheet("margin:0px;spacing:0px;padding:0px;");
+  menuInsert->setObjectName(QString::fromUtf8("menuInsert"));
+  tabWMenu->addTab(menuInsert, "Insert");
+  hlInsert = new QGridLayout(menuInsert);
+  hlInsert->setContentsMargins(0,0,0,0);
+  hlInsert->setObjectName(QString::fromUtf8("hlInsert"));
+  hlInsert->setSpacing(0);
+  horizontalSpacer_3 = new QSpacerItem(0, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+  horizontalLayout_14->addItem(horizontalSpacer_3);
+  horizontalLayout_14->setContentsMargins(0,0,0,0);
+
+  insertTB = new KToolBar(this);
+  insertTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
+  hlInsert->addWidget(insertTB,0,0,0,3);
+
+  createAction("New Page", "document-new", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["New Page"], SIGNAL(triggered(bool)), this, SLOT(addHtmlPage()));
+  insertTB->addAction(ashActions["New Page"]);
+
+  createAction("New Script", "application-add", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["New Script"], SIGNAL(triggered(bool)), this, SLOT(addScript()));
+  insertTB->addAction(ashActions["New Script"]);
+
+  insertTB->addSeparator();
+
+  createAction("Add Image", "insert-image", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Add Image"], SIGNAL(triggered(bool)), this, SLOT(insertImage()));
+  insertTB->addAction(ashActions["Add Image"]);
+
+  createAction("Add Table", "insert-table", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Add Table"], SIGNAL(triggered(bool)), this, SLOT(insertTable()));
+  insertTB->addAction(ashActions["Add Table"]);
+
+  createAction("Add Link", "insert-link", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Add Link"], SIGNAL(triggered(bool)), this, SLOT(insertLink()));
+  insertTB->addAction(ashActions["Add Link"]);
+
+  createAction("Add Text", "insert-text", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Add Text"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+  insertTB->addAction(ashActions["Add Text"]);
+  ashActions["Add Text"]->setDisabled(true);
+
+  insertTB->addSeparator();
+
+  createAction("Special Character", "list-add-font", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Special Character"], SIGNAL(triggered(bool)), this, SLOT(insertChar()));
+  insertTB->addAction(ashActions["Special Character"]);
+  //ashActions["Special Character"]->setDisabled(true);
+
+  createAction("Get Color Code", "fill-color", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Get Color Code"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+  insertTB->addAction(ashActions["Get Color Code"]);
+  ashActions["Get Color Code"]->setDisabled(true);
+
+  QSpacerItem* horizontalSpacer8 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+  hlInsert->addItem(horizontalSpacer8,0,1);
+
+  btnNewLine = new KPushButton(menuInsert);
+  btnNewLine->setObjectName(QString::fromUtf8("btnNewLine"));
+  btnNewLine->setText("New Line");
+  btnNewLine->setMinimumSize(QSize(100, 16));
+  btnNewLine->setMaximumSize(QSize(100, 16));
+
+  hlInsert->addWidget(btnNewLine,2,2);
+
+  btnNewTab = new KPushButton(menuInsert);
+  btnNewTab->setObjectName(QString::fromUtf8("btnNewTab"));
+  btnNewTab->setText("New Tab");
+  btnNewTab->setMinimumSize(QSize(100, 16));
+  btnNewTab->setMaximumSize(QSize(100, 16));
+
+  hlInsert->addWidget(btnNewTab,1,2);
+
+  btnNewSpace = new KPushButton(menuInsert);
+  btnNewSpace->setObjectName(QString::fromUtf8("btnNewSpace"));
+  btnNewSpace->setText("New Space");
+  btnNewSpace->setMinimumSize(QSize(100, 16));
+  btnNewSpace->setMaximumSize(QSize(100, 16));
+  hlInsert->addWidget(btnNewSpace,0,2);
+
+  /***************************************************************
+  
+			Tools toolbar
+  
+  ***************************************************************/
+  
+  toolsTB = new KToolBar(this);
+  tabWMenu->addTab(toolsTB, "Tools");
+  toolsTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
+
+  createAction("Parse", "format-indent-more", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Parse"], SIGNAL(triggered(bool)), this, SLOT(reParse()));
+  toolsTB->addAction(ashActions["Parse"]);
+
+  createAction("Templaterize", "view-pim-tasks", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Templaterize"], SIGNAL(triggered(bool)), this, SLOT(templaterize()));
+  toolsTB->addAction(ashActions["Templaterize"]);
+
+  createAction("Translate", "application-x-marble", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Translate"], SIGNAL(triggered(bool)), this, SLOT(translate()));
+  toolsTB->addAction(ashActions["Translate"]);
+
+  createAction("Debug", "tools-report-bug", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Debug"], SIGNAL(triggered(bool)), this, SLOT(debugHtml()));
+  toolsTB->addAction(ashActions["Debug"]);
+
+  toolsTB->addSeparator();
+
+  createAction("Match Tag", "application-xml", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Match Tag"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+  toolsTB->addAction(ashActions["Match Tag"]);
+  ashActions["Match Tag"]->setDisabled(true);
+
+  createAction("Spelling", "tools-check-spelling", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Spelling"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+  toolsTB->addAction(ashActions["Spelling"]);
+  ashActions["Spelling"]->setDisabled(true);
+
+  createAction("Check Link", "network-connect", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Check Link"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+  toolsTB->addAction(ashActions["Check Link"]);
+  ashActions["Check Link"]->setDisabled(true);
+
+  /***************************************************************
+  
+			Option toolbar
+  
+  ***************************************************************/
+
+  optionsTB = new KToolBar(this);
+  tabWMenu->addTab(optionsTB, "Settings");
+  optionsTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
+
+  createAction("Configure WebKreator", "configure", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Configure WebKreator"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+  optionsTB->addAction(ashActions["Configure WebKreator"]);
+  ashActions["Configure WebKreator"]->setDisabled(true);
+
+  createAction("Configure ToolBars", "configure-toolbars", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Configure ToolBars"], SIGNAL(triggered(bool)), this, SLOT(editToolbar()));
+  optionsTB->addAction(ashActions["Configure ToolBars"]);
+
+  createAction("Configure Shortcuts", "configure-shortcuts", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Configure Shortcuts"], SIGNAL(triggered(bool)), this, SLOT(editShortcut()));
+  optionsTB->addAction(ashActions["Configure Shortcuts"]);
+
+  /***************************************************************
+  
+			Help tool bar
+  
+  ***************************************************************/
+
+  helpTB = new KToolBar(this);
+  tabWMenu->addTab(helpTB, "Help");
+  helpTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
+
+  createAction("Manual", "help-contents", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Manual"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+  helpTB->addAction(ashActions["Manual"]);
+  ashActions["Manual"]->setDisabled(true);
+
+  createAction("About", "help-about", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["About"], SIGNAL(triggered(bool)), this, SLOT(aboutKimberlite()));
+  helpTB->addAction(ashActions["About"]);
+
+  helpTB->addSeparator();
+
+  createAction("Report A Bug", "tools-report-bug", Qt::CTRL + Qt::Key_W);
+  connect(ashActions["Report A Bug"], SIGNAL(triggered(bool)), this, SLOT(reportBug()));
+  helpTB->addAction(ashActions["Report A Bug"]);
+
+  setMenuWidget(tabWMenu);
+  
+  /***************************************************************
+  
+			HTML tag Dock
+  
+  ***************************************************************/
+
+  dockHtmlTree = new QDockWidget(this);
+  dockHtmlTree->setWindowTitle("Tag tree");
+  treeHtml = new QTreeWidget(this);
+  treeHtml->setHeaderHidden(true);
+  dockHtmlTree->setWidget(treeHtml);
+  addDockWidget(Qt::LeftDockWidgetArea, dockHtmlTree);
+  connect(treeHtml, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
+  this, SLOT(setHtmlCursor(QTreeWidgetItem*, int)));
+  dockHtmlTree->setVisible(false);
+  
+  /*aHtmlThread = new ParserThread(this); //TODO make it work
+  aHtmlThread->rtfHtml = rtfHTMLEditor;
+  aHtmlThread->treeHtml = treeHtml;
+  connect(rtfHTMLEditor, SIGNAL(textChanged()), aHtmlThread, SLOT(getReady()));
+  aHtmlThread->start();*/
+
+  /***************************************************************
+  
+			Project Dock
+  
+  ***************************************************************/
+
+  aProjectManager = new ProjectManager2(0);
+  
+  tableDock = new QDockWidget(this);
+  tableDock->setWindowTitle("Project");
+  tableDock->setObjectName(QString::fromUtf8("tableDock"));
+  tableDock->setWidget(aProjectManager);
+  addDockWidget(Qt::LeftDockWidgetArea, tableDock);
+  tableDock->setVisible(false);
+  
+  connect(aProjectManager, SIGNAL(htmlPageChanged(QTreeWidgetItem*, QString)), this, SLOT(loadPage(QTreeWidgetItem*, QString)));
+  connect(aProjectManager, SIGNAL(javaScriptChanged(QTreeWidgetItem*, QString)), this, SLOT(loadScript(QTreeWidgetItem*, QString)));
+  connect(aProjectManager, SIGNAL(loadCss(QString)), this, SLOT(loadCss(QString)));
  
-    createAction("Zoom In", "zoom-in", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Zoom In"], SIGNAL(triggered(bool)), this, SLOT(zoomIn()));
-    viewTB->addAction(ashActions["Zoom In"]);
+  /***************************************************************
+  
+			Class Dock
+  
+  ***************************************************************/
 
-    createAction("Zoom Out", "zoom-out", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Zoom Out"], SIGNAL(triggered(bool)), this, SLOT(zoomOut()));
-    viewTB->addAction(ashActions["Zoom Out"]);
+  treeDock = new QDockWidget(this);
+  treeDock->setWindowTitle("CSS file");
+  treeDock->setObjectName(QString::fromUtf8("treeDock"));
+  treeDockCentral = new QWidget();
+  treeDockCentral->setObjectName(QString::fromUtf8("treeDockCentral"));
 
-    createAction("Zoom 1:1", "zoom-original", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Zoom 1:1"], SIGNAL(triggered(bool)), this, SLOT(zoomDefault()));
-    viewTB->addAction(ashActions["Zoom 1:1"]);
+  verticalLayout_5 = new QGridLayout(treeDockCentral);
+  verticalLayout_5->setObjectName(QString::fromUtf8("verticalLayout_5"));
+  verticalLayout_5->setContentsMargins(0,0,0,0);
+  
+  treeWidget = new QTreeWidget(treeDockCentral);
+  treeWidget->setHeaderHidden(true);
+  treeWidget->setObjectName(QString::fromUtf8("treeWidget"));
+  treeWidget->setIconSize(QSize(18,18));
+  treeWidget->setToolTip(QString("<img src=\"%1\" height=22 width=22> Class <br><img src=\"%2\" height=22 width=22> Identifier (ID)<br><img src=\"%3\" height=22 width=22> Tag<br><img src=\"%4\" height=22 width=22> State").arg(KStandardDirs::locate("appdata", "pixmap/class.png")).arg(KStandardDirs::locate("appdata", "pixmap/id.png")).arg(KStandardDirs::locate("appdata", "pixmap/tag.png")).arg(KStandardDirs::locate("appdata", "pixmap/state.png")));
+  
+  addDockWidget(Qt::LeftDockWidgetArea,treeDock );
+  treeDock->setVisible(false);
+  verticalLayout_5->addWidget(treeWidget,0,0,1,2);
+  treeDock->setWidget(treeDockCentral);
+  
+  btnTreeAdd = new KPushButton(treeDockCentral);
+  btnTreeAdd->setObjectName(QString::fromUtf8("btnTreeAdd"));
+  verticalLayout_5->addWidget(btnTreeAdd,1,0);
+  
+  btnTreeRemove = new KPushButton(treeDockCentral);
+  btnTreeRemove->setObjectName(QString::fromUtf8("btnTreeRemove"));
+  verticalLayout_5->addWidget(btnTreeRemove,1,1);
+  
+  connect(treeWidget, SIGNAL(itemClicked(QTreeWidgetItem* , int)), this, SLOT(cssClassClicked(QTreeWidgetItem*)));
+  connect(btnTreeAdd, SIGNAL(clicked()), this, SLOT(addClasses()));
+  
+  /***************************************************************
+  
+			Editing MODE
+  
+  ***************************************************************/
+  
+  tabWEditor = new QTabWidget(this);
+  setCentralWidget(tabWEditor);
+  tabWEditor->setObjectName(QString::fromUtf8("tabWEditor"));
+  tabWEditor->setTabPosition(QTabWidget::South);
+  setCentralWidget(tabWEditor);
 
-    menuInsert = new QWidget();
-    menuInsert->setStyleSheet("margin:0px;spacing:0px;padding:0px;");
-    menuInsert->setObjectName(QString::fromUtf8("menuInsert"));
-    tabWMenu->addTab(menuInsert, "Insert");
-    hlInsert = new QGridLayout(menuInsert);
-    hlInsert->setContentsMargins(0,0,0,0);
-    hlInsert->setObjectName(QString::fromUtf8("hlInsert"));
-    hlInsert->setSpacing(0);
-    horizontalSpacer_3 = new QSpacerItem(0, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+  /***************************************************************
+  
+			WYSIWYG MODE
+  
+  ***************************************************************/
 
-    horizontalLayout_14->addItem(horizontalSpacer_3);
-    horizontalLayout_14->setContentsMargins(0,0,0,0);
+  webPreview = new QWebView(this);
+  webPreview->setObjectName(QString::fromUtf8("webPreview"));
+  loadDefaultPage();
+  webPreview->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+  
+  connect(webPreview,SIGNAL(linkClicked(QUrl)), this, SLOT(defaultPageLinkClicked(QUrl)));
+  connect(webPreview->page(),SIGNAL(loadProgress(int)), this, SLOT(loading(int)));
+  connect(webPreview->page(),SIGNAL(linkHovered(QString,QString,QString)), this, SLOT(linkHovered(QString)));
+  
+  tabWEditor->addTab(webPreview, QString());
+  
+  /***************************************************************
+  
+			HTML mode
+  
+  ***************************************************************/
+  
+  tabHTML = new QWidget();
+  tabHTML->setObjectName(QString::fromUtf8("tabHTML"));
+  verticalLayout_3 = new QVBoxLayout(tabHTML);
+  verticalLayout_3->setObjectName(QString::fromUtf8("verticalLayout_3"));
+  verticalLayout_3->setContentsMargins(0,0,0,0);
+  rtfHTMLEditor = new RtfHtmlEditor(tabHTML);
+  rtfHTMLEditor->setObjectName(QString::fromUtf8("rtfHTMLEditor"));
+  rtfHTMLEditor->setAcceptRichText(false);
+  new HtmlSyntaxHighlighter(rtfHTMLEditor);
+  rtfHTMLEditor->setLineWrapMode(QTextEdit::NoWrap);
+  rtfHTMLEditor->setWordWrapMode(QTextOption::NoWrap);
+  rtfHTMLEditor->setWordWrapMode(QTextOption::NoWrap);
+  verticalLayout_3->addWidget(rtfHTMLEditor);
+  tabWEditor->addTab(tabHTML, QString());
+  
+  connect(rtfHTMLEditor, SIGNAL(textChanged()), this, SLOT(setModified()));
+  connect(rtfHTMLEditor, SIGNAL(cursorPositionChanged()), this, SLOT(cursorChanged()));
 
-    insertTB = new KToolBar(this);
-    insertTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
-    hlInsert->addWidget(insertTB,0,0,0,3);
+  /***************************************************************
+  
+			HTML Debugger
+  
+  ***************************************************************/
+  
+  dockDebug = new QDockWidget(tabHTML);
+  dockDebug->setWindowTitle("Debugger");
+  dockDebug->setObjectName(QString::fromUtf8("dockDebug"));
+  dockDebug->setHidden(true);
+  QSizePolicy sizePolicy3(QSizePolicy::Preferred, QSizePolicy::Fixed);
+  sizePolicy3.setHorizontalStretch(0);
+  sizePolicy3.setVerticalStretch(0);
+  sizePolicy3.setHeightForWidth(dockDebug->sizePolicy().hasHeightForWidth());
+  dockDebug->setSizePolicy(sizePolicy3);
+  dockDebug->setMinimumSize(QSize(0, 150));
+  dockDebugContents = new QWidget();
+  dockDebugContents->setObjectName(QString::fromUtf8("dockDebugContents"));
+  dockDebug->setWidget(dockDebugContents);
+  verticalLayout_99 = new QVBoxLayout(dockDebugContents);
+  verticalLayout_99->setObjectName(QString::fromUtf8("verticalLayout_99"));
+  lstDebug = new QListWidget(dockDebugContents);
+  verticalLayout_99->addWidget(lstDebug);
+  verticalLayout_3->addWidget(dockDebug);
+  
+  /***************************************************************
+  
+			Script mode
+  
+  ***************************************************************/
+  
+  rtfScriptEditor = new KTextEdit(this);
+  rtfScriptEditor->setObjectName(QString::fromUtf8("rtfScriptEditor"));
+  tabWEditor->addTab(rtfScriptEditor, "Script");
+  
+  connect(rtfScriptEditor, SIGNAL(cursorPositionChanged()), this, SLOT(cursorChanged()));
+  
+  /***************************************************************
+  
+			CSS MODE
+  
+  ***************************************************************/
 
-    createAction("New Page", "document-new", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["New Page"], SIGNAL(triggered(bool)), this, SLOT(addHtmlPage()));
-    insertTB->addAction(ashActions["New Page"]);
+  tabWCSSLevel = new QTabWidget(this);
+  tabWCSSLevel->setObjectName(QString::fromUtf8("tabWCSSLevel"));
+  tabWCSSLevel->setTabShape(QTabWidget::Triangular);
+  
+  connect(tabWCSSLevel, SIGNAL(currentChanged(int)), this, SLOT(changeCssMode(int)));
+  
+  /***************************************************************
+  
+			CSS begginermode
+  
+  ***************************************************************/
+  
+  tabBeginner = new QWidget();
+  tabBeginner->setObjectName(QString::fromUtf8("tabBeginner"));
+  verticalLayout_8 = new QVBoxLayout(tabBeginner);
+  verticalLayout_8->setObjectName(QString::fromUtf8("verticalLayout_8"));
+  scrollArea = new QScrollArea(tabBeginner);
+  scrollArea->setObjectName(QString::fromUtf8("scrollArea"));
+  scrollArea->setWidgetResizable(true);
+  scrollAreaWidgetContents = new QWidget();
+  scrollAreaWidgetContents->setObjectName(QString::fromUtf8("scrollAreaWidgetContents"));
+  verticalLayout_10 = new QVBoxLayout(scrollAreaWidgetContents);
+  verticalLayout_10->setObjectName(QString::fromUtf8("verticalLayout_10"));
+  
+  cssBegTagList << "height" << "width" << "text-align" << "text-transform" << "color" << "font-family" << "font-size" << "font-style" << "font-weight" << "background-image" << "background-color" << "background-repeat" << "border-width" << "border-color" << "border-style" << "float" << "position" << "z-index" << "margin-top" << "margin-bottom" << "margin-left" << "margin-right" << "padding-top" << "padding-bottom" << "padding-left" << "padding-right" << "list-style" << "cursor";
+  
+  grbSize = new QGroupBox(scrollAreaWidgetContents);
+  grbSize->setObjectName(QString::fromUtf8("grbSize"));
+  verticalLayout_9 = new QVBoxLayout(grbSize);
+  verticalLayout_9->setObjectName(QString::fromUtf8("verticalLayout_9"));
+  QStringList tmpTagList;
+  tmpTagList.clear();
+  tmpTagList << "height" << "width";
+  foreach (QString tag, tmpTagList) {
+    ashCssBeg[tag] = new CSSBeginnerWidget(tabBeginner,tag);
+    verticalLayout_9->addWidget(ashCssBeg[tag]);
+  }
+  verticalLayout_10->addWidget(grbSize);
 
-    createAction("New Script", "application-add", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["New Script"], SIGNAL(triggered(bool)), this, SLOT(addScript()));
-    insertTB->addAction(ashActions["New Script"]);
+  grbText = new QGroupBox(scrollAreaWidgetContents);
+  grbText->setObjectName(QString::fromUtf8("grbText"));
+  verticalLayout_11 = new QVBoxLayout(grbText);
+  verticalLayout_11->setObjectName(QString::fromUtf8("verticalLayout_11"));
+  
+  tmpTagList.clear();
+  tmpTagList << "text-align" << "text-transform" << "color" << "font-family" << "font-size" << "font-style" << "font-weight";
+  foreach (QString tag, tmpTagList) {
+    ashCssBeg[tag] = new CSSBeginnerWidget(tabBeginner,tag);
+    verticalLayout_11->addWidget(ashCssBeg[tag]);
+  }
+  verticalLayout_10->addWidget(grbText);
 
-    insertTB->addSeparator();
+  grbBackground = new QGroupBox(scrollAreaWidgetContents);
+  grbBackground->setObjectName(QString::fromUtf8("grbBackground"));
+  verticalLayout_12 = new QVBoxLayout(grbBackground);
+  verticalLayout_12->setObjectName(QString::fromUtf8("verticalLayout_12"));
 
-    createAction("Add Image", "insert-image", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Add Image"], SIGNAL(triggered(bool)), this, SLOT(insertImage()));
-    insertTB->addAction(ashActions["Add Image"]);
+  tmpTagList.clear();
+  tmpTagList << "background-image"<< "background-color"<< "background-repeat";
+  foreach (QString tag, tmpTagList) {
+    ashCssBeg[tag] = new CSSBeginnerWidget(tabBeginner,tag);
+    verticalLayout_12->addWidget(ashCssBeg[tag]);
+  }
+  verticalLayout_10->addWidget(grbBackground);
 
-    createAction("Add Table", "insert-table", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Add Table"], SIGNAL(triggered(bool)), this, SLOT(insertTable()));
-    insertTB->addAction(ashActions["Add Table"]);
+  grbBorder = new QGroupBox(scrollAreaWidgetContents);
+  grbBorder->setObjectName(QString::fromUtf8("grbBorder"));
+  verticalLayout_13 = new QVBoxLayout(grbBorder);
+  verticalLayout_13->setObjectName(QString::fromUtf8("verticalLayout_13"));
 
-    createAction("Add Link", "insert-link", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Add Link"], SIGNAL(triggered(bool)), this, SLOT(insertLink()));
-    insertTB->addAction(ashActions["Add Link"]);
+  tmpTagList.clear();
+  tmpTagList << "border-width"<< "border-color"<< "border-style";
+  foreach (QString tag, tmpTagList) {
+    ashCssBeg[tag] = new CSSBeginnerWidget(tabBeginner,tag);
+    verticalLayout_13->addWidget(ashCssBeg[tag]);
+  }
+  verticalLayout_10->addWidget(grbBorder);
 
-    createAction("Add Text", "insert-text", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Add Text"], SIGNAL(triggered(bool)), this, SLOT(quit()));
-    insertTB->addAction(ashActions["Add Text"]);
-    ashActions["Add Text"]->setDisabled(true);
+  grbLayout = new QGroupBox(scrollAreaWidgetContents);
+  grbLayout->setObjectName(QString::fromUtf8("grbLayout"));
+  grbLayout->setMinimumSize(QSize(0, 0));
+  verticalLayout_14 = new QVBoxLayout(grbLayout);
+  verticalLayout_14->setObjectName(QString::fromUtf8("verticalLayout_14"));
 
-    insertTB->addSeparator();
+  tmpTagList.clear();
+  tmpTagList << "float"<< "position"<< "z-index"<< "margin-top"<< "margin-bottom"<< "margin-left"<< "margin-right"<< "padding-top"<< "padding-bottom"<< "padding-left"<< "padding-right";
+  foreach (QString tag, tmpTagList) {
+    ashCssBeg[tag] = new CSSBeginnerWidget(tabBeginner,tag);
+    verticalLayout_14->addWidget(ashCssBeg[tag]);
+  }
+  verticalLayout_10->addWidget(grbLayout);
 
-    createAction("Special Character", "list-add-font", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Special Character"], SIGNAL(triggered(bool)), this, SLOT(insertChar()));
-    insertTB->addAction(ashActions["Special Character"]);
-    //ashActions["Special Character"]->setDisabled(true);
+  grbOther = new QGroupBox(scrollAreaWidgetContents);
+  grbOther->setObjectName(QString::fromUtf8("grbOther"));
+  QVBoxLayout* aQVBoxLayout = new QVBoxLayout(grbOther);
+  
+  verticalLayout_15 = new QVBoxLayout();
+  verticalLayout_15->setObjectName(QString::fromUtf8("verticalLayout_15"));
+  aQVBoxLayout->addLayout(verticalLayout_15);
+  
+  tmpTagList.clear();
+  tmpTagList << "list-style"<< "cursor";
+  foreach (QString tag, tmpTagList) {
+    ashCssBeg[tag] = new CSSBeginnerWidget(tabBeginner,tag);
+    verticalLayout_15->addWidget(ashCssBeg[tag]);
+  }
 
-    createAction("Get Color Code", "fill-color", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Get Color Code"], SIGNAL(triggered(bool)), this, SLOT(quit()));
-    insertTB->addAction(ashActions["Get Color Code"]);
-    ashActions["Get Color Code"]->setDisabled(true);
+  txtOtherTags = new QTextEdit();
+  txtOtherTags->setMaximumSize(9999,125);
+  txtOtherTags->setMinimumSize(0,125);
+  aQVBoxLayout->addWidget(txtOtherTags);
+  verticalLayout_10->addWidget(grbOther);
+  scrollArea->setWidget(scrollAreaWidgetContents);
+  verticalLayout_8->addWidget(scrollArea);
+  tabWCSSLevel->addTab(tabBeginner, "Begginer");
+  
+  /***************************************************************
+  
+			CSS ADVANCED mode
+  
+  ***************************************************************/
+  
+  tabAdvanced = new QWidget();
+  tabAdvanced->setObjectName(QString::fromUtf8("tabAdvanced"));
+  verticalLayout_18 = new QVBoxLayout(tabAdvanced);
+  verticalLayout_18->setObjectName(QString::fromUtf8("verticalLayout_18"));
+  tblCSSPage = new QTableWidget(tabAdvanced);
+  
+  if (tblCSSPage->columnCount() < 5)
+      tblCSSPage->setColumnCount(5);    
 
-    QSpacerItem* horizontalSpacer8 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-    hlInsert->addItem(horizontalSpacer8,0,1);
+  QTableWidgetItem *__rowItem = new QTableWidgetItem();
+  tblCSSPage->setVerticalHeaderItem(0, __rowItem);
+  tblCSSPage->setObjectName(QString::fromUtf8("tblCSSPage"));
+  tblCSSPage->setEditTriggers(QAbstractItemView::NoEditTriggers);
+  tblCSSPage->setAlternatingRowColors(true);
+  tblCSSPage->setSelectionMode(QAbstractItemView::NoSelection);
+  tblCSSPage->setWordWrap(false);
+  tblCSSPage->setCornerButtonEnabled(false);
 
-    btnNewLine = new KPushButton(menuInsert);
-    btnNewLine->setObjectName(QString::fromUtf8("btnNewLine"));
-    btnNewLine->setText("New Line");
-    //sizePolicy1.setHeightForWidth(btnChar->sizePolicy().hasHeightForWidth());
-    //btnNewLine->setSizePolicy(sizePolicy1);
-    btnNewLine->setMinimumSize(QSize(100, 16));
-    btnNewLine->setMaximumSize(QSize(100, 16));
+  verticalLayout_18->addWidget(tblCSSPage);
 
-    hlInsert->addWidget(btnNewLine,2,2);
+  hbButton2 = new QHBoxLayout();
+  hbButton2->setObjectName(QString::fromUtf8("hbButton2"));
+  btnaddClass = new QPushButton(tabAdvanced);
+  btnaddClass->setObjectName(QString::fromUtf8("btnaddClass"));
+  connect(btnaddClass, SIGNAL(clicked()), this, SLOT(addClasses()));
 
-    btnNewTab = new KPushButton(menuInsert);
-    btnNewTab->setObjectName(QString::fromUtf8("btnNewTab"));
-    btnNewTab->setText("New Tab");
-    //sizePolicy1.setHeightForWidth(btnChar->sizePolicy().hasHeightForWidth());
-    //btnNewTab->setSizePolicy(sizePolicy1);
-    btnNewTab->setMinimumSize(QSize(100, 16));
-    btnNewTab->setMaximumSize(QSize(100, 16));
+  hbButton2->addWidget(btnaddClass);
 
-    hlInsert->addWidget(btnNewTab,1,2);
+  btnAddPClass = new QPushButton(tabAdvanced);
+  btnAddPClass->setObjectName(QString::fromUtf8("btnAddPClass"));
+  hbButton2->addWidget(btnAddPClass);
+  btnRemoveClass = new QPushButton(tabAdvanced);
+  btnRemoveClass->setObjectName(QString::fromUtf8("btnRemoveClass"));
+  hbButton2->addWidget(btnRemoveClass);
+  horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+  hbButton2->addItem(horizontalSpacer);
+  verticalLayout_18->addLayout(hbButton2);
 
-    btnNewSpace = new KPushButton(menuInsert);
-    btnNewSpace->setObjectName(QString::fromUtf8("btnNewSpace"));
-    btnNewSpace->setText("New Space");
-    //sizePolicy1.setHeightForWidth(btnChar->sizePolicy().hasHeightForWidth());
-    //btnNewSpace->setSizePolicy(sizePolicy1);
-    btnNewSpace->setMinimumSize(QSize(100, 16));
-    btnNewSpace->setMaximumSize(QSize(100, 16));
-    hlInsert->addWidget(btnNewSpace,0,2);
-    //hlInsert->addLayout(vlSpacing);
+  tabWCSSLevel->addTab(tabAdvanced, QString());
+  
+  /***************************************************************
+  
+			CSS EXPERT mode
+  
+  ***************************************************************/
 
+  rtfCSSEditor = new RtfCssEditor(this);
+  rtfCSSEditor->setObjectName(QString::fromUtf8("rtfCSSEditor"));
+  new CssSyntaxHighlighter(rtfCSSEditor);
+  
+  QStringList wordList;
+  QSqlQuery query22;
+  query22.exec("SELECT TITLE FROM TCSS_TAG");
+  
+  while (query22.next())
+    wordList <<  query22.value(0).toString();
+
+  cssCompleter = new QCompleter(wordList, tabAdvanced);
+  cssCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+  rtfCSSEditor->setCompleter(cssCompleter);
+
+  tabWCSSLevel->addTab(rtfCSSEditor, "Expert");
+  tabWEditor->addTab(tabWCSSLevel, QString());
     
-    toolsTB = new KToolBar(this);
-    tabWMenu->addTab(toolsTB, "Tools");
-    toolsTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
-
-    createAction("Parse", "format-indent-more", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Parse"], SIGNAL(triggered(bool)), this, SLOT(reParse()));
-    toolsTB->addAction(ashActions["Parse"]);
-
-    createAction("Templaterize", "view-pim-tasks", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Templaterize"], SIGNAL(triggered(bool)), this, SLOT(templaterize()));
-    toolsTB->addAction(ashActions["Templaterize"]);
-
-    createAction("Translate", "application-x-marble", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Translate"], SIGNAL(triggered(bool)), this, SLOT(translate()));
-    toolsTB->addAction(ashActions["Translate"]);
-
-    createAction("Debug", "tools-report-bug", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Debug"], SIGNAL(triggered(bool)), this, SLOT(debugHtml()));
-    toolsTB->addAction(ashActions["Debug"]);
-
-    toolsTB->addSeparator();
-
-    createAction("Match Tag", "application-xml", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Match Tag"], SIGNAL(triggered(bool)), this, SLOT(quit()));
-    toolsTB->addAction(ashActions["Match Tag"]);
-    ashActions["Match Tag"]->setDisabled(true);
-
-    createAction("Spelling", "tools-check-spelling", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Spelling"], SIGNAL(triggered(bool)), this, SLOT(quit()));
-    toolsTB->addAction(ashActions["Spelling"]);
-    ashActions["Spelling"]->setDisabled(true);
-
-    createAction("Check Link", "network-connect", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Check Link"], SIGNAL(triggered(bool)), this, SLOT(quit()));
-    toolsTB->addAction(ashActions["Check Link"]);
-    ashActions["Check Link"]->setDisabled(true);
-
-
-    
-
-    optionsTB = new KToolBar(this);
-    tabWMenu->addTab(optionsTB, "Settings");
-    optionsTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
-
-    createAction("Configure WebKreator", "configure", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Configure WebKreator"], SIGNAL(triggered(bool)), this, SLOT(quit()));
-    optionsTB->addAction(ashActions["Configure WebKreator"]);
-    ashActions["Configure WebKreator"]->setDisabled(true);
-
-    createAction("Configure ToolBars", "configure-toolbars", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Configure ToolBars"], SIGNAL(triggered(bool)), this, SLOT(editToolbar()));
-    optionsTB->addAction(ashActions["Configure ToolBars"]);
-
-    createAction("Configure Shortcuts", "configure-shortcuts", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Configure Shortcuts"], SIGNAL(triggered(bool)), this, SLOT(editShortcut()));
-    optionsTB->addAction(ashActions["Configure Shortcuts"]);
-
-    
-
-    helpTB = new KToolBar(this);
-    tabWMenu->addTab(helpTB, "Help");
-    helpTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
-
-    createAction("Manual", "help-contents", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Manual"], SIGNAL(triggered(bool)), this, SLOT(quit()));
-    helpTB->addAction(ashActions["Manual"]);
-    ashActions["Manual"]->setDisabled(true);
-
-    createAction("About", "help-about", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["About"], SIGNAL(triggered(bool)), this, SLOT(aboutKimberlite()));
-    helpTB->addAction(ashActions["About"]);
-
-    helpTB->addSeparator();
-
-    createAction("Report A Bug", "tools-report-bug", Qt::CTRL + Qt::Key_W);
-    connect(ashActions["Report A Bug"], SIGNAL(triggered(bool)), this, SLOT(reportBug()));
-    helpTB->addAction(ashActions["Report A Bug"]);
-
-    setMenuWidget(tabWMenu); //BUG
-
-    dockHtmlTree = new QDockWidget(this);
-    dockHtmlTree->setWindowTitle("Tag tree");
-    treeHtml = new QTreeWidget(this);
-    treeHtml->setHeaderHidden(true);
-    dockHtmlTree->setWidget(treeHtml);
-    addDockWidget(Qt::LeftDockWidgetArea, dockHtmlTree);
-    connect(treeHtml, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
-    this, SLOT(setHtmlCursor(QTreeWidgetItem*, int)));
-    dockHtmlTree->setVisible(false);
- 
-    tableDock = new QDockWidget(this);
-    tableDock->setWindowTitle("Project");
-    tableDock->setObjectName(QString::fromUtf8("tableDock"));
-
-    aProjectManager = new ProjectManager2(0);
-    
-    
-    tableDockCentral = new QWidget();
-    tableDockCentral->setObjectName(QString::fromUtf8("tableDockCentral"));
-    verticalLayout_4 = new QVBoxLayout(tableDockCentral);
-    verticalLayout_4->setObjectName(QString::fromUtf8("verticalLayout_4"));
-
-    addDockWidget(Qt::LeftDockWidgetArea, tableDock);
-    tableDock->setVisible(false);
-    hlButton = new QHBoxLayout();
-    hlButton->setObjectName(QString::fromUtf8("hlButton"));
-    btnTableAdd = new KPushButton(tableDockCentral);
-    btnTableAdd->setObjectName(QString::fromUtf8("btnTableAdd"));
-
-    hlButton->addWidget(btnTableAdd);
-
-    btnTableRemove = new KPushButton(tableDockCentral);
-    btnTableRemove->setObjectName(QString::fromUtf8("btnTableRemove"));
-
-    hlButton->addWidget(btnTableRemove);
-
-
-    verticalLayout_4->addLayout(hlButton);
-
-    //tableDock->setWidget(tableDockCentral);
-
-    //mainLayout->addWidget(tableDock);
-
-    treeDock = new QDockWidget(this);
-    treeDock->setWindowTitle("CSS file");
-    treeDock->setObjectName(QString::fromUtf8("treeDock"));
-    treeDockCentral = new QWidget();
-    treeDockCentral->setObjectName(QString::fromUtf8("treeDockCentral"));
-
-    verticalLayout_5 = new QVBoxLayout(treeDockCentral);
-    verticalLayout_5->setObjectName(QString::fromUtf8("verticalLayout_5"));
-    verticalLayout_5->setContentsMargins(0,0,0,0);
-    treeWidget = new QTreeWidget(treeDockCentral);
-    treeWidget->setHeaderHidden(true);
-    treeWidget->setObjectName(QString::fromUtf8("treeWidget"));
-    treeWidget->setIconSize(QSize(18,18));
-    treeWidget->setToolTip(QString("<img src=\"%1\" height=22 width=22> Class <br><img src=\"%2\" height=22 width=22> Identifier (ID)<br><img src=\"%3\" height=22 width=22> Tag<br><img src=\"%4\" height=22 width=22> State").arg(KStandardDirs::locate("appdata", "pixmap/class.png")).arg(KStandardDirs::locate("appdata", "pixmap/id.png")).arg(KStandardDirs::locate("appdata", "pixmap/tag.png")).arg(KStandardDirs::locate("appdata", "pixmap/state.png")));
-    addDockWidget(Qt::LeftDockWidgetArea,treeDock );
-    treeDock->setVisible(false);
-    
-
-    verticalLayout_5->addWidget(treeWidget);
-
-    hlButton2 = new QHBoxLayout();
-    hlButton2->setObjectName(QString::fromUtf8("hlButton2"));
-    btnTreeAdd = new KPushButton(treeDockCentral);
-    btnTreeAdd->setObjectName(QString::fromUtf8("btnTreeAdd"));
-    connect(btnTreeAdd, SIGNAL(clicked()), this, SLOT(addClasses()));
-
-    hlButton2->addWidget(btnTreeAdd);
-
-    btnTreeRemove = new KPushButton(treeDockCentral);
-    btnTreeRemove->setObjectName(QString::fromUtf8("btnTreeRemove"));
-
-    hlButton2->addWidget(btnTreeRemove);
-
-
-    verticalLayout_5->addLayout(hlButton2);
-
-    treeDock->setWidget(treeDockCentral);
-    tabWEditor = new QTabWidget(this);
-    setCentralWidget(tabWEditor);
-    tabWEditor->setObjectName(QString::fromUtf8("tabWEditor"));
-    tabWEditor->setTabPosition(QTabWidget::South);
-    tabPreview = new QWidget();
-    tabPreview->setObjectName(QString::fromUtf8("tabPreview"));
-    horizontalLayout_2 = new QHBoxLayout(tabPreview);
-    horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
-    webPreview = new QWebView(tabPreview);
-    webPreview->setObjectName(QString::fromUtf8("webPreview"));
-    //webPreview->setUrl(QUrl("about:blank"));
-    loadDefaultPage();
-    webPreview->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
-    connect(webPreview,SIGNAL(linkClicked(QUrl)), this, SLOT(defaultPageLinkClicked(QUrl)));
-    connect(webPreview->page(),SIGNAL(loadProgress(int)), this, SLOT(loading(int)));
-    connect(webPreview->page(),SIGNAL(linkHovered(QString,QString,QString)), this, SLOT(linkHovered(QString)));
-
-    horizontalLayout_2->addWidget(webPreview);
-
-    tabWEditor->addTab(tabPreview, QString());
-    tabHTML = new QWidget();
-    tabHTML->setObjectName(QString::fromUtf8("tabHTML"));
-    verticalLayout_3 = new QVBoxLayout(tabHTML);
-    verticalLayout_3->setObjectName(QString::fromUtf8("verticalLayout_3"));
-    rtfHTMLEditor = new RtfHtmlEditor(tabHTML);
-    rtfHTMLEditor->setObjectName(QString::fromUtf8("rtfHTMLEditor"));
-    rtfHTMLEditor->setAcceptRichText(false);
-    new HtmlSyntaxHighlighter(rtfHTMLEditor);
-    rtfHTMLEditor->setLineWrapMode(QTextEdit::NoWrap);
-    rtfHTMLEditor->setWordWrapMode(QTextOption::NoWrap);
-    rtfHTMLEditor->setWordWrapMode(QTextOption::NoWrap);
-    connect(rtfHTMLEditor, SIGNAL(textChanged()), this, SLOT(setModified()));
-    connect(rtfHTMLEditor, SIGNAL(cursorPositionChanged()), this, SLOT(cursorChanged()));
-
-    verticalLayout_3->addWidget(rtfHTMLEditor);
-
-    dockDebug = new QDockWidget(tabHTML);
-    dockDebug->setWindowTitle("Debugger");
-    dockDebug->setObjectName(QString::fromUtf8("dockDebug"));
-    dockDebug->setHidden(true);
-    QSizePolicy sizePolicy3(QSizePolicy::Preferred, QSizePolicy::Fixed);
-    sizePolicy3.setHorizontalStretch(0);
-    sizePolicy3.setVerticalStretch(0);
-    sizePolicy3.setHeightForWidth(dockDebug->sizePolicy().hasHeightForWidth());
-    dockDebug->setSizePolicy(sizePolicy3);
-    dockDebug->setMinimumSize(QSize(0, 150));
-    dockDebugContents = new QWidget();
-    dockDebugContents->setObjectName(QString::fromUtf8("dockDebugContents"));
-    dockDebug->setWidget(dockDebugContents);
-    verticalLayout_99 = new QVBoxLayout(dockDebugContents);
-    verticalLayout_99->setObjectName(QString::fromUtf8("verticalLayout_99"));
-    lstDebug = new QListWidget(dockDebugContents);
-    verticalLayout_99->addWidget(lstDebug);
-
-    verticalLayout_3->addWidget(dockDebug);
-
-    tabWEditor->addTab(tabHTML, QString());
-    tabScripts = new QWidget();
-    tabScripts->setObjectName(QString::fromUtf8("tabScripts"));
-    verticalLayout_7 = new QVBoxLayout(tabScripts);
-    verticalLayout_7->setObjectName(QString::fromUtf8("verticalLayout_7"));
-    rtfScriptEditor = new KTextEdit(tabScripts);
-    rtfScriptEditor->setObjectName(QString::fromUtf8("rtfScriptEditor"));
-    connect(rtfScriptEditor, SIGNAL(cursorPositionChanged()), this, SLOT(cursorChanged()));
-
-    verticalLayout_7->addWidget(rtfScriptEditor);
-
-    tabWEditor->addTab(tabScripts, QString());
-    tabCSS = new QWidget();
-    tabCSS->setObjectName(QString::fromUtf8("tabCSS"));
-    verticalLayout_6 = new QVBoxLayout(tabCSS);
-    verticalLayout_6->setObjectName(QString::fromUtf8("verticalLayout_6"));
-    tabWCSSLevel = new QTabWidget(tabCSS);
-    connect(tabWCSSLevel, SIGNAL(currentChanged(int)), this, SLOT(changeCssMode(int)));
-    tabWCSSLevel->setObjectName(QString::fromUtf8("tabWCSSLevel"));
-    /*tabWCSSLevel->setStyleSheet(QString::fromUtf8("QTabWidget::tab-bar {\n"
-"	border-radius: 5px;\n"
-"    alignment: center;\n"
-"}\n"
-"\n"
-"QTabBar::tab:selected {\n"
-"	background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,\n"
-"                                               stop:0 darkgray, stop:1 lightgray);\n"
-"	border-radius: 5px;\n"
-"	margin-top:5px;\n"
-"	margin-bottom:5px;\n"
-"}\n"
-"\n"
-"QTabBar {\n"
-"background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
-"                                         stop: 0 #111111, stop: 0.4 #444444,\n"
-"                                         stop: 0.5 #444444, stop: 1.0 #111111);\n"
-"border-radius: 5px;\n"
-"padding-left:15px;\n"
-"padding-right:15px;\n"
-"margin-left:10px;\n"
-"margin-right:10px;\n"
-"border: 2px solid grey;\n"
-"width:100%;\n"
-"}\n"
-"\n"
-"QTabBar:tab {\n"
-"border-top:0px;\n"
-"border-bottom:0px;\n"
-"margin-left:20px;\n"
-"margin-right:20px;\n"
-"padding-left:10px;\n"
-"padding-right:10px;\n"
-"}\n"
-"\n"
-"QTabWidget::pane {\n"
-"	border:0px;\n"
-"	spacing:0px;\n"
-"	margin:0px;\n"
-"	padding:0px\n"
-"}"));*/
-    tabWCSSLevel->setTabShape(QTabWidget::Triangular);
-    
-    /***************************************************************
-    
-                         CSS begginermode
-    
-    ***************************************************************/
-    
-    tabBeginner = new QWidget();
-    tabBeginner->setObjectName(QString::fromUtf8("tabBeginner"));
-    verticalLayout_8 = new QVBoxLayout(tabBeginner);
-    verticalLayout_8->setObjectName(QString::fromUtf8("verticalLayout_8"));
-    scrollArea = new QScrollArea(tabBeginner);
-    scrollArea->setObjectName(QString::fromUtf8("scrollArea"));
-    scrollArea->setWidgetResizable(true);
-    scrollAreaWidgetContents = new QWidget();
-    scrollAreaWidgetContents->setObjectName(QString::fromUtf8("scrollAreaWidgetContents"));
-    //scrollAreaWidgetContents->setGeometry(QRect(0, 0, 567, 508));
-    verticalLayout_10 = new QVBoxLayout(scrollAreaWidgetContents);
-    verticalLayout_10->setObjectName(QString::fromUtf8("verticalLayout_10"));
-    
-    cssBegTagList << "height" << "width" << "text-align" << "text-transform" << "color" << "font-family" << "font-size" << "font-style" << "font-weight" << "background-image" << "background-color" << "background-repeat" << "border-width" << "border-color" << "border-style" << "float" << "position" << "z-index" << "margin-top" << "margin-bottom" << "margin-left" << "margin-right" << "padding-top" << "padding-bottom" << "padding-left" << "padding-right" << "list-style" << "cursor";
-    
-    grbSize = new QGroupBox(scrollAreaWidgetContents);
-    grbSize->setObjectName(QString::fromUtf8("grbSize"));
-    verticalLayout_9 = new QVBoxLayout(grbSize);
-    verticalLayout_9->setObjectName(QString::fromUtf8("verticalLayout_9"));
-    QStringList tmpTagList;
-    tmpTagList.clear();
-    tmpTagList << "height" << "width";
-    foreach (QString tag, tmpTagList) {
-      ashCssBeg[tag] = new CSSBeginnerWidget(tabBeginner,tag);
-      verticalLayout_9->addWidget(ashCssBeg[tag]);
-    }
-    verticalLayout_10->addWidget(grbSize);
-
-    grbText = new QGroupBox(scrollAreaWidgetContents);
-    grbText->setObjectName(QString::fromUtf8("grbText"));
-    verticalLayout_11 = new QVBoxLayout(grbText);
-    verticalLayout_11->setObjectName(QString::fromUtf8("verticalLayout_11"));
-    
-    tmpTagList.clear();
-    tmpTagList << "text-align" << "text-transform" << "color" << "font-family" << "font-size" << "font-style" << "font-weight";
-    foreach (QString tag, tmpTagList) {
-      ashCssBeg[tag] = new CSSBeginnerWidget(tabBeginner,tag);
-      verticalLayout_11->addWidget(ashCssBeg[tag]);
-    }
-    verticalLayout_10->addWidget(grbText);
-
-    grbBackground = new QGroupBox(scrollAreaWidgetContents);
-    grbBackground->setObjectName(QString::fromUtf8("grbBackground"));
-    verticalLayout_12 = new QVBoxLayout(grbBackground);
-    verticalLayout_12->setObjectName(QString::fromUtf8("verticalLayout_12"));
-
-    tmpTagList.clear();
-    tmpTagList << "background-image"<< "background-color"<< "background-repeat";
-    foreach (QString tag, tmpTagList) {
-      ashCssBeg[tag] = new CSSBeginnerWidget(tabBeginner,tag);
-      verticalLayout_12->addWidget(ashCssBeg[tag]);
-    }
-    verticalLayout_10->addWidget(grbBackground);
-
-    grbBorder = new QGroupBox(scrollAreaWidgetContents);
-    grbBorder->setObjectName(QString::fromUtf8("grbBorder"));
-    verticalLayout_13 = new QVBoxLayout(grbBorder);
-    verticalLayout_13->setObjectName(QString::fromUtf8("verticalLayout_13"));
-
-    tmpTagList.clear();
-    tmpTagList << "border-width"<< "border-color"<< "border-style";
-    foreach (QString tag, tmpTagList) {
-      ashCssBeg[tag] = new CSSBeginnerWidget(tabBeginner,tag);
-      verticalLayout_13->addWidget(ashCssBeg[tag]);
-    }
-    verticalLayout_10->addWidget(grbBorder);
-
-    grbLayout = new QGroupBox(scrollAreaWidgetContents);
-    grbLayout->setObjectName(QString::fromUtf8("grbLayout"));
-    grbLayout->setMinimumSize(QSize(0, 0));
-    verticalLayout_14 = new QVBoxLayout(grbLayout);
-    verticalLayout_14->setObjectName(QString::fromUtf8("verticalLayout_14"));
-
-    tmpTagList.clear();
-    tmpTagList << "float"<< "position"<< "z-index"<< "margin-top"<< "margin-bottom"<< "margin-left"<< "margin-right"<< "padding-top"<< "padding-bottom"<< "padding-left"<< "padding-right";
-    foreach (QString tag, tmpTagList) {
-      ashCssBeg[tag] = new CSSBeginnerWidget(tabBeginner,tag);
-      verticalLayout_14->addWidget(ashCssBeg[tag]);
-    }
-    verticalLayout_10->addWidget(grbLayout);
-
-    grbOther = new QGroupBox(scrollAreaWidgetContents);
-    grbOther->setObjectName(QString::fromUtf8("grbOther"));
-    QVBoxLayout* aQVBoxLayout = new QVBoxLayout(grbOther);
-    //aQVBoxLayout->setContentsMargins(0,0,0,0);
-    
-    verticalLayout_15 = new QVBoxLayout();
-    verticalLayout_15->setObjectName(QString::fromUtf8("verticalLayout_15"));
-    aQVBoxLayout->addLayout(verticalLayout_15);
-    
-    tmpTagList.clear();
-    tmpTagList << "list-style"<< "cursor";
-    foreach (QString tag, tmpTagList) {
-      ashCssBeg[tag] = new CSSBeginnerWidget(tabBeginner,tag);
-      verticalLayout_15->addWidget(ashCssBeg[tag]);
-    }
-
-    txtOtherTags = new QTextEdit();
-    txtOtherTags->setMaximumSize(9999,125);
-    txtOtherTags->setMinimumSize(0,125);
-    aQVBoxLayout->addWidget(txtOtherTags);
-
-    verticalLayout_10->addWidget(grbOther);
-
-    scrollArea->setWidget(scrollAreaWidgetContents);
-
-    verticalLayout_8->addWidget(scrollArea);
-
-    tabWCSSLevel->addTab(tabBeginner, QString());
-    
-    /***************************************************************
-    
-                         CSS ADVANCED mode
-    
-    ***************************************************************/
-    
-    tabAdvanced = new QWidget();
-    tabAdvanced->setObjectName(QString::fromUtf8("tabAdvanced"));
-    verticalLayout_18 = new QVBoxLayout(tabAdvanced);
-    verticalLayout_18->setObjectName(QString::fromUtf8("verticalLayout_18"));
-    tblCSSPage = new QTableWidget(tabAdvanced);
-    
-    if (tblCSSPage->columnCount() < 5)
-        tblCSSPage->setColumnCount(5);    
-
-    QTableWidgetItem *__rowItem = new QTableWidgetItem();
-    tblCSSPage->setVerticalHeaderItem(0, __rowItem);
-    //QTableWidgetItem *__tableItem = new QTableWidgetItem();
-    //tblCSSPage->setItem(0, 0, __tableItem);
-    tblCSSPage->setObjectName(QString::fromUtf8("tblCSSPage"));
-    tblCSSPage->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    tblCSSPage->setAlternatingRowColors(true);
-    tblCSSPage->setSelectionMode(QAbstractItemView::NoSelection);
-    tblCSSPage->setWordWrap(false);
-    tblCSSPage->setCornerButtonEnabled(false);
-
-    verticalLayout_18->addWidget(tblCSSPage);
-
-    hbButton2 = new QHBoxLayout();
-    hbButton2->setObjectName(QString::fromUtf8("hbButton2"));
-    btnaddClass = new QPushButton(tabAdvanced);
-    btnaddClass->setObjectName(QString::fromUtf8("btnaddClass"));
-    connect(btnaddClass, SIGNAL(clicked()), this, SLOT(addClasses()));
-
-    hbButton2->addWidget(btnaddClass);
-
-    btnAddPClass = new QPushButton(tabAdvanced);
-    btnAddPClass->setObjectName(QString::fromUtf8("btnAddPClass"));
-
-    hbButton2->addWidget(btnAddPClass);
-
-    btnRemoveClass = new QPushButton(tabAdvanced);
-    btnRemoveClass->setObjectName(QString::fromUtf8("btnRemoveClass"));
-
-    hbButton2->addWidget(btnRemoveClass);
-
-    horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-    hbButton2->addItem(horizontalSpacer);
-
-
-    verticalLayout_18->addLayout(hbButton2);
-
-    tabWCSSLevel->addTab(tabAdvanced, QString());
-    tabexpert = new QWidget();
-    tabexpert->setObjectName(QString::fromUtf8("tabexpert"));
-    verticalLayout_17 = new QVBoxLayout(tabexpert);
-    verticalLayout_17->setObjectName(QString::fromUtf8("verticalLayout_17"));
-    rtfCSSEditor = new RtfCssEditor(tabexpert);
-    rtfCSSEditor->setObjectName(QString::fromUtf8("rtfCSSEditor"));
-    new CssSyntaxHighlighter(rtfCSSEditor);
-    connect(rtfCSSEditor, SIGNAL(cursorPositionChanged()), this, SLOT(cursorChanged()));
-    
-    QStringList wordList;
-    QSqlQuery query22;
-    query22.exec("SELECT TITLE FROM TCSS_TAG");
-    
-    while (query22.next()) {
-      wordList <<  query22.value(0).toString();
-    }
-
-    cssCompleter = new QCompleter(wordList, tabAdvanced);
-    cssCompleter->setCaseSensitivity(Qt::CaseInsensitive);
-    //cssCompleter->setWidget(rtfCSSEditor);
-    rtfCSSEditor->setCompleter(cssCompleter);
-
-    verticalLayout_17->addWidget(rtfCSSEditor);
-
-    tabWCSSLevel->addTab(tabexpert, QString());
-
-    verticalLayout_6->addWidget(tabWCSSLevel);
-
-    tabWEditor->addTab(tabCSS, QString());
-    /*tabValidator = new QWidget();
-    tabValidator->setObjectName(QString::fromUtf8("tabValidator"));
-    verticalLayout_16 = new QVBoxLayout(tabValidator);
-    verticalLayout_16->setObjectName(QString::fromUtf8("verticalLayout_16"));
-    webValidator = new QWebView(tabValidator);
-    webValidator->setObjectName(QString::fromUtf8("webValidator"));
-    webValidator->setUrl(QUrl("about:blank"));
-
-    verticalLayout_16->addWidget(webValidator);*/
-    
-    tableDock->setWidget(aProjectManager);
-    connect(aProjectManager, SIGNAL(htmlPageChanged(QTreeWidgetItem*, QString)), this, SLOT(loadPage(QTreeWidgetItem*, QString)));
-    connect(aProjectManager, SIGNAL(javaScriptChanged(QTreeWidgetItem*, QString)), this, SLOT(loadScript(QTreeWidgetItem*, QString)));
-    connect(aProjectManager, SIGNAL(loadCss(QString)), this, SLOT(loadCss(QString)));
-    connect(treeWidget, SIGNAL(itemClicked(QTreeWidgetItem* , int)), this, SLOT(cssClassClicked(QTreeWidgetItem*)));
-    connect(tabWEditor, SIGNAL(currentChanged(int)), this, SLOT(modeChanged(int)));
-
-    //tabWEditor->addTab(tabValidator, QString());
-    
-    setCentralWidget(tabWEditor);
-
-    statusbar = new KStatusBar(this);
-    statusbar->setObjectName(QString::fromUtf8("statusbar"));
-    //statusbar->setGeometry(QRect(0, 696, 1008, 21));
-    this->setStatusBar(statusbar);
-    
-    lblStatusBar3 = new QLabel();
-    lblStatusBar3->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding);
-    statusBar()->addWidget(lblStatusBar3,100);
-    
-    lblStatusBar1 = new QLabel();
-    lblStatusBar1->setText("");
-    lblStatusBar1->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum);
-    lblStatusBar1->setFrameShape(QFrame::StyledPanel);
-    lblStatusBar1->setFrameShadow(QFrame::Sunken);
-    statusBar()->addWidget(lblStatusBar1);
-    
-    lblStatusBar2 = new QLabel();
-    lblStatusBar2->setText("HTMLv4");
-    lblStatusBar2->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum);
-    lblStatusBar2->setFrameShape(QFrame::StyledPanel);
-    lblStatusBar2->setFrameShadow(QFrame::Sunken);
-    statusBar()->addWidget(lblStatusBar2);
-    
-    pbStatusBar = new QProgressBar();
-    pbStatusBar->setMaximumSize(100,999);
-    statusBar()->addWidget(pbStatusBar);
-    
-    //statusBar()->insertItem(new QSpacerItem(40, 20, QSizePolicy::Minimum, QSizePolicy::Minimum),2);
-    
-    //this->setStandardToolBarMenuEnabled(false);
-    //this->toolBarArea()->setHidden(true);
-//toolBars()[0]->setHidden(true);
-    tabWEditor->setTabEnabled(1,false);
-    tabWEditor->setTabEnabled(2,false);
-    tabWEditor->setTabEnabled(3,false);
-    tabWMenu->setTabEnabled(1,false);
-    tabWMenu->setTabEnabled(3,false);
-    tabWMenu->setTabEnabled(2,false);
-    tabWMenu->setTabEnabled(4,false);
-    tabWMenu->setTabEnabled(5,false);
-    tabWMenu->setTabEnabled(6,false);
-    ashActions["Save"]->setDisabled(true);
-    ashActions["Save As"]->setDisabled(true);
-    ashActions["Print"]->setDisabled(true);
-    ashActions["Print Preview"]->setDisabled(true);
-    rtfHTMLEditor->clear();
-    
-    /*aHtmlThread = new ParserThread(this);
-    aHtmlThread->rtfHtml = rtfHTMLEditor;
-    aHtmlThread->treeHtml = treeHtml;
-    connect(rtfHTMLEditor, SIGNAL(textChanged()), aHtmlThread, SLOT(getReady()));
-    aHtmlThread->start();*/
-    
-    retranslateUi();
+  connect(rtfCSSEditor, SIGNAL(cursorPositionChanged()), this, SLOT(cursorChanged()));
+  
+  /***************************************************************
+  
+			StatusBar
+  
+  ***************************************************************/
+
+  statusbar = new KStatusBar(this);
+  statusbar->setObjectName(QString::fromUtf8("statusbar"));
+  this->setStatusBar(statusbar);
+  
+  lblStatusBar3 = new QLabel();
+  lblStatusBar3->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding);
+  statusBar()->addWidget(lblStatusBar3,100);
+  
+  lblStatusBar1 = new QLabel();
+  lblStatusBar1->setText("");
+  lblStatusBar1->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum);
+  lblStatusBar1->setFrameShape(QFrame::StyledPanel);
+  lblStatusBar1->setFrameShadow(QFrame::Sunken);
+  statusBar()->addWidget(lblStatusBar1);
+  
+  lblStatusBar2 = new QLabel();
+  lblStatusBar2->setText("HTMLv4");
+  lblStatusBar2->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum);
+  lblStatusBar2->setFrameShape(QFrame::StyledPanel);
+  lblStatusBar2->setFrameShadow(QFrame::Sunken);
+  statusBar()->addWidget(lblStatusBar2);
+  
+  pbStatusBar = new QProgressBar();
+  pbStatusBar->setMaximumSize(100,999);
+  statusBar()->addWidget(pbStatusBar);
+  
+  /***************************************************************
+  
+			Default disabled widget
+  
+  ***************************************************************/
+
+  tabWEditor->setTabEnabled(1,false);
+  tabWEditor->setTabEnabled(2,false);
+  tabWEditor->setTabEnabled(3,false);
+  tabWMenu->setTabEnabled(1,false);
+  tabWMenu->setTabEnabled(3,false);
+  tabWMenu->setTabEnabled(2,false);
+  tabWMenu->setTabEnabled(4,false);
+  tabWMenu->setTabEnabled(5,false);
+  tabWMenu->setTabEnabled(6,false);
+  ashActions["Save"]->setDisabled(true);
+  ashActions["Save As"]->setDisabled(true);
+  ashActions["Print"]->setDisabled(true);
+  ashActions["Print Preview"]->setDisabled(true);
+  rtfHTMLEditor->clear();
+
+  connect(tabWEditor, SIGNAL(currentChanged(int)), this, SLOT(modeChanged(int))); //DO NOT move
+  retranslateUi();
 }
 
 void MainWindow::retranslateUi() {
-    setWindowTitle(QApplication::translate("this", "Kimberlite", 0, QApplication::UnicodeUTF8));
-    tabWMenu->setTabText(tabWMenu->indexOf(menufile), QApplication::translate("this", "File", 0, QApplication::UnicodeUTF8));
-    //lblTextColor->setText(QApplication::translate("this", "Text:", 0, QApplication::UnicodeUTF8));
-    //lblHighlightColor->setText(QApplication::translate("this", "Highlight:", 0, QApplication::UnicodeUTF8));
-    //lblBackgroundColor->setText(QApplication::translate("this", "Background:", 0, QApplication::UnicodeUTF8));
-    btnTableAdd->setText(QApplication::translate("this", "Add", 0, QApplication::UnicodeUTF8));
-    btnTableRemove->setText(QApplication::translate("this", "Remove", 0, QApplication::UnicodeUTF8));
-    treeWidget->headerItem()->setText(0, QApplication::translate("this", "1", 0, QApplication::UnicodeUTF8));
-    btnTreeAdd->setText(QApplication::translate("this", "Add", 0, QApplication::UnicodeUTF8));
-    btnTreeRemove->setText(QApplication::translate("this", "Remove", 0, QApplication::UnicodeUTF8));
-    tabWEditor->setTabText(tabWEditor->indexOf(tabPreview), QApplication::translate("this", "WYSIWYG", 0, QApplication::UnicodeUTF8));
-    //btnParse->setText(QApplication::translate("this", "PushButton", 0, QApplication::UnicodeUTF8));
-    tabWEditor->setTabText(tabWEditor->indexOf(tabHTML), QApplication::translate("this", "HTML", 0, QApplication::UnicodeUTF8));
-    tabWEditor->setTabText(tabWEditor->indexOf(tabScripts), QApplication::translate("this", "Scripts", 0, QApplication::UnicodeUTF8));
-    grbSize->setTitle(QApplication::translate("this", "Size", 0, QApplication::UnicodeUTF8));
-    grbText->setTitle(QApplication::translate("this", "Text", 0, QApplication::UnicodeUTF8));
-    grbBackground->setTitle(QApplication::translate("this", "Background", 0, QApplication::UnicodeUTF8));
-    grbBorder->setTitle(QApplication::translate("this", "Border", 0, QApplication::UnicodeUTF8));
-    grbLayout->setTitle(QApplication::translate("this", "Layout", 0, QApplication::UnicodeUTF8));
-    grbOther->setTitle(QApplication::translate("this", "Other", 0, QApplication::UnicodeUTF8));
-    tabWCSSLevel->setTabText(tabWCSSLevel->indexOf(tabBeginner), QApplication::translate("this", "Beginner", 0, QApplication::UnicodeUTF8));
-    /*tblCSSPage->horizontalHeaderItem(0)->setText(QApplication::translate("this", "name", 0, QApplication::UnicodeUTF8));
-    tblCSSPage->horizontalHeaderItem(1)->setText(QApplication::translate("this", "content", 0, QApplication::UnicodeUTF8));
-    tblCSSPage->horizontalHeaderItem(2)->setText(QApplication::translate("this", "unit", 0, QApplication::UnicodeUTF8));
-    tblCSSPage->horizontalHeaderItem(3)->setText(QApplication::translate("this", "comment", 0, QApplication::UnicodeUTF8));
-    tblCSSPage->horizontalHeaderItem(4)->setText(QApplication::translate("this", "remove", 0, QApplication::UnicodeUTF8));
-    tblCSSPage->verticalHeaderItem(0)->setText(QApplication::translate("this", "New Row", 0, QApplication::UnicodeUTF8));*/
-
-    //const bool __sortingEnabled = tblCSSPage->isSortingEnabled();
-    tblCSSPage->setSortingEnabled(false);
-    //tblCSSPage->item(0, 0)->setText(QApplication::translate("this", "fdtgdfgdgdfgdgdfgdfgdfgdfgdgg", 0, QApplication::UnicodeUTF8));
-
-    //tblCSSPage->setSortingEnabled(__sortingEnabled);
-    btnaddClass->setText(QApplication::translate("this", "Add class", 0, QApplication::UnicodeUTF8));
-    btnAddPClass->setText(QApplication::translate("this", "Add pseudo class", 0, QApplication::UnicodeUTF8));
-    btnRemoveClass->setText(QApplication::translate("this", "Remove class", 0, QApplication::UnicodeUTF8));
-    tabWCSSLevel->setTabText(tabWCSSLevel->indexOf(tabAdvanced), QApplication::translate("this", "Advanced", 0, QApplication::UnicodeUTF8));
-    tabWCSSLevel->setTabEnabled(1,false);
-    tabWCSSLevel->setTabText(tabWCSSLevel->indexOf(tabexpert), QApplication::translate("this", "Expert", 0, QApplication::UnicodeUTF8));
-    tabWEditor->setTabText(tabWEditor->indexOf(tabCSS), QApplication::translate("this", "CSS", 0, QApplication::UnicodeUTF8));
-    //tabWEditor->setTabText(tabWEditor->indexOf(tabValidator), QApplication::translate("this", "Validator", 0, QApplication::UnicodeUTF8));
-    Q_UNUSED(this);
+  setWindowTitle(QApplication::translate("this", "Kimberlite", 0, QApplication::UnicodeUTF8));
+  btnTreeAdd->setText(QApplication::translate("this", "Add", 0, QApplication::UnicodeUTF8));
+  btnTreeRemove->setText(QApplication::translate("this", "Remove", 0, QApplication::UnicodeUTF8));
+  tabWEditor->setTabText(tabWEditor->indexOf(webPreview), QApplication::translate("this", "WYSIWYG", 0, QApplication::UnicodeUTF8));
+  tabWEditor->setTabText(tabWEditor->indexOf(tabHTML), QApplication::translate("this", "HTML", 0, QApplication::UnicodeUTF8));
+  tabWEditor->setTabText(tabWEditor->indexOf(rtfScriptEditor), QApplication::translate("this", "Scripts", 0, QApplication::UnicodeUTF8));
+  grbSize->setTitle(QApplication::translate("this", "Size", 0, QApplication::UnicodeUTF8));
+  grbText->setTitle(QApplication::translate("this", "Text", 0, QApplication::UnicodeUTF8));
+  grbBackground->setTitle(QApplication::translate("this", "Background", 0, QApplication::UnicodeUTF8));
+  grbBorder->setTitle(QApplication::translate("this", "Border", 0, QApplication::UnicodeUTF8));
+  grbLayout->setTitle(QApplication::translate("this", "Layout", 0, QApplication::UnicodeUTF8));
+  grbOther->setTitle(QApplication::translate("this", "Other", 0, QApplication::UnicodeUTF8));
+  tblCSSPage->setSortingEnabled(false);
+  btnaddClass->setText(QApplication::translate("this", "Add class", 0, QApplication::UnicodeUTF8));
+  btnAddPClass->setText(QApplication::translate("this", "Add pseudo class", 0, QApplication::UnicodeUTF8));
+  btnRemoveClass->setText(QApplication::translate("this", "Remove class", 0, QApplication::UnicodeUTF8));
+  tabWCSSLevel->setTabText(tabWCSSLevel->indexOf(tabAdvanced), QApplication::translate("this", "Advanced", 0, QApplication::UnicodeUTF8));
+  tabWCSSLevel->setTabEnabled(1,false);
+  tabWEditor->setTabText(tabWEditor->indexOf(tabWCSSLevel), QApplication::translate("this", "CSS", 0, QApplication::UnicodeUTF8));
+  Q_UNUSED(this);
 } // retranslateUi
-
-// QString MainWindow::readCSSFile(QString path) {
-//     QString inputFileName = path;
-//     QString tmpFile;
-//     //path = "/home/lepagee/dev/webkreator/StyleSheet.css";
-//     //if(KIO::NetAccess::download(inputFileName, tmpFile, this)) {
-//       QString line;
-//       bool inComment = false;
-//       QFile file(path);
-//       file.open(QIODevice::ReadOnly);
-//       while (!file.atEnd()) {
-// 	line = QString(file.readLine()).toAscii();
-// 	printf("%s",line.toStdString().c_str());
-// 	if (line.indexOf("/*") != -1) {
-// 	  inComment = true;
-// 	}
-// 	if (line.indexOf("*/") != -1) {
-// 	  inComment = false;
-// 	}
-// 
-// 	if (inComment == false) {
-// 	  //printf("\n This is what you are looking for: %d,%d",line.right(2).left(1).toStdString().c_str(),line.right(1).toStdString().c_str());
-// 	  //line = line.remove(line.count() -2,2); //Remove UNICODE linefeed
-// 	}
-// 
-// 	CssParser::cssFile += line;
-//       }
-// 
-//       KIO::NetAccess::removeTempFile(tmpFile);
-//     /*}
-//     else
-//     {
-//       KMessageBox::error(this,
-//       KIO::NetAccess::lastErrorString());
-//     }*/
-// 
-// 
-//     while (CssParser::cssFile.indexOf("\n") != -1) {
-//       CssParser::cssFile.remove(CssParser::cssFile.indexOf("\n"),1);
-//     }
-//   printf("%s",CssParser::cssFile.toStdString().c_str());
-//   return CssParser::cssFile;
-// }
 
 void MainWindow::fillCSSBegMode(QString className) {
   QStringList aClass = CssParser::getClass(className);
@@ -1178,7 +1066,7 @@ void MainWindow::fillCSSBegMode(QString className) {
       ashCssBeg[CssParser::getPropriety(propriety.toLower())]->fillMe(propriety);
     }
   }
-}
+} //fillCSSBegMode
 
 void MainWindow::fillCSSAdvMode() {
   QString color1 = "background-color:#7AEEFF;";
@@ -1368,41 +1256,40 @@ void MainWindow::fillCSSAdvMode() {
     else
       color =color1;
   }
-}
+} //fillCSSAdvMode
+
 MainWindow::~MainWindow() {
   QDir aDir;
   aDir.rmdir(QDir::tempPath()+"/kimberlite");
-}
+} //~MainWindow
 
 void MainWindow::reParse() {
   HtmlData data = HtmlParser::getHtmlData(rtfHTMLEditor->toPlainText());
   updateHtmlTree(data);
   rtfHTMLEditor->setPlainText(aParser->getParsedHtml(data));
-}
+} //reParse
 
 void MainWindow::templaterize() {
   StringConverter* aStringConverter = new StringConverter(this);
   aStringConverter->toTemplate(rtfHTMLEditor->toPlainText());
-}
+} //templaterize
 
 void MainWindow::translate() {
   StringConverter* aStringConverter = new StringConverter(this);
   aStringConverter->translate(rtfHTMLEditor->toPlainText());
-}
+} //translate
 
 void MainWindow::newProject(){
   NewProject* aNewProject = new NewProject(this);
   aNewProject->show();
-  /*openProject("/home/lepagee/dev/myproject/kimberlite/template/default.wkp");
-  fileName.clear();*/
   connect(aNewProject,SIGNAL(createProject(QString, QString)),this,SLOT(newProject(QString,QString)));
-}
+} //newProject
 
 void MainWindow::newProject(QString name, QString filePath) {
   openProject(filePath);
   fileName.clear();
   aProjectManager->setProjectName(name);
-}
+} //newProject
  
 void MainWindow::saveProjectAs(const QString &outputFileName){
   changeCssMode(tabWCSSLevel->currentIndex());
@@ -1418,34 +1305,34 @@ void MainWindow::saveProjectAs(const QString &outputFileName){
 
   fileName = outputFileName;
   saveRecentProject(fileName);
-}
+} //saveProjectAs
  
 void MainWindow::saveProjectAs(){
   saveProjectAs(KFileDialog::getSaveFileName());
-}
+} //saveProjectAs
  
 void MainWindow::saveProject(){
   if(!fileName.isEmpty()) 
     saveProjectAs(fileName);
   else 
     saveProjectAs();
-}
+} //saveProject
 
 void MainWindow::saveFile(){ 
   if(!pageName.isEmpty()) 
     saveProjectAs(pageName);
   else
     saveProjectAs();
-}
+} //saveFile
 
 
 void MainWindow::openProject() {
   QString fileName = KFileDialog::getOpenFileName();
   openProject(fileName);
-}
+} //openProject
  
 void MainWindow::openProject(QString fileName) {
-  qDebug() << "Load: " << fileName;
+  qDebug() << "Loading project" << fileName;
   if (!fileName.isEmpty()) {
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text)) 
@@ -1454,7 +1341,6 @@ void MainWindow::openProject(QString fileName) {
       aProjectManager->read(&file);
     aProjectManager->expandAll();
     setWindowTitle("Kimberlite - "+aProjectManager->projectTitle);
-    //tabPreview->setDisabled(true);
     #if QT_VERSION >= 0x040500
     webPreview->page()->setContentEditable(true);
     #endif
@@ -1476,38 +1362,40 @@ void MainWindow::openProject(QString fileName) {
     
     this->fileName = fileName;
   }
-}
+} //openProject
 
 void MainWindow::showPageList(bool state) {
   if (state == true ) 
     tableDock->setHidden(false);
   else 
     tableDock->setHidden(true);
-}
+} //showPageList
+
 void MainWindow::showCSS(bool state) {
   if (state == true ) 
     treeDock->setHidden(false);
   else
     treeDock->setHidden(true);
-}
+} //showCSS
 
 void MainWindow::showDebugger(bool state) {
   if (state == true )
     dockDebug->setHidden(false);
   else
     dockDebug->setHidden(true);
-}
+} //showDebugger
+
 void MainWindow::showInspector(bool state) {
   QWebSettings::globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
   webPreview->triggerPageAction(QWebPage::InspectElement);
-}
+} //showInspector
 
 void MainWindow::showHtml(bool state) {
   if (state == true )
     dockHtmlTree->setHidden(false);
   else 
     dockHtmlTree->setHidden(true);
-}
+} //showHtml
 
 void MainWindow::zoomIn() {
   switch (tabWEditor->currentIndex()) {
@@ -1517,7 +1405,7 @@ void MainWindow::zoomIn() {
     case 1:
       rtfHTMLEditor->zoomIn(1);
   }
-}
+} //zoomIn
 
 void MainWindow::zoomOut() {
   switch (tabWEditor->currentIndex()) {
@@ -1527,21 +1415,18 @@ void MainWindow::zoomOut() {
     case 1:
       rtfHTMLEditor->zoomOut(1);
   }
-}
+} //zoomOut
 
 void MainWindow::zoomDefault() {
   webPreview->setZoomFactor(1);
-}
+} //zoomDefault
 
 void MainWindow::setupToolTip() {
-
-   KTipDatabase* aTipDB = new KTipDatabase();
-
+   /*KTipDatabase* aTipDB = new KTipDatabase();
    KTipDialog* aTipDialog = new KTipDialog(aTipDB, this);
    aTipDialog->setShowOnStart(true);
-   aTipDialog->showTip(this, QString(), true);
-
-}
+   aTipDialog->showTip(this, QString(), true);*/
+}  //setupToolTip
 
 QString MainWindow::getClassName(QTreeWidgetItem* anItem) {
   QString className;
@@ -1554,7 +1439,7 @@ QString MainWindow::getClassName(QTreeWidgetItem* anItem) {
   }
   className = className.trimmed();
   return className;
-}
+} //getClassName
 
 QTreeWidgetItem* MainWindow::getClassWidget(QString className) {
   QTreeWidgetItem* toReturn;
@@ -1581,7 +1466,7 @@ QTreeWidgetItem* MainWindow::getClassWidget(QString className) {
     }
   }
   return NULL;
-}
+} //getClassWidget
 
 void MainWindow::cssClassClicked(QTreeWidgetItem* anItem) {
   if (tabWCSSLevel->currentIndex() == 0)
@@ -1590,18 +1475,16 @@ void MainWindow::cssClassClicked(QTreeWidgetItem* anItem) {
     QString className = getClassName(anItem);
     setCssCursor(className);
   }
-}
+} //cssClassClicked
 
 void MainWindow::loadCSSClass(QTreeWidgetItem* anItem) {
   QString newStyle = CssParser::setClass(currentClassName, clearCssBeg());
   QString className = getClassName(anItem);
   currentClassName = className;
   fillCSSBegMode(currentClassName);
-  qDebug() << newStyle;
   CssParser::cssFile = newStyle;
-  //saveProjectAs(aProject->cssPage , newStyle);
   rtfCSSEditor->setText(CssParser::parseCSS());
-}
+} //loadCSSClass
 
 void MainWindow::setCssCursor(QString className) {
   uint counter =0;
@@ -1612,14 +1495,13 @@ void MainWindow::setCssCursor(QString className) {
 	QTextCursor tc = rtfCSSEditor->textCursor();
 	tc.setPosition(counter);
 	rtfCSSEditor->setTextCursor(tc);
-	qDebug() << "Cursor position:" << counter;
 	rtfCSSEditor->setFocus();
 	return;
       }
     }
     counter += lineList[i].count() +1;
   }
-}
+} //setCssCursor
 
 void MainWindow::loadPage(QTreeWidgetItem* item, QString text, bool force) {
   if ((item != currentHTMLPage) || (force)) {
@@ -1659,23 +1541,23 @@ void MainWindow::loadPage(QTreeWidgetItem* item, QString text, bool force) {
     }
     setWindowTitle("Kimberlite - "+aProjectManager->projectTitle + "  (" + completeName + item->text(0) + ")");
   }
-}
+} //loadPage
 
 void MainWindow::setModified() {
   isModified = true;
-}
+} //setModified
 
 void MainWindow::addHtmlPage() {
   NewWebPage* aDialog = new NewWebPage(this,aProjectManager->htmlPage);
   aDialog->show();
   connect(aDialog, SIGNAL(addFolder(QString,QTreeWidgetItem*)), aProjectManager, SLOT(addFolder(QString,QTreeWidgetItem*)));
   connect(aDialog, SIGNAL(addHtmlPage(QString,QString,QString,QString)), aProjectManager, SLOT(addHtmlPage(QString,QString,QString,QString)));
-}
+} //addHtmlPage
 
 void MainWindow::addScript() {
   NewScript* aScript = new NewScript(this,aProjectManager->script);
   aScript->show();
-}
+} //addScript
 
 QString MainWindow::clearCssBeg() {
   QString currentClass;
@@ -1691,17 +1573,17 @@ QString MainWindow::clearCssBeg() {
   currentClass += txtOtherTags->toPlainText();
   txtOtherTags->clear();
   return currentClass;
-}
+} //clearCssBeg
 
 void MainWindow::disableWidget(bool value) {
-    tabWEditor->setEnabled(value);
-    editTB->setEnabled(value);
-    viewTB->setEnabled(value);
-    insertTB->setEnabled(value);
-    toolsTB->setEnabled(value);
-    optionsTB->setEnabled(value);
-    helpTB->setEnabled(value);
-}
+  tabWEditor->setEnabled(value);
+  editTB->setEnabled(value);
+  viewTB->setEnabled(value);
+  insertTB->setEnabled(value);
+  toolsTB->setEnabled(value);
+  optionsTB->setEnabled(value);
+  helpTB->setEnabled(value);
+} //disableWidget
 
 void MainWindow::changeCssMode(int mode) {
   if (previousCssMode == 2) {
@@ -1722,7 +1604,7 @@ void MainWindow::changeCssMode(int mode) {
     //setCssCursor(currentClassName);
   }
   previousCssMode = mode;
-}
+} //changeCssMode
 
 void MainWindow::updateClassTree() {
   QTreeWidgetItem* anItem =  new QTreeWidgetItem();
@@ -1747,7 +1629,7 @@ void MainWindow::updateClassTree() {
     if (toSelect)
       treeWidget->setCurrentItem(toSelect);
   }
-}
+} //updateClassTree
 
 void MainWindow::splitSubClass(QString name, QTreeWidgetItem* parent) {
   if (((name.indexOf(":") != -1) && (name.indexOf(" ") == -1)) /*|| (((name.indexOf(":") < (name.indexOf(" ")) && ((name.indexOf(" ") != -1)))))*/ && ((name.indexOf(":") != 0))) {
@@ -1800,7 +1682,7 @@ void MainWindow::splitSubClass(QString name, QTreeWidgetItem* parent) {
   else if (",") {
     
   }*/
-}
+} //splitSubClass
 
 KIcon MainWindow::getRightIcon(QString text) {
   KIcon* anIcon = 0;
@@ -1821,7 +1703,7 @@ KIcon MainWindow::getRightIcon(QString text) {
   }
   //anIcon->setPixmap(anIcon->pixmap(QSize(16,32)));
   return *anIcon;
-}
+} //getRightIcon
 
 void MainWindow::loadScript(QTreeWidgetItem* anItem, QString text) {
   if (anItem != currentScript) {
@@ -1832,7 +1714,7 @@ void MainWindow::loadScript(QTreeWidgetItem* anItem, QString text) {
     rtfScriptEditor->setPlainText(text.trimmed());
     currentScript = anItem;
   }
-}
+} //loadScript
 
 void MainWindow::loadCss(QString text) {
   CssParser::cssFile = text;
@@ -1841,7 +1723,7 @@ void MainWindow::loadCss(QString text) {
   styleSheetName->setText(0,"Style");
   updateClassTree();
   ////fillCSSAdvMode();
-}
+} //loadCss
 
 void MainWindow::modeChanged(int index) {
   tableDock->setVisible(true);
@@ -1889,12 +1771,12 @@ void MainWindow::modeChanged(int index) {
       treeDock->setVisible(true);
       pbStatusBar->setEnabled(false);
   }
-}
+} //modeChanged
 
 void MainWindow::updateHtmlTree(QString &file) {
   HtmlData pageData = aParser->getHtmlData(file);
   updateHtmlTree(pageData);
-}
+} //updateHtmlTree
 
 void MainWindow::updateHtmlTree(HtmlData &pageData) {
   IndexedTreeWidgetItem* previousNode(NULL);
@@ -1914,14 +1796,14 @@ void MainWindow::updateHtmlTree(HtmlData &pageData) {
     index += pageData.tagList[j].count()+1 + (3*(pageData.levelList[j+((size-1!=j)?1:0)]));
   }
   treeHtml->expandAll();
-}
+} //updateHtmlTree
 
 void MainWindow::setHtmlCursor(QTreeWidgetItem* item, int column) {
   QTextCursor tc = rtfHTMLEditor->textCursor();
   tc.setPosition(((IndexedTreeWidgetItem*) item)->index);
   rtfHTMLEditor->setTextCursor(tc);
   rtfHTMLEditor->setFocus();
-}
+} //setHtmlCursor
 
 void MainWindow::debugHtml() {
   showDebugger(true);
@@ -1939,7 +1821,7 @@ void MainWindow::debugHtml() {
       anItem->setIcon(KIcon("dialog-information"));
     lstDebug->addItem(anItem);
   }
-}
+} //debugHtml
 
 void MainWindow::setBold() {
   switch (tabWEditor->currentIndex()) {
@@ -1952,7 +1834,7 @@ void MainWindow::setBold() {
       addTag("<b>","</b>");
       break;
   }
-}
+} //setBold
 
 void MainWindow::setItalic() {
   switch (tabWEditor->currentIndex()) {
@@ -1965,7 +1847,7 @@ void MainWindow::setItalic() {
       addTag("<i>","</i>");
       break;
   }
-}
+} //setItalic
 
 void MainWindow::setUnderline() {
   switch (tabWEditor->currentIndex()) {
@@ -1978,7 +1860,7 @@ void MainWindow::setUnderline() {
       addTag("<u>","</u>");
       break;
   }
-}
+} //setUnderline
 
 void MainWindow::execCommand(const QString &cmd, const QString &arg = "") {
   QWebFrame *frame = webPreview->page()->mainFrame();
@@ -1988,14 +1870,14 @@ void MainWindow::execCommand(const QString &cmd, const QString &arg = "") {
   else
     js = QString("document.execCommand(\"%1\", false, null)").arg(cmd);
   frame->evaluateJavaScript(js);
-}
+} //execCommand
 
 void MainWindow::addTag(QString prefix, QString suffix) {
   QTextCursor tc = rtfHTMLEditor->textCursor();
   QString text = tc.selectedText();
   tc.removeSelectedText();
   tc.insertText(prefix + text + suffix);
-}
+} //addTag
 
 void MainWindow::addTag(QString prefix, QString suffix, QString cmd, QString arg = "") {
   switch (tabWEditor->currentIndex()) {
@@ -2008,50 +1890,50 @@ void MainWindow::addTag(QString prefix, QString suffix, QString cmd, QString arg
       addTag(prefix,suffix);
       break;
   }
-}
+} //addTag
 
 void MainWindow::setAlignCenter() {
   addTag("<center>","</center>","justifyCenter");
-}
+} //setAlignCenter
 
 void MainWindow::setAlignLeft() {
   addTag("<font style=\"text-align:left\">","</font>","justifyLeft");
-}
+} //setAlignLeft
 
 void MainWindow::setAlignRight() {
   addTag("<font style=\"text-align:right\">","</font>","justifyRight");
-}
+} //setAlignRight
 
 void MainWindow::setJustify() {
   addTag("<font style=\"text-align:justify\">","</font>","justifyFull");
-}
+} //setJustify
 
 void MainWindow::setHeader(QString text) {
   addTag("<"+text+">","</"+text+">","formatBlock",text.toLower());
-}
+} //setHeader
 
 void MainWindow::setFont(QString text) {
   addTag("<font face=\""+text+"\">","</font>","fontName", text.toLower());
-}
+} //setFont
 
 void MainWindow::setFontSize(int size) {
   QString number = QString::number(size);
   addTag("<font size=\""+number+"\">","</font>","fontSize",number);
-}
+} //setFontSize
 
 void MainWindow::setTextColor() {
   QString color = kcbbTextColor->color().name();
   addTag("<font color=\""+color+"\">","</font>","foreColor", color);
-}
+} //setTextColor
 
 void MainWindow::setHighlightColor() {
   QString color = cbbHighlightColor->color().name();
   addTag("<font style=\"background-color:"+color+"\">","</font>","hiliteColor", color);
-}
+} //setHighlightColor
 
 void MainWindow::setUList() {
   addTag("<ul>","</ul>","insertUnorderedList");
-}
+} //setUList
 
 void MainWindow::setBackgroundColor() {
   if (tabWEditor->currentIndex() == 0)
@@ -2062,7 +1944,7 @@ void MainWindow::setBackgroundColor() {
   rtfHTMLEditor->setPlainText(aParser->getParsedHtml(pageData));
   if (tabWEditor->currentIndex() == 0)
     webPreview->setHtml(rtfHTMLEditor->toPlainText());
-}
+} //setBackgroundColor
 
 void MainWindow::insertImage() {
   /*QString filters;
@@ -2078,7 +1960,7 @@ void MainWindow::insertImage() {
     return;
   QUrl url = QUrl::fromLocalFile(fn);
   addTag("<img src=\""+url.toString()+"\" \\>","","insertImage", url.toString());
-}
+} //insertImage
 
 void MainWindow::insertTable() {
   NewTable* aNewTable = new NewTable(this);
@@ -2091,29 +1973,29 @@ void MainWindow::insertTable() {
   newdiv.innerHTML(\"<tr><td>test4</td></tr>\");\
   document.appendChild(newdiv);");*/
   frame->evaluateJavaScript(js);
-}
+} //insertTable
 
 void MainWindow::insertLink() {
   RessrourceManager* aRessounrceManager = new RessrourceManager(this);
   aRessounrceManager->show();
-}
+} //insertLink
 
 void MainWindow::insertChar() {
   KDialog* aDialog = new KDialog(this);
   aDialog->setMainWidget(new KCharSelect(aDialog));
   aDialog->show();
-}
+} //insertChar
 
 void MainWindow::editShortcut() {
   KDialog* aDialog = new KDialog(this);
   aDialog->setMainWidget(new KShortcutsEditor(actionCollection,aDialog));
   aDialog->show();
-}
+} //editShortcut
 
 void MainWindow::editToolbar() {
   KEditToolBar* aToolbarEditor = new KEditToolBar(actionCollection);
   aToolbarEditor->show();
-}
+} //editToolbar
 
 void MainWindow::aboutKimberlite() {
   KAboutData* aboutData = new KAboutData( "kimberlite", "kimberlite",
@@ -2123,12 +2005,12 @@ void MainWindow::aboutKimberlite() {
   ki18n("Copyright (c) 2008 Emmanuel Lepage Vallee") );
   KAboutApplicationDialog* aDialog = new KAboutApplicationDialog(aboutData,this);
   aDialog->show();
-}
+} //aboutKimberlite
 
 void MainWindow::reportBug() {
   KBugReport* aDialog = new KBugReport();
   aDialog->show();
-}
+} //reportBug
 
 void MainWindow::disableWysiwyg(bool value) {
   cbbFont->setDisabled(value);
@@ -2158,7 +2040,7 @@ void MainWindow::disableWysiwyg(bool value) {
   ashActions["Add Table"]->setDisabled(value);
   ashActions["Add Link"]->setDisabled(value);
   ashActions["Special Character"]->setDisabled(value);
-}
+} //disableWysiwyg
 
 KAction* MainWindow::createAction(QString name, QString icon, QKeySequence shortcut, bool checkable) {
   KAction* newAction = new KAction(this);
@@ -2169,11 +2051,11 @@ KAction* MainWindow::createAction(QString name, QString icon, QKeySequence short
   actionCollection->addAction(name, newAction);
   ashActions[name] = newAction;
   return newAction;
-}
+} //createAction
 
 void MainWindow::quit() {
   exit(33);
-}
+} //quit
 
 void MainWindow::print() {
   QPrintDialog* aDialog = new QPrintDialog(this);
@@ -2192,14 +2074,14 @@ void MainWindow::print() {
 	rtfCSSEditor->print(aDialog->printer());
     }
   }
-}
+} //print
 
 void MainWindow::printPreview() { //BUG Linking error
   /*QPrinter* aPrinter = new QPrinter();
   KPrintPreview var(aPrinter,this);
   KPrintPreview* aDialog = new KPrintPreview(aPrinter,this);
   aDialog->show();*/
-}
+} //printPreview
 
 void MainWindow::undo() {
   switch (tabWEditor->currentIndex()) {
@@ -2215,7 +2097,7 @@ void MainWindow::undo() {
     case 3:
       rtfCSSEditor->undo();
   }
-}
+} //undo
 
 void MainWindow::redo() {
   switch (tabWEditor->currentIndex()) {
@@ -2231,7 +2113,7 @@ void MainWindow::redo() {
     case 3:
       rtfCSSEditor->redo();
   }
-}
+} //redo
 
 void MainWindow::copy() {
   switch (tabWEditor->currentIndex()) {
@@ -2247,7 +2129,7 @@ void MainWindow::copy() {
     case 3:
       rtfCSSEditor->copy();
   }
-}
+} //copy
 
 void MainWindow::cut() {
   switch (tabWEditor->currentIndex()) {
@@ -2263,11 +2145,11 @@ void MainWindow::cut() {
     case 3:
       rtfCSSEditor->cut();
   }
-}
+} //cut
 
 void MainWindow::paste() {
   switch (tabWEditor->currentIndex()) {
-    case 0:
+    case MODE_WYSIWYG :
       webPreview->page()->triggerAction(QWebPage::Paste,true);
       break;
     case 1:
@@ -2279,7 +2161,7 @@ void MainWindow::paste() {
     case 3:
       rtfCSSEditor->paste();
   }
-}
+} //paste
 
 void MainWindow::find() {
   switch (tabWEditor->currentIndex()) {
@@ -2290,13 +2172,13 @@ void MainWindow::find() {
       rtfHTMLEditor->findText();
       break;
     case 2:
-      //rtfScriptEditor->paste();
+      //rtfScriptEditor->findText();
       break;
     case 3:
-      //rtfCSSEditor->paste();
+      //rtfCSSEditor->findText();
       break;
   }
-}
+} //find
 
 QStringList MainWindow::loadRecentProjectList() {
   QStringList toReturn;
@@ -2311,7 +2193,7 @@ QStringList MainWindow::loadRecentProjectList() {
     toReturn << "";
   file.close();
   return toReturn;
-}
+} //loadRecentProjectList
 
 void MainWindow::saveRecentProject(QString filePath) {
   QStringList recentProjectList;
@@ -2344,7 +2226,7 @@ void MainWindow::saveRecentProject(QString filePath) {
   file.write(outputByteArray);
   file.finalize();
   file.close();
-}
+} //saveRecentProject
 
 void MainWindow::loadDefaultPage() {
   KIconLoader *iconloader = KIconLoader::global();
@@ -2378,7 +2260,7 @@ void MainWindow::loadDefaultPage() {
 
   file2.close();
   webPreview->setHtml(page);
-}
+} //loadDefaultPage
 
 void MainWindow::defaultPageLinkClicked(const QUrl & url) {
   if (url.toString() == "new")
@@ -2387,7 +2269,7 @@ void MainWindow::defaultPageLinkClicked(const QUrl & url) {
     openProject();
   else if (url.toString().left(5) == "load:")
     openProject(url.toString().remove(0,5));
-}
+} //defaultPageLinkClicked
 
 void MainWindow::cursorChanged() {
   QTextCursor tc;
@@ -2420,7 +2302,7 @@ void MainWindow::cursorChanged() {
       break;
   }
   lblStatusBar1->setText("Line: " + QString::number(tc.blockNumber()));
-}
+} //cursorChanged
 
 void MainWindow::addClasses() {
   bool ok;
@@ -2434,12 +2316,12 @@ void MainWindow::addClasses() {
     updateClassTree();
     fillCSSBegMode(currentClassName);
   }
-}
+} //addClasses
 
 void MainWindow::loading(int value) {
   pbStatusBar->setValue(value);
-}
+} //loading
 
 void MainWindow::linkHovered(QString link) {
   lblStatusBar3->setText(link);
-}
+} //linkHovered
