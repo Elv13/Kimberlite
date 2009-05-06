@@ -56,7 +56,6 @@
 #include <QProgressBar>
 #include "src/CSSbeginnerWidget.h"
 #include "src/addProprietyWidget.h"
-#include "src/stringToTemplate.h"
 #include "src/ProjectManager_v2.h"
 #include "src/template.h"
 #include "src/ressourcesManager.h"
@@ -213,6 +212,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   btnBold->setMaximumSize(QSize(30, 30));
   KIcon* icnBold = new KIcon("format-text-bold");
   btnBold->setIcon(*icnBold);
+  btnBold->setCheckable(true);
   connect(btnBold, SIGNAL(clicked()), this, SLOT(setBold()));
 
   hlTextAtributeButton->addWidget(btnBold);
@@ -223,6 +223,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   btnUnderline->setMaximumSize(QSize(30, 16777215));
   KIcon* icnUnderLine = new KIcon("format-text-underline");
   btnUnderline->setIcon(*icnUnderLine);
+  btnUnderline->setCheckable(true);
   connect(btnUnderline, SIGNAL(clicked()), this, SLOT(setUnderline()));
 
   hlTextAtributeButton->addWidget(btnUnderline);
@@ -233,6 +234,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   btnItalic->setMaximumSize(QSize(30, 16777215));
   KIcon* icnItalic = new KIcon("format-text-italic");
   btnItalic->setIcon(*icnItalic);
+  btnItalic->setCheckable(true);
   connect(btnItalic, SIGNAL(clicked()), this, SLOT(setItalic()));
 
   hlTextAtributeButton->addWidget(btnItalic);
@@ -712,12 +714,12 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   webPreview->setObjectName(QString::fromUtf8("webPreview"));
   loadDefaultPage();
   webPreview->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+  tabWEditor->addTab(webPreview, QString());
   
   connect(webPreview,SIGNAL(linkClicked(QUrl)), this, SLOT(defaultPageLinkClicked(QUrl)));
   connect(webPreview->page(),SIGNAL(loadProgress(int)), this, SLOT(loading(int)));
   connect(webPreview->page(),SIGNAL(linkHovered(QString,QString,QString)), this, SLOT(linkHovered(QString)));
-  
-  tabWEditor->addTab(webPreview, QString());
+  connect(webPreview->page(),SIGNAL(selectionChanged()), this, SLOT(webPageCursorMoved()));
   
   /***************************************************************
   
@@ -1272,12 +1274,18 @@ void MainWindow::reParse() {
 void MainWindow::templaterize() {
   StringConverter* aStringConverter = new StringConverter(this);
   aStringConverter->toTemplate(rtfHTMLEditor->toPlainText());
+  connect(aStringConverter, SIGNAL(over(QString)),this, SLOT(replaceHtml(QString)));
 } //templaterize
 
 void MainWindow::translate() {
   StringConverter* aStringConverter = new StringConverter(this);
   aStringConverter->translate(rtfHTMLEditor->toPlainText());
+  connect(aStringConverter, SIGNAL(over(QString)),this, SLOT(replaceHtml(QString)));
 } //translate
+
+void MainWindow::replaceHtml(QString newHtml) {
+  rtfHTMLEditor->setPlainText(newHtml);
+} //replaceHtml
 
 void MainWindow::newProject(){
   NewProject* aNewProject = new NewProject(this);
@@ -1749,6 +1757,7 @@ void MainWindow::modeChanged(int index) {
       break;
     }
     case 1:
+      //if (webPreview->isModified()) //Too dangerous
       rtfHTMLEditor->setPlainText(aParser->getParsedHtml(webPreview->page()->mainFrame()->toHtml()));
       disableWysiwyg(false);
       ashActions["Zoom 1:1"]->setEnabled(true);
@@ -2325,3 +2334,14 @@ void MainWindow::loading(int value) {
 void MainWindow::linkHovered(QString link) {
   lblStatusBar3->setText(link);
 } //linkHovered
+
+void MainWindow::webPageCursorMoved() {
+  QAction* action = webPreview->pageAction(QWebPage::ToggleBold);
+  btnBold->setChecked(action->isChecked());
+  action = webPreview->pageAction(QWebPage::ToggleItalic);
+  btnItalic->setChecked(action->isChecked());
+  action = webPreview->pageAction(QWebPage::ToggleUnderline);
+  btnUnderline->setChecked(action->isChecked());
+  //lblStatusBar1->setText(QString::number(webPreview->page()->totalBytes()/1024) + "KB");
+}
+

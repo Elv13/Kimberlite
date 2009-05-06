@@ -31,6 +31,7 @@
 #include <QtGui/QTreeWidget>
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QWidget>
+#include <KIcon>
 
 QT_BEGIN_NAMESPACE
 
@@ -81,7 +82,8 @@ public:
         horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
         btnAddFolder = new QPushButton(grbFolder);
         btnAddFolder->setObjectName(QString::fromUtf8("btnAddFolder"));
-        btnAddFolder->setMaximumSize(QSize(30, 30));
+        //btnAddFolder->setMaximumSize(QSize(30, 30));
+	btnAddFolder->setIcon(KIcon("menu-add"));
 
         horizontalLayout->addWidget(btnAddFolder);
 
@@ -252,7 +254,8 @@ public:
         horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
         btnAddFolder = new QPushButton(grbFolder);
         btnAddFolder->setObjectName(QString::fromUtf8("btnAddFolder"));
-        btnAddFolder->setMaximumSize(QSize(30, 30));
+        //btnAddFolder->setMaximumSize(QSize(30, 30));
+	btnAddFolder->setIcon(KIcon("menu-add"));
 
         horizontalLayout->addWidget(btnAddFolder);
 
@@ -424,7 +427,8 @@ public:
         horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
         btnAddFolder = new QPushButton(grbFolder);
         btnAddFolder->setObjectName(QString::fromUtf8("btnAddFolder"));
-        btnAddFolder->setMaximumSize(QSize(30, 30));
+        //btnAddFolder->setMaximumSize(QSize(30, 30));
+	btnAddFolder->setIcon(KIcon("menu-add"));
 
         horizontalLayout->addWidget(btnAddFolder);
 

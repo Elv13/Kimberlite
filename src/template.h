@@ -16,17 +16,18 @@
 #include <QDialog>
 #include <QVector>
 #include <sonnet/dictionarycombobox.h>
+#include <KTitleWidget>
 #include "htmlParser.h"
 
 #define eTranslate 0
 #define eTemplate 1
 
-struct StringInfo {
-  int index;
-  QString originalText;
-  QString newText;
+class StringInfo {
+  public:
+    int index;
+    QString originalText;
+    QString newText;
 };
-
 
 class StringConverter : public QDialog {
   Q_OBJECT
@@ -34,7 +35,7 @@ public:
     StringConverter(QWidget* parent);
     QVBoxLayout *verticalLayout_4;
     QVBoxLayout *verticalLayout_2;
-    QLabel *label_5;
+    KTitleWidget* label_5;
     QLabel *label_2;
     QPlainTextEdit *plainTextEdit_2;
     QVBoxLayout *verticalLayout;
@@ -64,6 +65,9 @@ public:
     void finish();
   private:
     bool findDuplicate(QString name);
+    HtmlData pageData;
+  signals:
+    void over(QString);
 };
 
 #endif // TRANSLATEE11004_H

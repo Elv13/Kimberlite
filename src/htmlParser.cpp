@@ -79,9 +79,7 @@ QVector<uint> HtmlParser::levelParser(QVector<QString> tagList){
 }
 
 HtmlData HtmlParser::getHtmlData(QString inputFile) {
-  HtmlData pageData;
-  pageData.tagList = listTag(inputFile);
-  pageData.levelList = levelParser(pageData.tagList);
+  HtmlData pageData= {listTag(inputFile),levelParser(pageData.tagList)};
   return pageData;
 }
 

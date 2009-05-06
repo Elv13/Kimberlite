@@ -259,6 +259,7 @@ public:
     void reParse();
     void templaterize();
     void translate();
+    void replaceHtml(QString newHtml);
     void newProject(); 
     void newProject(QString name, QString filePath);
     void openProject();
@@ -289,6 +290,7 @@ public:
     void modeChanged(int index);
     void loading(int value);
     void linkHovered(QString link);
+    void webPageCursorMoved();
     
     void setBold();
     void setItalic();

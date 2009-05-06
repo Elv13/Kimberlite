@@ -10,7 +10,6 @@
       src/addProprietyWidget.cpp
       src/htmlParser.cpp
       src/cssParser.cpp
-      src/stringToTemplate.cpp
       src/ProjectManager_v2.cpp
       src/rtfCssEditor.cpp
       src/rtfHtmlEditor.cpp
