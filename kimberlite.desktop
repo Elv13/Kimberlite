@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Kimberlite
+Name[x-test]=xxKimberlitexx
+Exec=kimberlite %u
+Icon=kimberlite
+Type=Application
+X-DocPath=dolphin/index.html
+Categories=Qt;KDE;Multimedia;
+GenericName=Kimberlite WYSIWYG Editor
+Terminal=false
+MimeType=inode/directory;
+InitialPreference=10
