@@ -1,4 +1,10 @@
-      project(kimberlite)
+project(kimberlite)
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules )
+cmake_minimum_required(VERSION 2.6)
+
+find_package(KDE4 4.1.0 REQUIRED)
+find_package(Qt4 4.5.0 REQUIRED)
+include(KDE4Defaults)
 
       find_package(KDE4 REQUIRED)
       include_directories( ${KDE4_INCLUDES}${QT_INCLUDE_DIR}/QtWebKit )
@@ -53,3 +59,10 @@
 	  pixmap/tag.png
 	  pixmap/logo.png
       DESTINATION ${DATA_INSTALL_DIR}/kimberlite/pixmap )
+      
+      install( FILES  
+	kimberlite.desktop 
+      DESTINATION ${XDG_APPS_INSTALL_DIR} )
+      
+      
+      add_subdirectory( pixmap/logo )
