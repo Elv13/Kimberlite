@@ -58,6 +58,11 @@ include(KDE4Defaults)
 	  pixmap/class.png
 	  pixmap/tag.png
 	  pixmap/logo.png
+	  pixmap/showCSS.png
+	  pixmap/showDebugger.png
+	  pixmap/showHTML.png
+	  pixmap/showInspector.png
+	  pixmap/showProject.png
       DESTINATION ${DATA_INSTALL_DIR}/kimberlite/pixmap )
       
       install( FILES  
@@ -66,3 +71,4 @@ include(KDE4Defaults)
       
       
       add_subdirectory( pixmap/logo )
+      add_subdirectory( pixmap/icon )

@@ -97,37 +97,37 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   QPalette aPalette;
   fileTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
 
-  createAction("New Project", "document-new", Qt::CTRL + Qt::Key_W);
+  createAction("New Project", "document-new", Qt::CTRL + Qt::Key_N);
   connect(ashActions["New Project"], SIGNAL(triggered(bool)),this, SLOT(newProject()));
   fileTB->addAction(ashActions["New Project"]);
 
-  createAction("Open Project", "document-open", Qt::CTRL + Qt::Key_W);
+  createAction("Open Project", "document-open", Qt::CTRL + Qt::Key_O);
   connect(ashActions["Open Project"], SIGNAL(triggered(bool)),this, SLOT(openProject()));
   fileTB->addAction(ashActions["Open Project"]);
 
   fileTB->addSeparator();
 
-  createAction("Save", "document-save", Qt::CTRL + Qt::Key_W);
+  createAction("Save", "document-save", Qt::CTRL + Qt::Key_S);
   connect(ashActions["Save"], SIGNAL(triggered(bool)),this, SLOT(saveProject()));
   fileTB->addAction(ashActions["Save"]);
 
-  createAction("Save As", "document-save-as", Qt::CTRL + Qt::Key_W);
+  createAction("Save As", "document-save-as", Qt::CTRL + Qt::SHIFT + Qt::Key_S);
   connect(ashActions["Save As"], SIGNAL(triggered(bool)), this, SLOT(saveProjectAs()));
   fileTB->addAction(ashActions["Save As"]);
 
   fileTB->addSeparator();
 
-  createAction("Print", "document-print", Qt::CTRL + Qt::Key_W);
+  createAction("Print", "document-print", Qt::CTRL + Qt::Key_P);
   connect(ashActions["Print"], SIGNAL(triggered(bool)),this, SLOT(print()));
   fileTB->addAction(ashActions["Print"]);
 
-  createAction("Print Preview", "document-print-preview", Qt::CTRL + Qt::Key_W);
+  createAction("Print Preview", "document-print-preview", NULL);
   connect(ashActions["Print Preview"], SIGNAL(triggered(bool)), this, SLOT(printPreview()));
   fileTB->addAction(ashActions["Print Preview"]);
 
   fileTB->addSeparator();
 
-  createAction("Quit", "application-exit", Qt::CTRL + Qt::Key_W);
+  createAction("Quit", "application-exit", Qt::CTRL + Qt::Key_Q);
   connect(ashActions["Quit"], SIGNAL(triggered(bool)),this, SLOT(quit()));
   fileTB->addAction(ashActions["Quit"]);
   
@@ -146,31 +146,31 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   editTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
   horizontalLayout_14->addWidget(editTB);
 
-  createAction("Undo", "edit-undo", Qt::CTRL + Qt::Key_W);
+  createAction("Undo", "edit-undo", Qt::CTRL + Qt::Key_Z);
   connect(ashActions["Undo"], SIGNAL(triggered(bool)), this, SLOT(undo()));
   editTB->addAction(ashActions["Undo"]);
 
-  createAction("Redo", "edit-redo", Qt::CTRL + Qt::Key_W);
+  createAction("Redo", "edit-redo", Qt::CTRL + Qt::SHIFT + Qt::Key_Z);
   connect(ashActions["Redo"], SIGNAL(triggered(bool)), this, SLOT(redo()));
   editTB->addAction(ashActions["Redo"]);
 
   editTB->addSeparator();
 
-  createAction("Copy", "edit-copy", Qt::CTRL + Qt::Key_W);
+  createAction("Copy", "edit-copy", Qt::CTRL + Qt::Key_C);
   connect(ashActions["Copy"], SIGNAL(triggered(bool)), this, SLOT(copy()));
   editTB->addAction(ashActions["Copy"]);
 
-  createAction("Cut", "edit-cut", Qt::CTRL + Qt::Key_W);
+  createAction("Cut", "edit-cut", Qt::CTRL + Qt::Key_X);
   connect(ashActions["Cut"], SIGNAL(triggered(bool)), this, SLOT(cut()));
   editTB->addAction(ashActions["Cut"]);
 
-  createAction("Paste", "edit-paste", Qt::CTRL + Qt::Key_W);
+  createAction("Paste", "edit-paste", Qt::CTRL + Qt::Key_V);
   connect(ashActions["Paste"], SIGNAL(triggered(bool)), this, SLOT(paste()));
   editTB->addAction(ashActions["Paste"]);
 
   editTB->addSeparator();
 
-  createAction("Find", "edit-find", Qt::CTRL + Qt::Key_W);
+  createAction("Find", "edit-find", Qt::CTRL + Qt::Key_F);
   connect(ashActions["Find"], SIGNAL(triggered(bool)), this, SLOT(find()));
   editTB->addAction(ashActions["Find"]);
 
@@ -212,6 +212,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   btnBold->setMaximumSize(QSize(30, 30));
   KIcon* icnBold = new KIcon("format-text-bold");
   btnBold->setIcon(*icnBold);
+  btnBold->setIconSize(QSize(22,22));
   btnBold->setCheckable(true);
   connect(btnBold, SIGNAL(clicked()), this, SLOT(setBold()));
 
@@ -224,6 +225,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   KIcon* icnUnderLine = new KIcon("format-text-underline");
   btnUnderline->setIcon(*icnUnderLine);
   btnUnderline->setCheckable(true);
+  btnUnderline->setIconSize(QSize(22,22));
   connect(btnUnderline, SIGNAL(clicked()), this, SLOT(setUnderline()));
 
   hlTextAtributeButton->addWidget(btnUnderline);
@@ -234,6 +236,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   btnItalic->setMaximumSize(QSize(30, 16777215));
   KIcon* icnItalic = new KIcon("format-text-italic");
   btnItalic->setIcon(*icnItalic);
+  btnItalic->setIconSize(QSize(22,22));
   btnItalic->setCheckable(true);
   connect(btnItalic, SIGNAL(clicked()), this, SLOT(setItalic()));
 
@@ -252,6 +255,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   btnAlignLeft->setMaximumSize(QSize(30, 16777215));
   KIcon* icnAlignLeft = new KIcon("format-justify-left");
   btnAlignLeft->setIcon(*icnAlignLeft);
+  btnAlignLeft->setIconSize(QSize(22,22));
   connect(btnAlignLeft, SIGNAL(clicked()), this, SLOT(setAlignLeft()));
 
   hlTextAtributeButton->addWidget(btnAlignLeft);
@@ -262,6 +266,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   btnAlignCenter->setMaximumSize(QSize(30, 16777215));
   KIcon* icnAlignCenter = new KIcon("format-justify-center");
   btnAlignCenter->setIcon(*icnAlignCenter);
+  btnAlignCenter->setIconSize(QSize(22,22));
   connect(btnAlignCenter, SIGNAL(clicked()), this, SLOT(setAlignCenter()));
 
   hlTextAtributeButton->addWidget(btnAlignCenter);
@@ -272,6 +277,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   btnAlignRight->setMaximumSize(QSize(30, 16777215));
   KIcon* icnAlignRight = new KIcon("format-justify-right");
   btnAlignRight->setIcon(*icnAlignRight);
+  btnAlignRight->setIconSize(QSize(22,22));
   connect(btnAlignRight, SIGNAL(clicked()), this, SLOT(setAlignRight()));
 
   hlTextAtributeButton->addWidget(btnAlignRight);
@@ -282,6 +288,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   btnJustify->setMaximumSize(QSize(30, 16777215));
   KIcon* icnJustify = new KIcon("format-justify-fill");
   btnJustify->setIcon(*icnJustify);
+  btnJustify->setIconSize(QSize(22,22));
   connect(btnJustify, SIGNAL(clicked()), this, SLOT(setJustify()));
 
   hlTextAtributeButton->addWidget(btnJustify);
@@ -309,6 +316,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   btnLink = new KPushButton(menuEdit);
   btnLink->setObjectName(QString::fromUtf8("btnLink"));
   btnLink->setIcon(KIcon("insert-link"));
+  btnLink->setIconSize(QSize(22,22));
   btnLink->setMinimumSize(QSize(30, 30));
   btnLink->setMaximumSize(QSize(30, 16777215));
 
@@ -317,6 +325,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   btnChar = new KPushButton(menuEdit);
   btnChar->setObjectName(QString::fromUtf8("btnChar"));
   btnChar->setIcon(KIcon("draw-text"));
+  btnChar->setIconSize(QSize(22,22));
   btnChar->setMinimumSize(QSize(30, 30));
   btnChar->setMaximumSize(QSize(30, 16777215));
 
@@ -325,6 +334,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   btnTable = new KPushButton(menuEdit);
   btnTable->setObjectName(QString::fromUtf8("btnTable"));
   btnTable->setIcon(KIcon("insert-table"));
+  btnTable->setIconSize(QSize(22,22));
   btnTable->setMinimumSize(QSize(30, 30));
   btnTable->setMaximumSize(QSize(30, 16777215));
 
@@ -333,6 +343,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   btnList = new KPushButton(menuEdit);
   btnList->setObjectName(QString::fromUtf8("btnList"));
   btnList->setIcon(KIcon("format-list-unordered"));
+  btnList->setIconSize(QSize(22,22));
   btnList->setMinimumSize(QSize(30, 30));
   btnList->setMaximumSize(QSize(30, 16777215));
   connect(btnList, SIGNAL(clicked()), this, SLOT(setUList()));
@@ -398,37 +409,37 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   tabWMenu->addTab(viewTB, "View");
   viewTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
 
-  createAction("Project", "text-x-katefilelist", Qt::CTRL + Qt::Key_W,true);
+  createAction("Project", KStandardDirs::locate("appdata", "pixmap/showProject.png"), NULL,true);
   connect(ashActions["Project"], SIGNAL(triggered(bool)), this, SLOT(showPageList(bool)));
   viewTB->addAction(ashActions["Project"]);
 
-  createAction("CSS Class", "text-x-katefilelist", Qt::CTRL + Qt::Key_W, true);
+  createAction("CSS Class", KStandardDirs::locate("appdata", "pixmap/showCSS.png"), NULL, true);
   connect(ashActions["CSS Class"], SIGNAL(triggered(bool)), this, SLOT(showCSS(bool)));
   viewTB->addAction(ashActions["CSS Class"]);
 
-  createAction("HTML Tree", "text-x-katefilelist", Qt::CTRL + Qt::Key_W, true);
+  createAction("HTML Tree", KStandardDirs::locate("appdata", "pixmap/showHTML.png"), NULL, true);
   connect(ashActions["HTML Tree"], SIGNAL(triggered(bool)), this, SLOT(showHtml(bool)));
   viewTB->addAction(ashActions["HTML Tree"]);
 
-  createAction("Debugger", "text-x-katefilelist", Qt::CTRL + Qt::Key_W, true);
+  createAction("Debugger", KStandardDirs::locate("appdata", "pixmap/showDebugger.png"), NULL, true);
   connect(ashActions["Debugger"], SIGNAL(triggered(bool)), this, SLOT(showDebugger(bool)));
   viewTB->addAction(ashActions["Debugger"]);
   
-  createAction("Inspector", "text-x-katefilelist", Qt::CTRL + Qt::Key_W);
+  createAction("Inspector", KStandardDirs::locate("appdata", "pixmap/showInspector.png"), NULL);
   connect(ashActions["Inspector"], SIGNAL(triggered(bool)), this, SLOT(showInspector(bool)));
   viewTB->addAction(ashActions["Inspector"]);
   
   viewTB->addSeparator();
 
-  createAction("Zoom In", "zoom-in", Qt::CTRL + Qt::Key_W);
+  createAction("Zoom In", "zoom-in", Qt::CTRL + Qt::Key_Equal);
   connect(ashActions["Zoom In"], SIGNAL(triggered(bool)), this, SLOT(zoomIn()));
   viewTB->addAction(ashActions["Zoom In"]);
 
-  createAction("Zoom Out", "zoom-out", Qt::CTRL + Qt::Key_W);
+  createAction("Zoom Out", "zoom-out", Qt::CTRL + Qt::Key_Minus);
   connect(ashActions["Zoom Out"], SIGNAL(triggered(bool)), this, SLOT(zoomOut()));
   viewTB->addAction(ashActions["Zoom Out"]);
 
-  createAction("Zoom 1:1", "zoom-original", Qt::CTRL + Qt::Key_W);
+  createAction("Zoom 1:1", "zoom-original", NULL);
   connect(ashActions["Zoom 1:1"], SIGNAL(triggered(bool)), this, SLOT(zoomDefault()));
   viewTB->addAction(ashActions["Zoom 1:1"]);
 
@@ -455,41 +466,41 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   insertTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
   hlInsert->addWidget(insertTB,0,0,0,3);
 
-  createAction("New Page", "document-new", Qt::CTRL + Qt::Key_W);
+  createAction("New Page", "document-new", Qt::CTRL + Qt::ALT + Qt::Key_N);
   connect(ashActions["New Page"], SIGNAL(triggered(bool)), this, SLOT(addHtmlPage()));
   insertTB->addAction(ashActions["New Page"]);
 
-  createAction("New Script", "application-add", Qt::CTRL + Qt::Key_W);
+  createAction("New Script", "application-add", Qt::CTRL + Qt::SHIFT + Qt::Key_N);
   connect(ashActions["New Script"], SIGNAL(triggered(bool)), this, SLOT(addScript()));
   insertTB->addAction(ashActions["New Script"]);
 
   insertTB->addSeparator();
 
-  createAction("Add Image", "insert-image", Qt::CTRL + Qt::Key_W);
+  createAction("Add Image", "insert-image", Qt::CTRL + Qt::Key_I);
   connect(ashActions["Add Image"], SIGNAL(triggered(bool)), this, SLOT(insertImage()));
   insertTB->addAction(ashActions["Add Image"]);
 
-  createAction("Add Table", "insert-table", Qt::CTRL + Qt::Key_W);
+  createAction("Add Table", "insert-table", Qt::CTRL + Qt::Key_T);
   connect(ashActions["Add Table"], SIGNAL(triggered(bool)), this, SLOT(insertTable()));
   insertTB->addAction(ashActions["Add Table"]);
 
-  createAction("Add Link", "insert-link", Qt::CTRL + Qt::Key_W);
+  createAction("Add Link", "insert-link", Qt::CTRL + Qt::Key_L);
   connect(ashActions["Add Link"], SIGNAL(triggered(bool)), this, SLOT(insertLink()));
   insertTB->addAction(ashActions["Add Link"]);
 
-  createAction("Add Text", "insert-text", Qt::CTRL + Qt::Key_W);
+  createAction("Add Text", "insert-text", NULL);
   connect(ashActions["Add Text"], SIGNAL(triggered(bool)), this, SLOT(quit()));
   insertTB->addAction(ashActions["Add Text"]);
   ashActions["Add Text"]->setDisabled(true);
 
   insertTB->addSeparator();
 
-  createAction("Special Character", "list-add-font", Qt::CTRL + Qt::Key_W);
+  createAction("Special Character", "list-add-font", NULL);
   connect(ashActions["Special Character"], SIGNAL(triggered(bool)), this, SLOT(insertChar()));
   insertTB->addAction(ashActions["Special Character"]);
   //ashActions["Special Character"]->setDisabled(true);
 
-  createAction("Get Color Code", "fill-color", Qt::CTRL + Qt::Key_W);
+  createAction("Get Color Code", "fill-color", NULL);
   connect(ashActions["Get Color Code"], SIGNAL(triggered(bool)), this, SLOT(quit()));
   insertTB->addAction(ashActions["Get Color Code"]);
   ashActions["Get Color Code"]->setDisabled(true);
@@ -530,35 +541,35 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   tabWMenu->addTab(toolsTB, "Tools");
   toolsTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
 
-  createAction("Parse", "format-indent-more", Qt::CTRL + Qt::Key_W);
+  createAction("Parse", "format-indent-more", Qt::CTRL + Qt::Key_P);
   connect(ashActions["Parse"], SIGNAL(triggered(bool)), this, SLOT(reParse()));
   toolsTB->addAction(ashActions["Parse"]);
 
-  createAction("Templaterize", "view-pim-tasks", Qt::CTRL + Qt::Key_W);
+  createAction("Templaterize", "view-pim-tasks", NULL);
   connect(ashActions["Templaterize"], SIGNAL(triggered(bool)), this, SLOT(templaterize()));
   toolsTB->addAction(ashActions["Templaterize"]);
 
-  createAction("Translate", "application-x-marble", Qt::CTRL + Qt::Key_W);
+  createAction("Translate", "application-x-marble", NULL);
   connect(ashActions["Translate"], SIGNAL(triggered(bool)), this, SLOT(translate()));
   toolsTB->addAction(ashActions["Translate"]);
 
-  createAction("Debug", "tools-report-bug", Qt::CTRL + Qt::Key_W);
+  createAction("Debug", "tools-report-bug", Qt::CTRL + Qt::Key_D);
   connect(ashActions["Debug"], SIGNAL(triggered(bool)), this, SLOT(debugHtml()));
   toolsTB->addAction(ashActions["Debug"]);
 
   toolsTB->addSeparator();
 
-  createAction("Match Tag", "application-xml", Qt::CTRL + Qt::Key_W);
+  createAction("Match Tag", "application-xml", NULL);
   connect(ashActions["Match Tag"], SIGNAL(triggered(bool)), this, SLOT(quit()));
   toolsTB->addAction(ashActions["Match Tag"]);
   ashActions["Match Tag"]->setDisabled(true);
 
-  createAction("Spelling", "tools-check-spelling", Qt::CTRL + Qt::Key_W);
+  createAction("Spelling", "tools-check-spelling", NULL);
   connect(ashActions["Spelling"], SIGNAL(triggered(bool)), this, SLOT(quit()));
   toolsTB->addAction(ashActions["Spelling"]);
   ashActions["Spelling"]->setDisabled(true);
 
-  createAction("Check Link", "network-connect", Qt::CTRL + Qt::Key_W);
+  createAction("Check Link", "network-connect", NULL);
   connect(ashActions["Check Link"], SIGNAL(triggered(bool)), this, SLOT(quit()));
   toolsTB->addAction(ashActions["Check Link"]);
   ashActions["Check Link"]->setDisabled(true);
@@ -573,16 +584,16 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   tabWMenu->addTab(optionsTB, "Settings");
   optionsTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
 
-  createAction("Configure WebKreator", "configure", Qt::CTRL + Qt::Key_W);
+  createAction("Configure WebKreator", "configure", NULL);
   connect(ashActions["Configure WebKreator"], SIGNAL(triggered(bool)), this, SLOT(quit()));
   optionsTB->addAction(ashActions["Configure WebKreator"]);
   ashActions["Configure WebKreator"]->setDisabled(true);
 
-  createAction("Configure ToolBars", "configure-toolbars", Qt::CTRL + Qt::Key_W);
+  createAction("Configure ToolBars", "configure-toolbars", NULL);
   connect(ashActions["Configure ToolBars"], SIGNAL(triggered(bool)), this, SLOT(editToolbar()));
   optionsTB->addAction(ashActions["Configure ToolBars"]);
 
-  createAction("Configure Shortcuts", "configure-shortcuts", Qt::CTRL + Qt::Key_W);
+  createAction("Configure Shortcuts", "configure-shortcuts", NULL);
   connect(ashActions["Configure Shortcuts"], SIGNAL(triggered(bool)), this, SLOT(editShortcut()));
   optionsTB->addAction(ashActions["Configure Shortcuts"]);
 
@@ -596,18 +607,18 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   tabWMenu->addTab(helpTB, "Help");
   helpTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
 
-  createAction("Manual", "help-contents", Qt::CTRL + Qt::Key_W);
+  createAction("Manual", "help-contents", NULL);
   connect(ashActions["Manual"], SIGNAL(triggered(bool)), this, SLOT(quit()));
   helpTB->addAction(ashActions["Manual"]);
   ashActions["Manual"]->setDisabled(true);
 
-  createAction("About", "help-about", Qt::CTRL + Qt::Key_W);
+  createAction("About", "help-about", NULL);
   connect(ashActions["About"], SIGNAL(triggered(bool)), this, SLOT(aboutKimberlite()));
   helpTB->addAction(ashActions["About"]);
 
   helpTB->addSeparator();
 
-  createAction("Report A Bug", "tools-report-bug", Qt::CTRL + Qt::Key_W);
+  createAction("Report A Bug", "tools-report-bug", NULL);
   connect(ashActions["Report A Bug"], SIGNAL(triggered(bool)), this, SLOT(reportBug()));
   helpTB->addAction(ashActions["Report A Bug"]);
 
