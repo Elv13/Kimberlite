@@ -141,13 +141,9 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
 
   editTB->addSeparator();
 
-  vlTextAtribute = new QVBoxLayout();
-  vlTextAtribute->setObjectName(QString::fromUtf8("vlTextAtribute"));
-  vlTextAtribute->setContentsMargins(0,0,0,0);
   hlFont = new QHBoxLayout();
   hlFont->setContentsMargins(0,0,0,0);
-  hlFont->setObjectName(QString::fromUtf8("hlFont"));
-  hlFont->setSizeConstraint(QLayout::SetMinimumSize);
+  
   cbbFont = new QComboBox(menuEdit);
   cbbFont->setObjectName(QString::fromUtf8("cbbFont"));
   cbbFont->setMinimumSize(QSize(225, 0));
@@ -162,9 +158,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   cbbFontSize->setSuffix("px");
   connect(cbbFontSize, SIGNAL(valueChanged(int)), this, SLOT(setFontSize(int)));
   hlFont->addWidget(cbbFontSize);
-  
-  vlOther = new QVBoxLayout();
-  vlOther->setObjectName(QString::fromUtf8("vlOther"));
+
   cbbHeader = new KComboBox(menuEdit);
   cbbHeader->setMaximumSize(QSize(225, 205));
   cbbHeader->setObjectName(QString::fromUtf8("cbbHeader"));
@@ -176,11 +170,9 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   connect(cbbHeader, SIGNAL(currentIndexChanged (QString)), this, SLOT(setHeader(QString)));
   hlFont->addWidget(cbbHeader);
 
-  vlTextAtribute->addLayout(hlFont);
-
-  hlTextAtributeButton = new QHBoxLayout();
+  hlTextAtributeButton  = new QHBoxLayout();
   hlTextAtributeButton->setContentsMargins(0,0,0,0);
-  hlTextAtributeButton->setObjectName(QString::fromUtf8("hlTextAtributeButton"));
+  
   btnBold = createToolButton(menuEdit,"format-text-bold","Make selected bold",true);
   connect(btnBold, SIGNAL(clicked()), this, SLOT(setBold()));
   hlTextAtributeButton->addWidget(btnBold);
@@ -259,11 +251,8 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   connect(cbbBackgroundColor, SIGNAL(currentIndexChanged(int)), this, SLOT(setBackgroundColor()));
   hlTextAtributeButton->addWidget(cbbBackgroundColor);
   
-  hlTextAtributeButton->addItem(new QSpacerItem(0, 18, QSizePolicy::Expanding, QSizePolicy::Minimum));
-  
-  horizontalSpacer_2 = new QSpacerItem(40, 0, QSizePolicy::Minimum, QSizePolicy::Minimum);
-  hlTextAtributeButton->addItem(horizontalSpacer_2);
-  vlTextAtribute->addLayout(hlTextAtributeButton);
+  hlTextAtributeButton->addItem(new QSpacerItem(0, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
+
   
   horizontalLayout_14->addLayout(hlFont,0,1);
   horizontalLayout_14->addLayout(hlTextAtributeButton,1,1);
