@@ -77,6 +77,31 @@
 #include <QAction>
 #include <KActionCollection>
 #include <QProgressBar>
+#include <KIO/NetAccess>
+#include <KFileDialog>
+#include <KMessageBox>
+#include <KSaveFile>
+#include <QTextStream>
+#include <QInputDialog>
+#include <kstandarddirs.h>
+#include <QColor>
+#include <QBrush>
+#include <QPalette>
+#include <QListWidgetItem>
+#include <QWebFrame>
+#include <QTextCursor>
+#include <QDir>
+#include <KCharSelect>
+#include <KShortcutsEditor>
+#include <KEditToolBar>
+#include <KAboutApplicationDialog>
+#include <KBugReport>
+#include <KAboutData>
+#include <KStatusBar>
+#include <ktip.h>
+#include <QPrintDialog>
+#include <KPrintPreview>
+#include <QPrinter>
 
 #include "src/CSSbeginnerWidget.h"
 #include "src/rtfCssEditor.h"
@@ -98,14 +123,12 @@ public:
     MainWindow(QWidget* parent);
     ~MainWindow();
     void retranslateUi();
-    //QString readCSSFile(QString path);
     void fillCSSBegMode(QString className);
-    void fillCSSAdvMode();
     KActionCollection* actionCollection;
     QWidget *centralwidget;
     KTabWidget *tabWMenu;
     QWidget *menuEdit;
-    QHBoxLayout *horizontalLayout_14;
+    QGridLayout *horizontalLayout_14;
     QSpacerItem *horizontalSpacer_3;
     QVBoxLayout *vlTextAtribute;
     QHBoxLayout *hlFont;
@@ -234,7 +257,6 @@ public:
     void updateHtmlTree(QString &file);
     void updateHtmlTree(HtmlData &pageData);
     void disableWysiwyg(bool value);
-    KAction* createAction(QString name, QString icon, QKeySequence shortcut, bool checkable = false);
     QString getClassName(QTreeWidgetItem* anItem);
     QTreeWidgetItem* getClassWidget(QString className);
     void setCssCursor(QString className);
@@ -243,7 +265,11 @@ public:
     QStringList loadRecentProjectList();
     void saveRecentProject(QString filePath);
     void loadDefaultPage();
-  
+    KPushButton* createToolButton(QWidget* parent, QString icon, QString toolTip="", bool checkable=false);
+    QFrame* createSpacer();
+    KAction* createAction(QString name, QString icon, QKeySequence shortcut, bool checkable = false);
+
+    
   private slots:
     void defaultPageLinkClicked(const QUrl& url);
     void quit();
@@ -255,7 +281,6 @@ public:
     void redo();
     void find();
     void printPreview();
-    void setupToolTip();
     void reParse();
     void templaterize();
     void translate();
@@ -277,10 +302,6 @@ public:
     void updateClassTree();
     void debugHtml();
     
-    void showPageList(bool);
-    void showCSS(bool);
-    void showHtml(bool state);
-    void showDebugger(bool);
     void showInspector(bool state);
     void addHtmlPage();
     void addScript();

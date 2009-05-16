@@ -23,37 +23,8 @@
         @date 13 August 2008
         @version 0.1-pre-alpah0
 */
-
 #include "mainwindow.h"
 
-#include <KIcon>
-#include <QtSql>
-#include <QSqlDatabase>
-#include <QStringList>
-#include <QSqlDriver>
-#include <KIO/NetAccess>
-#include <KFileDialog>
-#include <KMessageBox>
-#include <KIO/NetAccess>
-#include <KSaveFile>
-#include <QTextStream>
-#include <QInputDialog>
-#include <kstandarddirs.h>
-#include <QColor>
-#include <QBrush>
-#include <QPalette>
-#include <QListWidgetItem>
-#include <QWebFrame>
-#include <QTextCursor>
-#include <QDir>
-#include <KCharSelect>
-#include <KShortcutsEditor>
-#include <KEditToolBar>
-#include <KAboutApplicationDialog>
-#include <KBugReport>
-#include <KAboutData>
-#include <KStatusBar>
-#include <QProgressBar>
 #include "src/CSSbeginnerWidget.h"
 #include "src/addProprietyWidget.h"
 #include "src/ProjectManager_v2.h"
@@ -64,20 +35,14 @@
 #include "src/newScript.h"
 #include "src/newProject.h"
 #include "src/debugger.h"
-#include <ktip.h>
-#include <QPrintDialog>
-#include <KPrintPreview>
-#include <QPrinter>
 
-MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(NULL),currentScript(NULL),aProjectManager(NULL) {
-  isModified = false;
+MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(NULL),currentScript(NULL),aProjectManager(NULL),isModified(false) {
   actionCollection = new KActionCollection(this);
   setWindowTitle("Kimberlite");
-  setupToolTip(); 
   db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE"));
   db->setDatabaseName( KStandardDirs::locate( "appdata", "kimberlite.db" ));
   if ( db->open()) 
-    qDebug() << "database corectly opened";
+    qDebug() << "Database corectly opened";
   else 
     qDebug() << "ERROR while opening the database, get ready for a crash";
   
@@ -139,12 +104,12 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
 
   menuEdit = new QWidget();
   menuEdit->setObjectName(QString::fromUtf8("menuEdit"));
-  horizontalLayout_14 = new QHBoxLayout(menuEdit);
+  horizontalLayout_14 = new QGridLayout(menuEdit);
   horizontalLayout_14->setObjectName(QString::fromUtf8("horizontalLayout_14"));
   horizontalLayout_14->setContentsMargins(0,0,0,0);
   editTB = new KToolBar(this);
   editTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
-  horizontalLayout_14->addWidget(editTB);
+  horizontalLayout_14->addWidget(editTB,0,0,2,1);
 
   createAction("Undo", "edit-undo", Qt::CTRL + Qt::Key_Z);
   connect(ashActions["Undo"], SIGNAL(triggered(bool)), this, SLOT(undo()));
@@ -186,121 +151,22 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   cbbFont = new QComboBox(menuEdit);
   cbbFont->setObjectName(QString::fromUtf8("cbbFont"));
   cbbFont->setMinimumSize(QSize(225, 0));
-  cbbFont->setMaximumSize(QSize(225, 20));
+  cbbFont->setMaximumSize(QSize(225, 25));
   cbbFont->addItems(QFontDatabase().families());
   connect(cbbFont, SIGNAL(currentIndexChanged (QString)), this, SLOT(setFont(QString)));
-
   hlFont->addWidget(cbbFont);
 
   cbbFontSize = new KIntSpinBox(menuEdit);
-  
   cbbFontSize->setObjectName(QString::fromUtf8("cbbFontSize"));
-  cbbFontSize->setMaximumSize(QSize(225, 20));
+  cbbFontSize->setMaximumSize(QSize(225, 25));
   cbbFontSize->setSuffix("px");
   connect(cbbFontSize, SIGNAL(valueChanged(int)), this, SLOT(setFontSize(int)));
-
   hlFont->addWidget(cbbFontSize);
-
-
-  vlTextAtribute->addLayout(hlFont);
-
-  hlTextAtributeButton = new QHBoxLayout();
-  hlTextAtributeButton->setObjectName(QString::fromUtf8("hlTextAtributeButton"));
-  btnBold = new KPushButton(menuEdit);
-  btnBold->setObjectName(QString::fromUtf8("btnBold"));
-  btnBold->setMinimumSize(QSize(30, 30));
-  btnBold->setMaximumSize(QSize(30, 30));
-  KIcon* icnBold = new KIcon("format-text-bold");
-  btnBold->setIcon(*icnBold);
-  btnBold->setIconSize(QSize(22,22));
-  btnBold->setCheckable(true);
-  connect(btnBold, SIGNAL(clicked()), this, SLOT(setBold()));
-
-  hlTextAtributeButton->addWidget(btnBold);
-
-  btnUnderline = new KPushButton(menuEdit);
-  btnUnderline->setObjectName(QString::fromUtf8("btnUnderline"));
-  btnUnderline->setMinimumSize(QSize(30, 30));
-  btnUnderline->setMaximumSize(QSize(30, 16777215));
-  KIcon* icnUnderLine = new KIcon("format-text-underline");
-  btnUnderline->setIcon(*icnUnderLine);
-  btnUnderline->setCheckable(true);
-  btnUnderline->setIconSize(QSize(22,22));
-  connect(btnUnderline, SIGNAL(clicked()), this, SLOT(setUnderline()));
-
-  hlTextAtributeButton->addWidget(btnUnderline);
-
-  btnItalic = new KPushButton(menuEdit);
-  btnItalic->setObjectName(QString::fromUtf8("btnItalic"));
-  btnItalic->setMinimumSize(QSize(30, 30));
-  btnItalic->setMaximumSize(QSize(30, 16777215));
-  KIcon* icnItalic = new KIcon("format-text-italic");
-  btnItalic->setIcon(*icnItalic);
-  btnItalic->setIconSize(QSize(22,22));
-  btnItalic->setCheckable(true);
-  connect(btnItalic, SIGNAL(clicked()), this, SLOT(setItalic()));
-
-  hlTextAtributeButton->addWidget(btnItalic);
-
-  line = new QFrame(menuEdit);
-  line->setObjectName(QString::fromUtf8("line"));
-  line->setFrameShape(QFrame::VLine);
-  line->setFrameShadow(QFrame::Sunken);
-
-  hlTextAtributeButton->addWidget(line);
-
-  btnAlignLeft = new KPushButton(menuEdit);
-  btnAlignLeft->setObjectName(QString::fromUtf8("btnAlignLeft"));
-  btnAlignLeft->setMinimumSize(QSize(30, 30));
-  btnAlignLeft->setMaximumSize(QSize(30, 16777215));
-  KIcon* icnAlignLeft = new KIcon("format-justify-left");
-  btnAlignLeft->setIcon(*icnAlignLeft);
-  btnAlignLeft->setIconSize(QSize(22,22));
-  connect(btnAlignLeft, SIGNAL(clicked()), this, SLOT(setAlignLeft()));
-
-  hlTextAtributeButton->addWidget(btnAlignLeft);
-
-  btnAlignCenter = new KPushButton(menuEdit);
-  btnAlignCenter->setObjectName(QString::fromUtf8("btnAlignCenter"));
-  btnAlignCenter->setMinimumSize(QSize(30, 30));
-  btnAlignCenter->setMaximumSize(QSize(30, 16777215));
-  KIcon* icnAlignCenter = new KIcon("format-justify-center");
-  btnAlignCenter->setIcon(*icnAlignCenter);
-  btnAlignCenter->setIconSize(QSize(22,22));
-  connect(btnAlignCenter, SIGNAL(clicked()), this, SLOT(setAlignCenter()));
-
-  hlTextAtributeButton->addWidget(btnAlignCenter);
-
-  btnAlignRight = new KPushButton(menuEdit);
-  btnAlignRight->setObjectName(QString::fromUtf8("btnAlignRight"));
-  btnAlignRight->setMinimumSize(QSize(30, 30));
-  btnAlignRight->setMaximumSize(QSize(30, 16777215));
-  KIcon* icnAlignRight = new KIcon("format-justify-right");
-  btnAlignRight->setIcon(*icnAlignRight);
-  btnAlignRight->setIconSize(QSize(22,22));
-  connect(btnAlignRight, SIGNAL(clicked()), this, SLOT(setAlignRight()));
-
-  hlTextAtributeButton->addWidget(btnAlignRight);
-
-  btnJustify = new KPushButton(menuEdit);
-  btnJustify->setObjectName(QString::fromUtf8("btnJustify"));
-  btnJustify->setMinimumSize(QSize(30, 30));
-  btnJustify->setMaximumSize(QSize(30, 16777215));
-  KIcon* icnJustify = new KIcon("format-justify-fill");
-  btnJustify->setIcon(*icnJustify);
-  btnJustify->setIconSize(QSize(22,22));
-  connect(btnJustify, SIGNAL(clicked()), this, SLOT(setJustify()));
-
-  hlTextAtributeButton->addWidget(btnJustify);
-  horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Minimum, QSizePolicy::Minimum);
-  hlTextAtributeButton->addItem(horizontalSpacer_2);
-  vlTextAtribute->addLayout(hlTextAtributeButton);
-  horizontalLayout_14->addLayout(vlTextAtribute);
-
+  
   vlOther = new QVBoxLayout();
   vlOther->setObjectName(QString::fromUtf8("vlOther"));
   cbbHeader = new KComboBox(menuEdit);
-  cbbHeader->setMaximumSize(QSize(225, 20));
+  cbbHeader->setMaximumSize(QSize(225, 205));
   cbbHeader->setObjectName(QString::fromUtf8("cbbHeader"));
   cbbHeader->addItem("H1");
   cbbHeader->addItem("H2");
@@ -308,94 +174,101 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   cbbHeader->addItem("H4");
   cbbHeader->addItem("H6");
   connect(cbbHeader, SIGNAL(currentIndexChanged (QString)), this, SLOT(setHeader(QString)));
+  hlFont->addWidget(cbbHeader);
 
-  vlOther->addWidget(cbbHeader);
+  vlTextAtribute->addLayout(hlFont);
 
-  hlOther = new QHBoxLayout();
-  hlOther->setObjectName(QString::fromUtf8("hlOther"));
-  btnLink = new KPushButton(menuEdit);
-  btnLink->setObjectName(QString::fromUtf8("btnLink"));
-  btnLink->setIcon(KIcon("insert-link"));
-  btnLink->setIconSize(QSize(22,22));
-  btnLink->setMinimumSize(QSize(30, 30));
-  btnLink->setMaximumSize(QSize(30, 16777215));
+  hlTextAtributeButton = new QHBoxLayout();
+  hlTextAtributeButton->setContentsMargins(0,0,0,0);
+  hlTextAtributeButton->setObjectName(QString::fromUtf8("hlTextAtributeButton"));
+  btnBold = createToolButton(menuEdit,"format-text-bold","Make selected bold",true);
+  connect(btnBold, SIGNAL(clicked()), this, SLOT(setBold()));
+  hlTextAtributeButton->addWidget(btnBold);
 
-  hlOther->addWidget(btnLink);
+  btnUnderline =  createToolButton(menuEdit,"format-text-underline","Underline selected text",true);
+  connect(btnUnderline, SIGNAL(clicked()), this, SLOT(setUnderline()));
+  hlTextAtributeButton->addWidget(btnUnderline);
 
-  btnChar = new KPushButton(menuEdit);
-  btnChar->setObjectName(QString::fromUtf8("btnChar"));
-  btnChar->setIcon(KIcon("draw-text"));
-  btnChar->setIconSize(QSize(22,22));
-  btnChar->setMinimumSize(QSize(30, 30));
-  btnChar->setMaximumSize(QSize(30, 16777215));
+  btnItalic = createToolButton(menuEdit,"format-text-italic","Make selected text italic",true);
+  connect(btnItalic, SIGNAL(clicked()), this, SLOT(setItalic()));
+  hlTextAtributeButton->addWidget(btnItalic);
 
-  hlOther->addWidget(btnChar);
+  hlTextAtributeButton->addWidget(createSpacer());
 
-  btnTable = new KPushButton(menuEdit);
-  btnTable->setObjectName(QString::fromUtf8("btnTable"));
-  btnTable->setIcon(KIcon("insert-table"));
-  btnTable->setIconSize(QSize(22,22));
-  btnTable->setMinimumSize(QSize(30, 30));
-  btnTable->setMaximumSize(QSize(30, 16777215));
+  btnAlignLeft = createToolButton(menuEdit,"format-justify-left","Align left selected text");
+  connect(btnAlignLeft, SIGNAL(clicked()), this, SLOT(setAlignLeft()));
+  hlTextAtributeButton->addWidget(btnAlignLeft);
 
-  hlOther->addWidget(btnTable);
+  btnAlignCenter = createToolButton(menuEdit,"format-justify-center","Center the selected text");
+  connect(btnAlignCenter, SIGNAL(clicked()), this, SLOT(setAlignCenter()));
+  hlTextAtributeButton->addWidget(btnAlignCenter);
 
-  btnList = new KPushButton(menuEdit);
-  btnList->setObjectName(QString::fromUtf8("btnList"));
-  btnList->setIcon(KIcon("format-list-unordered"));
-  btnList->setIconSize(QSize(22,22));
-  btnList->setMinimumSize(QSize(30, 30));
-  btnList->setMaximumSize(QSize(30, 16777215));
-  connect(btnList, SIGNAL(clicked()), this, SLOT(setUList()));
+  btnAlignRight =  createToolButton(menuEdit,"format-justify-right","Align right the selected text");
+  connect(btnAlignRight, SIGNAL(clicked()), this, SLOT(setAlignRight()));
+  hlTextAtributeButton->addWidget(btnAlignRight);
+
+  btnJustify = createToolButton(menuEdit,"format-justify-fill","Justify the selected text");
+  connect(btnJustify, SIGNAL(clicked()), this, SLOT(setJustify()));
+  hlTextAtributeButton->addWidget(btnJustify);
   
-  hlOther->addWidget(btnList);
-
-  vlOther->addLayout(hlOther);
-
-  horizontalLayout_14->addLayout(vlOther);
-
-  vlColor = new QGridLayout();
-  vlColor->setSpacing(0);
-  vlColor->setObjectName(QString::fromUtf8("vlColor"));
+  hlTextAtributeButton->addWidget(createSpacer());
+  
+  btnList =  createToolButton(menuEdit,"format-list-unordered","Create a dot list");
+  connect(btnList, SIGNAL(clicked()), this, SLOT(setUList()));
+  hlTextAtributeButton->addWidget(btnList);
+  
+  btnChar = createToolButton(menuEdit,"format-list-ordered","Create an ordered list");
+  hlTextAtributeButton->addWidget(btnChar);
+  
+  hlTextAtributeButton->addWidget(createSpacer());
   
   lblTextColor = new QLabel(menuEdit);
   lblTextColor->setObjectName(QString::fromUtf8("lblTextColor"));
   KIcon* icnTextColor = new KIcon("format-text-color");
-  lblTextColor->setPixmap(icnTextColor->pixmap(16,QIcon::Normal,QIcon::On));
-  vlColor->addWidget(lblTextColor,0,0);
+  lblTextColor->setPixmap(icnTextColor->pixmap(20,QIcon::Normal,QIcon::On));
+  hlTextAtributeButton->addWidget(lblTextColor);
 
   kcbbTextColor = new KColorCombo(menuEdit);
-  kcbbTextColor->setMaximumSize(QSize(40, 15));
+  kcbbTextColor->setMaximumSize(QSize(25, 25));
   kcbbTextColor->setObjectName(QString::fromUtf8("kcbbTextColor"));
   connect(kcbbTextColor, SIGNAL(currentIndexChanged(int)), this, SLOT(setTextColor()));
-  vlColor->addWidget(kcbbTextColor,0,1);
+  hlTextAtributeButton->addWidget(kcbbTextColor);
 
   lblHighlightColor = new QLabel(menuEdit);
   lblHighlightColor->setObjectName(QString::fromUtf8("lblHighlightColor"));
   KIcon* icnHighlightColor = new KIcon("format-stroke-color");
-  lblHighlightColor->setPixmap(icnHighlightColor->pixmap(16,QIcon::Normal,QIcon::On));
-  vlColor->addWidget(lblHighlightColor,1,0);
+  lblHighlightColor->setPixmap(icnHighlightColor->pixmap(18,QIcon::Normal,QIcon::On));
+  hlTextAtributeButton->addWidget(lblHighlightColor);
 
   cbbHighlightColor = new KColorCombo(menuEdit);
-  cbbHighlightColor->setMaximumSize(QSize(40, 15));
+  cbbHighlightColor->setMaximumSize(QSize(25, 25));
   cbbHighlightColor->setObjectName(QString::fromUtf8("cbbHighlightColor"));
+  //cbbHighlightColor->setStyleSheet("QComboBox QAbstractItemView { min-width:50px;}");
   connect(cbbHighlightColor, SIGNAL(currentIndexChanged(int)), this, SLOT(setHighlightColor()));
-  vlColor->addWidget(cbbHighlightColor,1,1);
+  hlTextAtributeButton->addWidget(cbbHighlightColor);
 
   lblBackgroundColor = new QLabel(menuEdit);
   lblBackgroundColor->setObjectName(QString::fromUtf8("lblBackgroundColor"));
   KIcon* icnBackgroundColor = new KIcon("fill-color");
-  lblBackgroundColor->setPixmap(icnBackgroundColor->pixmap(16,QIcon::Normal,QIcon::On));
-  vlColor->addWidget(lblBackgroundColor,2,0);
+  lblBackgroundColor->setPixmap(icnBackgroundColor->pixmap(18,QIcon::Normal,QIcon::On));
+  hlTextAtributeButton->addWidget(lblBackgroundColor);
 
   cbbBackgroundColor = new KColorCombo(menuEdit);
-  cbbBackgroundColor->setMaximumSize(QSize(40, 15));
+  cbbBackgroundColor->setMaximumSize(QSize(25, 25));
   cbbBackgroundColor->setObjectName(QString::fromUtf8("cbbBackgroundColor"));
   connect(cbbBackgroundColor, SIGNAL(currentIndexChanged(int)), this, SLOT(setBackgroundColor()));
-  vlColor->addWidget(cbbBackgroundColor,2,1);
+  hlTextAtributeButton->addWidget(cbbBackgroundColor);
+  
+  hlTextAtributeButton->addItem(new QSpacerItem(0, 18, QSizePolicy::Expanding, QSizePolicy::Minimum));
+  
+  horizontalSpacer_2 = new QSpacerItem(40, 0, QSizePolicy::Minimum, QSizePolicy::Minimum);
+  hlTextAtributeButton->addItem(horizontalSpacer_2);
+  vlTextAtribute->addLayout(hlTextAtributeButton);
+  
+  horizontalLayout_14->addLayout(hlFont,0,1);
+  horizontalLayout_14->addLayout(hlTextAtributeButton,1,1);
 
-
-  horizontalLayout_14->addLayout(vlColor);
+  horizontalLayout_14->addItem(new QSpacerItem(0, 20, QSizePolicy::Expanding, QSizePolicy::Minimum),0,2);
 
   tabWMenu->addTab(menuEdit, "Edit");
   
@@ -410,19 +283,15 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   viewTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
 
   createAction("Project", KStandardDirs::locate("appdata", "pixmap/showProject.png"), NULL,true);
-  connect(ashActions["Project"], SIGNAL(triggered(bool)), this, SLOT(showPageList(bool)));
   viewTB->addAction(ashActions["Project"]);
 
   createAction("CSS Class", KStandardDirs::locate("appdata", "pixmap/showCSS.png"), NULL, true);
-  connect(ashActions["CSS Class"], SIGNAL(triggered(bool)), this, SLOT(showCSS(bool)));
   viewTB->addAction(ashActions["CSS Class"]);
 
   createAction("HTML Tree", KStandardDirs::locate("appdata", "pixmap/showHTML.png"), NULL, true);
-  connect(ashActions["HTML Tree"], SIGNAL(triggered(bool)), this, SLOT(showHtml(bool)));
   viewTB->addAction(ashActions["HTML Tree"]);
 
   createAction("Debugger", KStandardDirs::locate("appdata", "pixmap/showDebugger.png"), NULL, true);
-  connect(ashActions["Debugger"], SIGNAL(triggered(bool)), this, SLOT(showDebugger(bool)));
   viewTB->addAction(ashActions["Debugger"]);
   
   createAction("Inspector", KStandardDirs::locate("appdata", "pixmap/showInspector.png"), NULL);
@@ -457,10 +326,6 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   hlInsert->setContentsMargins(0,0,0,0);
   hlInsert->setObjectName(QString::fromUtf8("hlInsert"));
   hlInsert->setSpacing(0);
-  horizontalSpacer_3 = new QSpacerItem(0, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-  horizontalLayout_14->addItem(horizontalSpacer_3);
-  horizontalLayout_14->setContentsMargins(0,0,0,0);
 
   insertTB = new KToolBar(this);
   insertTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
@@ -636,9 +501,12 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   treeHtml->setHeaderHidden(true);
   dockHtmlTree->setWidget(treeHtml);
   addDockWidget(Qt::LeftDockWidgetArea, dockHtmlTree);
-  connect(treeHtml, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
-  this, SLOT(setHtmlCursor(QTreeWidgetItem*, int)));
   dockHtmlTree->setVisible(false);
+  
+  connect(treeHtml, SIGNAL(itemClicked(QTreeWidgetItem*, int)), this, SLOT(setHtmlCursor(QTreeWidgetItem*, int)));
+  connect(ashActions["HTML Tree"], SIGNAL(triggered(bool)), dockHtmlTree, SLOT(setVisible(bool)));
+  connect(dockHtmlTree, SIGNAL(visibilityChanged(bool)), ashActions["HTML Tree"] , SLOT(setChecked(bool)));
+
   
   /*aHtmlThread = new ParserThread(this); //TODO make it work
   aHtmlThread->rtfHtml = rtfHTMLEditor;
@@ -664,6 +532,9 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   connect(aProjectManager, SIGNAL(htmlPageChanged(QTreeWidgetItem*, QString)), this, SLOT(loadPage(QTreeWidgetItem*, QString)));
   connect(aProjectManager, SIGNAL(javaScriptChanged(QTreeWidgetItem*, QString)), this, SLOT(loadScript(QTreeWidgetItem*, QString)));
   connect(aProjectManager, SIGNAL(loadCss(QString)), this, SLOT(loadCss(QString)));
+  connect(ashActions["Project"], SIGNAL(triggered(bool)), tableDock , SLOT(setVisible(bool)));
+  connect(tableDock, SIGNAL(visibilityChanged(bool)), ashActions["Project"] , SLOT(setChecked(bool)));
+
  
   /***************************************************************
   
@@ -702,6 +573,9 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   
   connect(treeWidget, SIGNAL(itemClicked(QTreeWidgetItem* , int)), this, SLOT(cssClassClicked(QTreeWidgetItem*)));
   connect(btnTreeAdd, SIGNAL(clicked()), this, SLOT(addClasses()));
+  connect(ashActions["CSS Class"], SIGNAL(triggered(bool)), treeDock, SLOT(setVisible(bool)));
+  connect(treeDock, SIGNAL(visibilityChanged(bool)), ashActions["CSS Class"] , SLOT(setChecked(bool)));
+
   
   /***************************************************************
   
@@ -780,6 +654,9 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   lstDebug = new QListWidget(dockDebugContents);
   verticalLayout_99->addWidget(lstDebug);
   verticalLayout_3->addWidget(dockDebug);
+  
+  connect(ashActions["Debugger"], SIGNAL(triggered(bool)), dockDebug, SLOT(setVisible(bool)));
+  connect(dockDebug, SIGNAL(visibilityChanged(bool)), ashActions["Debugger"] , SLOT(setChecked(bool)));
   
   /***************************************************************
   
@@ -917,52 +794,6 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   
   /***************************************************************
   
-			CSS ADVANCED mode
-  
-  ***************************************************************/
-  
-  tabAdvanced = new QWidget();
-  tabAdvanced->setObjectName(QString::fromUtf8("tabAdvanced"));
-  verticalLayout_18 = new QVBoxLayout(tabAdvanced);
-  verticalLayout_18->setObjectName(QString::fromUtf8("verticalLayout_18"));
-  tblCSSPage = new QTableWidget(tabAdvanced);
-  
-  if (tblCSSPage->columnCount() < 5)
-      tblCSSPage->setColumnCount(5);    
-
-  QTableWidgetItem *__rowItem = new QTableWidgetItem();
-  tblCSSPage->setVerticalHeaderItem(0, __rowItem);
-  tblCSSPage->setObjectName(QString::fromUtf8("tblCSSPage"));
-  tblCSSPage->setEditTriggers(QAbstractItemView::NoEditTriggers);
-  tblCSSPage->setAlternatingRowColors(true);
-  tblCSSPage->setSelectionMode(QAbstractItemView::NoSelection);
-  tblCSSPage->setWordWrap(false);
-  tblCSSPage->setCornerButtonEnabled(false);
-
-  verticalLayout_18->addWidget(tblCSSPage);
-
-  hbButton2 = new QHBoxLayout();
-  hbButton2->setObjectName(QString::fromUtf8("hbButton2"));
-  btnaddClass = new QPushButton(tabAdvanced);
-  btnaddClass->setObjectName(QString::fromUtf8("btnaddClass"));
-  connect(btnaddClass, SIGNAL(clicked()), this, SLOT(addClasses()));
-
-  hbButton2->addWidget(btnaddClass);
-
-  btnAddPClass = new QPushButton(tabAdvanced);
-  btnAddPClass->setObjectName(QString::fromUtf8("btnAddPClass"));
-  hbButton2->addWidget(btnAddPClass);
-  btnRemoveClass = new QPushButton(tabAdvanced);
-  btnRemoveClass->setObjectName(QString::fromUtf8("btnRemoveClass"));
-  hbButton2->addWidget(btnRemoveClass);
-  horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-  hbButton2->addItem(horizontalSpacer);
-  verticalLayout_18->addLayout(hbButton2);
-
-  tabWCSSLevel->addTab(tabAdvanced, QString());
-  
-  /***************************************************************
-  
 			CSS EXPERT mode
   
   ***************************************************************/
@@ -978,7 +809,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   while (query22.next())
     wordList <<  query22.value(0).toString();
 
-  cssCompleter = new QCompleter(wordList, tabAdvanced);
+  cssCompleter = new QCompleter(wordList, rtfCSSEditor);
   cssCompleter->setCaseSensitivity(Qt::CaseInsensitive);
   rtfCSSEditor->setCompleter(cssCompleter);
 
@@ -1057,11 +888,6 @@ void MainWindow::retranslateUi() {
   grbBorder->setTitle(QApplication::translate("this", "Border", 0, QApplication::UnicodeUTF8));
   grbLayout->setTitle(QApplication::translate("this", "Layout", 0, QApplication::UnicodeUTF8));
   grbOther->setTitle(QApplication::translate("this", "Other", 0, QApplication::UnicodeUTF8));
-  tblCSSPage->setSortingEnabled(false);
-  btnaddClass->setText(QApplication::translate("this", "Add class", 0, QApplication::UnicodeUTF8));
-  btnAddPClass->setText(QApplication::translate("this", "Add pseudo class", 0, QApplication::UnicodeUTF8));
-  btnRemoveClass->setText(QApplication::translate("this", "Remove class", 0, QApplication::UnicodeUTF8));
-  tabWCSSLevel->setTabText(tabWCSSLevel->indexOf(tabAdvanced), QApplication::translate("this", "Advanced", 0, QApplication::UnicodeUTF8));
   tabWCSSLevel->setTabEnabled(1,false);
   tabWEditor->setTabText(tabWEditor->indexOf(tabWCSSLevel), QApplication::translate("this", "CSS", 0, QApplication::UnicodeUTF8));
   Q_UNUSED(this);
@@ -1080,196 +906,6 @@ void MainWindow::fillCSSBegMode(QString className) {
     }
   }
 } //fillCSSBegMode
-
-void MainWindow::fillCSSAdvMode() {
-  QString color1 = "background-color:#7AEEFF;";
-  QString color2 ="background-color:#5BFF74;";
-  QString color = color1;
-  int nbRow =0;
-  tblCSSPage->setRowCount(nbRow);
-  QStringList classList = CssParser::getClassList();
-  for (int i =0; i < classList.count();i++) {
-    nbRow++;
-    tblCSSPage->setRowCount(nbRow);
-    QWidget* classNameBackground = new QWidget(tblCSSPage);
-    classNameBackground->setStyleSheet(color);
-    QLabel* lblClassName = new QLabel(classNameBackground);
-    lblClassName->setText("<b>"+classList[i]+"  { </b>");
-    tblCSSPage->setCellWidget((nbRow-1), 0, classNameBackground);
-
-    QWidget* classNameBackground1 = new QWidget(tblCSSPage);
-    classNameBackground1->setStyleSheet(color);
-    tblCSSPage->setCellWidget((nbRow-1), 1, classNameBackground1);
-
-    QWidget* classNameBackground2 = new QWidget(tblCSSPage);
-    classNameBackground2->setStyleSheet(color);
-    tblCSSPage->setCellWidget((nbRow-1), 2, classNameBackground2);
-
-    QWidget* classNameBackground3 = new QWidget(tblCSSPage);
-    classNameBackground3->setStyleSheet(color);
-    tblCSSPage->setCellWidget((nbRow-1), 3, classNameBackground3);
-
-    QWidget* classNameBackground4 = new QWidget(tblCSSPage);
-    classNameBackground4->setStyleSheet(color);
-    tblCSSPage->setCellWidget((nbRow-1), 4, classNameBackground4);
-
-    QStringList proprietyList = CssParser::getClass(classList[i]);
-    for (int j =0; j < proprietyList.count();j++) {
-      QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-      sizePolicy.setHorizontalStretch(0);
-      sizePolicy.setVerticalStretch(0);
-
-      QSizePolicy sizePolicy1(QSizePolicy::Fixed, QSizePolicy::Fixed);
-      sizePolicy1.setHorizontalStretch(0);
-      sizePolicy1.setVerticalStretch(0);
-
-      //Title
-      nbRow++;
-      tblCSSPage->setRowCount(nbRow);
-      //QTableWidgetItem *__tableItem2 = new QTableWidgetItem("   "+proprietyList[j]);
-      //tblCSSPage->setItem((nbRow-1), 0, __tableItem2);
-      QWidget* proprietyNameBackground = new QWidget(tblCSSPage);
-      proprietyNameBackground->setStyleSheet(color);
-      QLabel* lblProprietyName = new QLabel(proprietyNameBackground);
-      lblProprietyName->setText("    "+CssParser::getPropriety(proprietyList[j])+": ");
-      tblCSSPage->setCellWidget((nbRow-1), 0, proprietyNameBackground);
-
-
-      //Value
-      QWidget* valueBackground = new QWidget(tblCSSPage);
-      valueBackground->setStyleSheet( color + "margin-top:1px;");
-      QHBoxLayout* horizontalLayout_value = new QHBoxLayout(valueBackground);
-      horizontalLayout_value->setObjectName(QString::fromUtf8("horizontalLayout_value"));
-      QComboBox* cbbValue = new QComboBox(valueBackground);
-      cbbValue->setObjectName(QString::fromUtf8("cbbValue"));
-      cbbValue->setStyleSheet("background-color:default;");
-      cbbValue->setMinimumSize(100,30);
-      sizePolicy.setHeightForWidth(cbbValue->sizePolicy().hasHeightForWidth());
-      tblCSSPage->setCellWidget((nbRow-1), 1, valueBackground);
-      cbbValue->setSizePolicy(sizePolicy);
-      horizontalLayout_value->addWidget(cbbValue);
-
-      //Unit
-      QWidget* unitBackground = new QWidget(tblCSSPage);
-      QHBoxLayout* horizontalLayout_unit = new QHBoxLayout(unitBackground);
-      unitBackground->setStyleSheet( color + "margin:0px;padding:0px;spacing:0px;");
-      QComboBox* cbbUnit = new QComboBox(unitBackground);
-      cbbUnit->setMinimumSize(50,30);
-      cbbUnit->setStyleSheet("background-color:default;");
-      tblCSSPage->setCellWidget((nbRow-1), 2, unitBackground);
-      horizontalLayout_unit->addWidget(cbbUnit);
-      cbbUnit->setSizePolicy(sizePolicy);
-
-      //Add comment
-      QWidget* commentBackground = new QWidget(tblCSSPage);
-      commentBackground->setStyleSheet( color + "margin:0px;padding:0px;spacing:0px;");
-      //QHBoxLayout* horizontalLayout_comment = new QHBoxLayout(commentBackground);
-      QPushButton* btnAddComment = new QPushButton(commentBackground);
-      btnAddComment->setObjectName(QString::fromUtf8("btnAddComment"));
-      btnAddComment->setStyleSheet("background-color:default;");
-      btnAddComment->setSizePolicy(sizePolicy1);
-      btnAddComment->setMinimumSize(30,30);
-      btnAddComment->setMaximumSize(30,30);
-      //horizontalLayout_comment->addWidget(btnAddComment);
-      tblCSSPage->setCellWidget((nbRow-1), 3, commentBackground);
-      KIcon icnAddComment("edit-rename");
-      btnAddComment->setIcon(icnAddComment);
-
-      //Remove Line
-      QWidget* removeLineBackground = new QWidget(tblCSSPage);
-      removeLineBackground->setStyleSheet( color + "margin-top:1px;");
-      //QHBoxLayout* horizontalLayout_removeLine = new QHBoxLayout(removeLineBackground);
-      QPushButton* btnRemoveLine = new QPushButton(removeLineBackground);
-      btnRemoveLine->setStyleSheet("background-color:default;");
-      btnRemoveLine->setSizePolicy(sizePolicy1);
-      btnRemoveLine->setMinimumSize(30,30);
-      btnRemoveLine->setMaximumSize(30,30);
-      //horizontalLayout_removeLine->addWidget(btnRemoveLine);
-      tblCSSPage->setCellWidget((nbRow-1), 4, removeLineBackground);
-      KIcon icnRemove("list-remove");
-      btnRemoveLine->setIcon(icnRemove);
-
-      QList<bool>* isEditable = new QList<bool>;
-      QSqlQuery query;
-      query.exec("SELECT VALUE,UNIT FROM TCSS_TAG WHERE TITLE = '"+ CssParser::getPropriety(proprietyList[j]) +"'");
-      
-      while (query.next()) {
-	QStringList possibleValues = query.value(0).toString().split(";");
-	for (int i =0;i < possibleValues.count(); i++) {
-	  if (possibleValues[i].left(4) == "UNIT") {
-	    cbbValue->addItem(possibleValues[i].remove(0,4));
-	    //cbbValue->setEditable(true);
-	    isEditable->push_back(true);
-	  }
-	  else {
-	    cbbValue->addItem(possibleValues[i]);
-	    isEditable->push_back(false);
-	  }
-	}
-	QStringList possibleUnit = query.value(1).toString().split(";");
-	for (int i =0;i < possibleUnit.count(); i++) {
-	  if (possibleUnit[i].isEmpty() == false)
-	    cbbUnit->addItem(possibleUnit[i]);
-	}
-	//cbbUnit->addItem(query.value(1).toString());
-      }
-
-
-
-
-    }
-
-    AddProprietyWidget* anEndOfClass =  new AddProprietyWidget(tblCSSPage);
-    anEndOfClass->setStyleSheet( color);
-    nbRow++;
-    tblCSSPage->setRowCount(nbRow);
-    tblCSSPage->setCellWidget((nbRow-1), 0, anEndOfClass);
-
-    QWidget* classEndBackground1 = new QWidget(tblCSSPage);
-    classEndBackground1->setStyleSheet(color);
-    QWidget* classEndBackground2 = new QWidget(tblCSSPage);
-    classEndBackground2->setStyleSheet(color);
-    QWidget* classEndBackground3 = new QWidget(tblCSSPage);
-    classEndBackground3->setStyleSheet(color);
-    QWidget* classEndBackground4 = new QWidget(tblCSSPage);
-    classEndBackground4->setStyleSheet(color);
-    tblCSSPage->setCellWidget((nbRow-1), 1, classEndBackground1);
-    tblCSSPage->setCellWidget((nbRow-1), 2, classEndBackground2);
-    tblCSSPage->setCellWidget((nbRow-1), 3, classEndBackground3);
-    tblCSSPage->setCellWidget((nbRow-1), 4, classEndBackground4);
-
-    nbRow++;
-    tblCSSPage->setRowCount(nbRow);
-
-    QWidget* betweenClassBackground0 = new QWidget(tblCSSPage);
-    betweenClassBackground0->setStyleSheet(color);
-
-    QWidget* betweenClassBackground1 = new QWidget(tblCSSPage);
-    betweenClassBackground1->setStyleSheet(color);
-
-    QWidget* betweenClassBackground2 = new QWidget(tblCSSPage);
-    betweenClassBackground2->setStyleSheet(color);
-
-    QWidget* betweenClassBackground3 = new QWidget(tblCSSPage);
-    betweenClassBackground3->setStyleSheet(color);
-
-    QWidget* betweenClassBackground4 = new QWidget(tblCSSPage);
-    betweenClassBackground4->setStyleSheet(color);
-
-    tblCSSPage->setCellWidget((nbRow-1), 0, betweenClassBackground0);
-    tblCSSPage->setCellWidget((nbRow-1), 1, betweenClassBackground1);
-    tblCSSPage->setCellWidget((nbRow-1), 2, betweenClassBackground2);
-    tblCSSPage->setCellWidget((nbRow-1), 3, betweenClassBackground3);
-    tblCSSPage->setCellWidget((nbRow-1), 4, betweenClassBackground4);
-
-
-    //__tableItem->setText();
-    if (color == color1) 
-      color = color2;
-    else
-      color =color1;
-  }
-} //fillCSSAdvMode
 
 MainWindow::~MainWindow() {
   QDir aDir;
@@ -1346,7 +982,7 @@ void MainWindow::saveFile(){
 
 
 void MainWindow::openProject() {
-  QString fileName = KFileDialog::getOpenFileName();
+  QString fileName = KFileDialog::getOpenFileName(KUrl("$HOME"),"*.wkp|Kimberlite projects (*.wkp)",this,"Open Project");
   openProject(fileName);
 } //openProject
  
@@ -1360,9 +996,7 @@ void MainWindow::openProject(QString fileName) {
       aProjectManager->read(&file);
     aProjectManager->expandAll();
     setWindowTitle("Kimberlite - "+aProjectManager->projectTitle);
-    #if QT_VERSION >= 0x040500
     webPreview->page()->setContentEditable(true);
-    #endif
     tabWEditor->setTabEnabled(1,true);
     tabWEditor->setTabEnabled(2,true);
     tabWEditor->setTabEnabled(3,true);
@@ -1378,43 +1012,14 @@ void MainWindow::openProject(QString fileName) {
     ashActions["Print Preview"]->setDisabled(false);
     tableDock->setVisible(true);
     saveRecentProject(fileName);
-    
     this->fileName = fileName;
   }
 } //openProject
-
-void MainWindow::showPageList(bool state) {
-  if (state == true ) 
-    tableDock->setHidden(false);
-  else 
-    tableDock->setHidden(true);
-} //showPageList
-
-void MainWindow::showCSS(bool state) {
-  if (state == true ) 
-    treeDock->setHidden(false);
-  else
-    treeDock->setHidden(true);
-} //showCSS
-
-void MainWindow::showDebugger(bool state) {
-  if (state == true )
-    dockDebug->setHidden(false);
-  else
-    dockDebug->setHidden(true);
-} //showDebugger
 
 void MainWindow::showInspector(bool state) {
   QWebSettings::globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
   webPreview->triggerPageAction(QWebPage::InspectElement);
 } //showInspector
-
-void MainWindow::showHtml(bool state) {
-  if (state == true )
-    dockHtmlTree->setHidden(false);
-  else 
-    dockHtmlTree->setHidden(true);
-} //showHtml
 
 void MainWindow::zoomIn() {
   switch (tabWEditor->currentIndex()) {
@@ -1439,13 +1044,6 @@ void MainWindow::zoomOut() {
 void MainWindow::zoomDefault() {
   webPreview->setZoomFactor(1);
 } //zoomDefault
-
-void MainWindow::setupToolTip() {
-   /*KTipDatabase* aTipDB = new KTipDatabase();
-   KTipDialog* aTipDialog = new KTipDialog(aTipDB, this);
-   aTipDialog->setShowOnStart(true);
-   aTipDialog->showTip(this, QString(), true);*/
-}  //setupToolTip
 
 QString MainWindow::getClassName(QTreeWidgetItem* anItem) {
   QString className;
@@ -1556,7 +1154,6 @@ void MainWindow::loadPage(QTreeWidgetItem* item, QString text, bool force) {
     while (parent->parent() != NULL) {
       parent = parent->parent();
       completeName.insert(0,parent->text(0) + "/");
-      
     }
     setWindowTitle("Kimberlite - "+aProjectManager->projectTitle + "  (" + completeName + item->text(0) + ")");
   }
@@ -1616,9 +1213,7 @@ void MainWindow::changeCssMode(int mode) {
     rtfCSSEditor->setPlainText(CssParser::parseCSS());
     setCssCursor(currentClassName);
   }
-  else if (mode == 1) {
-    
-  }
+  else if (mode == 1) {}
   else if (mode == 2) {
     //setCssCursor(currentClassName);
   }
@@ -1642,7 +1237,6 @@ void MainWindow::updateClassTree() {
   if (classList.count() > 0) {
     if (currentClassName.isEmpty())
       currentClassName = classList[0];
-    
     fillCSSBegMode(currentClassName);
     QTreeWidgetItem* toSelect = getClassWidget(currentClassName);
     if (toSelect)
@@ -1695,32 +1289,20 @@ void MainWindow::splitSubClass(QString name, QTreeWidgetItem* parent) {
     aTreeViewWidgetItem->setIcon(0,getRightIcon(name));
     aTreeViewWidgetItem->setText(0,name);
   }
-  /*else if (":") {
-    
-  }
-  else if (",") {
-    
-  }*/
 } //splitSubClass
 
 KIcon MainWindow::getRightIcon(QString text) {
   KIcon* anIcon = 0;
-  if (text[0] == ' ') {
+  if (text[0] == ' ') 
     anIcon = new KIcon(KStandardDirs::locate("appdata", "pixmap/tag.png"));
-  }
-  else if (text[0] == ':') {
+  else if (text[0] == ':') 
     anIcon = new KIcon(KStandardDirs::locate("appdata", "pixmap/state.png"));
-  }
-  else if (text[0] == '#') {
+  else if (text[0] == '#') 
     anIcon = new KIcon(KStandardDirs::locate("appdata", "pixmap/id.png"));
-  }
-  else if (text[0] == '.') {
+  else if (text[0] == '.') 
     anIcon = new KIcon(KStandardDirs::locate("appdata", "pixmap/class.png"));
-  }
-  else {
+  else 
     anIcon = new KIcon(KStandardDirs::locate("appdata", "pixmap/tag.png"));
-  }
-  //anIcon->setPixmap(anIcon->pixmap(QSize(16,32)));
   return *anIcon;
 } //getRightIcon
 
@@ -1741,7 +1323,6 @@ void MainWindow::loadCss(QString text) {
   styleSheetName = new  QTreeWidgetItem(treeWidget);
   styleSheetName->setText(0,"Style");
   updateClassTree();
-  ////fillCSSAdvMode();
 } //loadCss
 
 void MainWindow::modeChanged(int index) {
@@ -1757,9 +1338,6 @@ void MainWindow::modeChanged(int index) {
       aFile.write(CssParser::parseCSS().toStdString().c_str());
       aFile.close();
       webPreview->setHtml(rtfHTMLEditor->toPlainText(),path2);
-      #if QT_VERSION >= 0x040500
-      //webPreview->page()->setContentEditable(true);
-      #endif
       disableWysiwyg(false);
       ashActions["Zoom 1:1"]->setEnabled(true);
       treeDock->setVisible(false);
@@ -1826,7 +1404,7 @@ void MainWindow::setHtmlCursor(QTreeWidgetItem* item, int column) {
 } //setHtmlCursor
 
 void MainWindow::debugHtml() {
-  showDebugger(true);
+  dockDebug->setVisible(true);
   lstDebug->clear();
   HtmlData pageData = HtmlParser::getHtmlData(rtfHTMLEditor->toPlainText());
   updateHtmlTree(pageData);
@@ -1846,9 +1424,7 @@ void MainWindow::debugHtml() {
 void MainWindow::setBold() {
   switch (tabWEditor->currentIndex()) {
     case 0:
-      #if QT_VERSION >= 0x040500
       webPreview->page()->triggerAction(QWebPage::ToggleBold,true);
-      #endif
       break;
     case 1:
       addTag("<b>","</b>");
@@ -1859,9 +1435,7 @@ void MainWindow::setBold() {
 void MainWindow::setItalic() {
   switch (tabWEditor->currentIndex()) {
     case 0:
-      #if QT_VERSION >= 0x040500
       webPreview->page()->triggerAction(QWebPage::ToggleItalic,true);
-      #endif
       break;
     case 1:
       addTag("<i>","</i>");
@@ -1872,9 +1446,7 @@ void MainWindow::setItalic() {
 void MainWindow::setUnderline() {
   switch (tabWEditor->currentIndex()) {
     case 0:
-      #if QT_VERSION >= 0x040500
       webPreview->page()->triggerAction(QWebPage::ToggleUnderline,true);
-      #endif
       break;
     case 1:
       addTag("<u>","</u>");
@@ -1902,9 +1474,7 @@ void MainWindow::addTag(QString prefix, QString suffix) {
 void MainWindow::addTag(QString prefix, QString suffix, QString cmd, QString arg = "") {
   switch (tabWEditor->currentIndex()) {
     case 0:
-      #if QT_VERSION >= 0x040500
       execCommand(cmd,arg);
-      #endif
       break;
     case 1:
       addTag(prefix,suffix);
@@ -2220,9 +1790,8 @@ void MainWindow::saveRecentProject(QString filePath) {
   QString path2 = KStandardDirs::locateLocal( "appdata", "recent.txt" );
   QFile file2(path2);
   file2.open(QIODevice::ReadOnly);
-  while (!file2.atEnd()) {
+  while (!file2.atEnd())
     recentProjectList << QString(file2.readLine()).toAscii();
-  }
   file2.close();
   
   if (recentProjectList.indexOf(filePath+"\n") != -1)
@@ -2250,7 +1819,6 @@ void MainWindow::saveRecentProject(QString filePath) {
 
 void MainWindow::loadDefaultPage() {
   KIconLoader *iconloader = KIconLoader::global();
-  //int iconSize = iconloader->currentSize(KIconLoader::Desktop);
   QString new_path = iconloader->iconPath("document-new", KIconLoader::Desktop );
   QString open_path = iconloader->iconPath("document-open", KIconLoader::Desktop );
   QStringList recentProject = loadRecentProjectList();
@@ -2328,9 +1896,8 @@ void MainWindow::addClasses() {
   bool ok;
   QString text = QInputDialog::getText(this, "Add class", "Insert the name of the new class", QLineEdit::Normal, "", &ok);
   if (ok && !text.isEmpty()) {
-    if (tabWCSSLevel->currentIndex() == 0) {
+    if (tabWCSSLevel->currentIndex() == 0) 
       CssParser::cssFile = CssParser::setClass(currentClassName, clearCssBeg());
-    }
     CssParser::cssFile += text+" {}";
     currentClassName = text;
     updateClassTree();
@@ -2354,5 +1921,25 @@ void MainWindow::webPageCursorMoved() {
   action = webPreview->pageAction(QWebPage::ToggleUnderline);
   btnUnderline->setChecked(action->isChecked());
   //lblStatusBar1->setText(QString::number(webPreview->page()->totalBytes()/1024) + "KB");
-}
+} //webPageCursorMoved
 
+KPushButton* MainWindow::createToolButton(QWidget* parent, QString icon, QString toolTip, bool checkable) {
+  KPushButton* aButton = new KPushButton(parent);
+  aButton->setMinimumSize(QSize(26, 26));
+  aButton->setMaximumSize(QSize(26, 26));
+  aButton->setIcon(KIcon(icon));
+  aButton->setIconSize(QSize(16,16));
+  aButton->setToolTip(toolTip);
+  aButton->setCheckable(checkable);
+  aButton->setStyleSheet("margin-left:1px;margin-right:1px;spacing:0px;padding:px;");
+  return aButton;
+} //createToolButton
+
+QFrame* MainWindow::createSpacer() {
+  QFrame* aline = new QFrame(menuEdit);
+  aline->setObjectName(QString::fromUtf8("line"));
+  aline->setFrameShape(QFrame::VLine);
+  aline->setFrameShadow(QFrame::Sunken);
+  aline->setStyleSheet("margin:3px;padding:3px;width:7px;");
+  return aline;
+}
