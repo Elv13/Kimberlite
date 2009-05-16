@@ -162,11 +162,9 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   cbbHeader = new KComboBox(menuEdit);
   cbbHeader->setMaximumSize(QSize(225, 205));
   cbbHeader->setObjectName(QString::fromUtf8("cbbHeader"));
-  cbbHeader->addItem("H1");
-  cbbHeader->addItem("H2");
-  cbbHeader->addItem("H3");
-  cbbHeader->addItem("H4");
-  cbbHeader->addItem("H6");
+  QStringList headerSize;
+  headerSize << "H1" << "H2" << "H3" << "H4" << "H5" << "H6";
+  cbbHeader->addItems(headerSize);
   connect(cbbHeader, SIGNAL(currentIndexChanged (QString)), this, SLOT(setHeader(QString)));
   hlFont->addWidget(cbbHeader);
 
@@ -253,7 +251,6 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   
   hlTextAtributeButton->addItem(new QSpacerItem(0, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
 
-  
   horizontalLayout_14->addLayout(hlFont,0,1);
   horizontalLayout_14->addLayout(hlTextAtributeButton,1,1);
 
@@ -845,15 +842,11 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   
   ***************************************************************/
 
-  tabWEditor->setTabEnabled(1,false);
-  tabWEditor->setTabEnabled(2,false);
-  tabWEditor->setTabEnabled(3,false);
-  tabWMenu->setTabEnabled(1,false);
-  tabWMenu->setTabEnabled(3,false);
-  tabWMenu->setTabEnabled(2,false);
-  tabWMenu->setTabEnabled(4,false);
-  tabWMenu->setTabEnabled(5,false);
-  tabWMenu->setTabEnabled(6,false);
+  for (int i =1;i <= 3;i++)
+    tabWEditor->setTabEnabled(i,false);
+  for (int i =1;i <= 6;i++)
+    tabWMenu->setTabEnabled(i,false);
+
   ashActions["Save"]->setDisabled(true);
   ashActions["Save As"]->setDisabled(true);
   ashActions["Print"]->setDisabled(true);
@@ -1592,45 +1585,18 @@ void MainWindow::reportBug() {
 } //reportBug
 
 void MainWindow::disableWysiwyg(bool value) {
-  cbbFont->setDisabled(value);
-  cbbFontSize->setDisabled(value);
-  btnBold->setDisabled(value);
-  btnUnderline->setDisabled(value);
-  btnItalic->setDisabled(value);
-  btnAlignLeft->setDisabled(value);
-  btnAlignCenter->setDisabled(value);
-  btnAlignRight->setDisabled(value);
-  btnJustify->setDisabled(value);
-  cbbHeader->setDisabled(value);
-  btnLink->setDisabled(value);
-  btnChar->setDisabled(value);
-  btnTable->setDisabled(value);
-  btnList->setDisabled(value);
-  lblTextColor->setDisabled(value);
-  kcbbTextColor->setDisabled(value);
-  lblHighlightColor->setDisabled(value);
-  cbbHighlightColor->setDisabled(value);
-  lblBackgroundColor->setDisabled(value);
-  cbbBackgroundColor->setDisabled(value);
-  btnNewLine->setDisabled(value);
-  btnNewTab->setDisabled(value);
-  btnNewSpace->setDisabled(value);
+  QList<QWidget*> aList;
+  aList << cbbFont << cbbFontSize << btnBold << btnUnderline << btnItalic << btnAlignLeft << btnAlignCenter << btnAlignRight 
+  << btnJustify << cbbHeader /* <<btnLink*/ << btnChar /*<< btnTable*/ << btnList << lblTextColor << kcbbTextColor
+  << lblHighlightColor << cbbHighlightColor << lblBackgroundColor << cbbBackgroundColor << btnNewLine 
+  << btnNewTab << btnNewSpace;
+  for (int i =0; i< aList.size();i++)
+    aList[i]->setDisabled(value);
   ashActions["Add Image"]->setDisabled(value);
   ashActions["Add Table"]->setDisabled(value);
   ashActions["Add Link"]->setDisabled(value);
   ashActions["Special Character"]->setDisabled(value);
 } //disableWysiwyg
-
-KAction* MainWindow::createAction(QString name, QString icon, QKeySequence shortcut, bool checkable) {
-  KAction* newAction = new KAction(this);
-  newAction->setText(i18n(name.toStdString().c_str()));
-  newAction->setIcon(KIcon(icon));
-  newAction->setShortcut(shortcut);
-  newAction->setCheckable(checkable);
-  actionCollection->addAction(name, newAction);
-  ashActions[name] = newAction;
-  return newAction;
-} //createAction
 
 void MainWindow::quit() {
   exit(33);
@@ -1932,3 +1898,14 @@ QFrame* MainWindow::createSpacer() {
   aline->setStyleSheet("margin:3px;padding:3px;width:7px;");
   return aline;
 }
+
+KAction* MainWindow::createAction(QString name, QString icon, QKeySequence shortcut, bool checkable) {
+  KAction* newAction = new KAction(this);
+  newAction->setText(i18n(name.toStdString().c_str()));
+  newAction->setIcon(KIcon(icon));
+  newAction->setShortcut(shortcut);
+  newAction->setCheckable(checkable);
+  actionCollection->addAction(name, newAction);
+  ashActions[name] = newAction;
+  return newAction;
+} //createAction
