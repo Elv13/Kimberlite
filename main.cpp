@@ -30,12 +30,11 @@ Boston, MA 02111-1307, USA.
 #include <KAboutData>
 #include <KCmdLineArgs>
 #include <KUrl>
-#include <iostream>
+#include <QDebug>
 
 #include "mainwindow.h"
 
 int main (int argc, char *argv[]) {
-
   KAboutData aboutData( "kimberlite", "kimberlite",
   ki18n("Kimberlite"), "0.0.9",
   ki18n("A complete environemnt to develop, manage and execute Unix scripts"),
@@ -51,6 +50,10 @@ int main (int argc, char *argv[]) {
 
   MainWindow* window = new MainWindow(0);
   window->show();
+  
+  KCmdLineArgs *args = KCmdLineArgs::parsedArgs(); 
+  if(args->count())
+    window->openProject(args->url(0).url().remove(0,7)); 
 
   return app.exec();
 }

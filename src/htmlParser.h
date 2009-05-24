@@ -29,7 +29,6 @@
 #include <QTreeWidgetItem>
 #include <QVector>
 #include <QtSql>
-#include <QRegExp>
 
 struct HtmlData {
   QVector<QString> tagList;
@@ -65,6 +64,5 @@ class HtmlParser{
   private:
     static QVector<uint> levelParser(QVector<QString> tagList);
     static QVector<QString> listTag(QString inputFile);
-    
 };
 #endif //HTML_PARSER

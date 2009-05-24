@@ -1,8 +1,6 @@
 #include "debugger.h"
 
 QVector<debugItem> HtmlDebugger::debug(HtmlData& pageData) {
-  //updateHtmlTree(aFile);
-  
   QString tag;
   QVector<debugItem> debugVector;
   qDebug() << "Size =" <<  QString::number(pageData.tagList.size()) << ", First =";

@@ -24,6 +24,8 @@ class ParserThread : public QThread {
       bool needUpdate;
       bool timeOver;
       void updateHtmlTree(HtmlData &pageData);
-
 };
 #endif
+
+//TODO Use the ID of the treeItem to find the modifier one and\
+go down from there until 10 consecutive match if operation is not "PASTE"

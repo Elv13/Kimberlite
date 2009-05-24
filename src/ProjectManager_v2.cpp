@@ -15,55 +15,47 @@ ProjectManager2::ProjectManager2(QWidget *parent) : QTreeWidget(parent),firstPag
   header()->setResizeMode(QHeaderView::Stretch);
   setHeaderLabels(labels);
 
-  folderIcon.addPixmap(style()->standardPixmap(QStyle::SP_DirClosedIcon),
-			QIcon::Normal, QIcon::Off);
-  folderIcon.addPixmap(style()->standardPixmap(QStyle::SP_DirOpenIcon),
-			QIcon::Normal, QIcon::On);
+  folderIcon.addPixmap(style()->standardPixmap(QStyle::SP_DirClosedIcon),QIcon::Normal, QIcon::Off);
+  folderIcon.addPixmap(style()->standardPixmap(QStyle::SP_DirOpenIcon),QIcon::Normal, QIcon::On);
   bookmarkIcon.addPixmap(style()->standardPixmap(QStyle::SP_FileIcon));
   connect(this, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this, SLOT(loadPage(QTreeWidgetItem *)));
 }
 
 bool ProjectManager2::read(QIODevice *device) {
-    QString errorStr;
-    int errorLine;
-    int errorColumn;
+  QString errorStr;
+  int errorLine;
+  int errorColumn;
 
-    if (!domDocument.setContent(device, true, &errorStr, &errorLine,&errorColumn)) {
-        QMessageBox::information(window(), tr("DOM Bookmarks"),tr("Parse error at line %1, column %2:\n%3").arg(errorLine).arg(errorColumn).arg(errorStr));
-        return false;
-    }
+  if (!domDocument.setContent(device, true, &errorStr, &errorLine,&errorColumn)) {
+    QMessageBox::information(window(), tr("DOM Bookmarks"),tr("Parse error at line %1, column %2:\n%3").arg(errorLine).arg(errorColumn).arg(errorStr));
+    return false;
+  }
 
-    QDomElement root = domDocument.documentElement();
-    if (root.tagName() != "xbel") {
-        QMessageBox::information(window(), tr("DOM Bookmarks"),tr("The file is not an XBEL file."));
-        return false;
-    } else if (root.hasAttribute("version")&& root.attribute("version") != "1.0") {
-        QMessageBox::information(window(), tr("DOM Bookmarks"), tr("The file is not an XBEL version 1.0 file."));
-        return false;
-    }
+  QDomElement root = domDocument.documentElement();
+  if (root.tagName() != "xbel") {
+    QMessageBox::information(window(), tr("DOM Bookmarks"),tr("The file is not an XBEL file."));
+    return false;
+  } 
+  else if (root.hasAttribute("version")&& root.attribute("version") != "1.0") {
+    QMessageBox::information(window(), tr("DOM Bookmarks"), tr("The file is not an XBEL version 1.0 file."));
+    return false;
+  }
 
-    clear();
+  clear();
 
-    //disconnect(this, SIGNAL(itemChanged(QTreeWidgetItem *, int)),this, SLOT(updateDomElement(QTreeWidgetItem *, int)));
-
-    QDomElement child = root.firstChildElement("project");
-    while (!child.isNull()) {
-        parseProjectElement(child);
-        child = child.nextSiblingElement("project");
-    }
-
-    //connect(this, SIGNAL(itemChanged(QTreeWidgetItem *, int)), this, SLOT(updateDomElement(QTreeWidgetItem *, int)));
-
-    return true;
-
+  QDomElement child = root.firstChildElement("project");
+  while (!child.isNull()) {
+    parseProjectElement(child);
+    child = child.nextSiblingElement("project");
+  }
+  return true;
 }
 
 bool ProjectManager2::write(QIODevice *device) {
-    const int IndentSize = 4;
-
-    QTextStream out(device);
-    domDocument.save(out, IndentSize);
-    return true;
+  const int IndentSize = 4;
+  QTextStream out(device);
+  domDocument.save(out, IndentSize);
+  return true;
 }
 
 void ProjectManager2::updateDomElement(QTreeWidgetItem *item, QString html) {
@@ -71,233 +63,216 @@ void ProjectManager2::updateDomElement(QTreeWidgetItem *item, QString html) {
   if (!element.isNull()) {
     QDomElement oldTitleElement = element.firstChildElement("content");
     QDomElement newTitleElement = domDocument.createElement("content");
-
     QDomText newTitleText = domDocument.createTextNode(fromHTML(html));
     newTitleElement.appendChild(newTitleText);
-
     element.replaceChild(newTitleElement, oldTitleElement);
   }
 }
 
 void ProjectManager2::parseProjectElement(const QDomElement &element, QTreeWidgetItem *parentItem) {
-    TreeItem *item = createItem(element, parentItem);
+  TreeItem *item = createItem(element, parentItem);
 
-    QString title = element.attribute("title");
-    projectTitle = title;
-    if (title.isEmpty())
-        title = QObject::tr("Folder");
+  QString title = element.attribute("title");
+  projectTitle = title;
+  if (title.isEmpty())
+    title = QObject::tr("Folder");
 
-    item->setFlags(item->flags() | Qt::ItemIsEditable);
-    item->setIcon(0, folderIcon);
-    item->setText(0, title);
+  item->setFlags(item->flags() | Qt::ItemIsEditable);
+  item->setIcon(0, folderIcon);
+  item->setText(0, title);
 
-    bool folded = (element.attribute("folded") != "no");
-    setItemExpanded(item, !folded);
+  bool folded = (element.attribute("folded") != "no");
+  setItemExpanded(item, !folded);
 
-    QDomElement child = element.firstChildElement();
-    while (!child.isNull()) {
-        if (child.tagName() == "folder") {
-            parseFolderElement(child, item);
-        } 
-        else if (child.tagName() == "html") {
-            parseHtmlElement(child, item);
-        }  
-        else if (child.tagName() == "style") {
-            styleSheethName = child.firstChildElement("file").attribute("name");
-	    emit loadCss(child.firstChildElement("file").text().trimmed());
-	    cssPage = child;
-        }  
-        else if (child.tagName() == "script") {
-            parseScriptElement(child, item);
-        }   
-        else if (child.tagName() == "ressources") {
-            parseRessourcesElement(child, item);
-        }
-        child = child.nextSiblingElement();
-    }
+  QDomElement child = element.firstChildElement();
+  while (!child.isNull()) {
+    if (child.tagName() == "folder") 
+      parseFolderElement(child, item);
+    else if (child.tagName() == "html") 
+      parseHtmlElement(child, item);
+    else if (child.tagName() == "style") {
+      styleSheethName = child.firstChildElement("file").attribute("name");
+      emit loadCss(child.firstChildElement("file").text().trimmed());
+      cssPage = child;
+    }  
+    else if (child.tagName() == "script") 
+      parseScriptElement(child, item);  
+    else if (child.tagName() == "ressources") 
+      parseRessourcesElement(child, item);
+    child = child.nextSiblingElement();
+  }
 }
 
 void ProjectManager2::parseFolderElement(const QDomElement &element, QTreeWidgetItem *parentItem) {
-    TreeItem *item = createItem(element, parentItem);
-    item->type =1;
-    QString title = element.attribute("title");
-    if (title.isEmpty())
-        title = QObject::tr("Folder");
+  TreeItem *item = createItem(element, parentItem);
+  item->type =1;
+  QString title = element.attribute("title");
+  if (title.isEmpty())
+    title = QObject::tr("Folder");
 
-    item->setFlags(item->flags() | Qt::ItemIsEditable);
-    item->setIcon(0, folderIcon);
-    item->setText(0, title);
+  item->setFlags(item->flags() | Qt::ItemIsEditable);
+  item->setIcon(0, folderIcon);
+  item->setText(0, title);
 
-    bool folded = (element.attribute("folded") != "no");
-    setItemExpanded(item, !folded);
+  bool folded = (element.attribute("folded") != "no");
+  setItemExpanded(item, !folded);
 
-    QDomElement child = element.firstChildElement();
-    while (!child.isNull()) {
-        if (child.tagName() == "folder") {
-            parseFolderElement(child, item);
-        } 
-        else if (child.tagName() == "page") {
-          TreeItem *item2 = createItem(child, item);
-          item2->setIcon(0,KIcon("application-xhtml+xml"));
-          item2->setText(0, child.attribute("name"));
-        }
-        else if (child.tagName() == "image") {
-            TreeItem *item2 = createItem(child, item);
-            item2->setText(0, child.attribute("name"));
-            item2->setIcon(0,KIcon("image-gif"));
-        } 
-        else if (child.tagName() == "swf") {
-            TreeItem *item2 = createItem(child, item);
-            item2->setText(0, child.attribute("name"));
-            item2->setIcon(0,KIcon("x-kde-nsplugin-generated"));
-        }
-        else if (child.tagName() == "flv") {
-           TreeItem *item2 = createItem(child, item);
-           item2->setText(0, child.attribute("name"));
-           item2->setIcon(0,KIcon("video-mpeg"));
-        }
-        else if (child.tagName() == "file") {
-            TreeItem *item2 = createItem(child, item);
-            item2->setText(0, child.attribute("name"));
-            item2->setIcon(0,KIcon("application-javascript"));
-        }
-        
-        child = child.nextSiblingElement();
+  QDomElement child = element.firstChildElement();
+  while (!child.isNull()) {
+    if (child.tagName() == "folder") 
+      parseFolderElement(child, item);
+    else if (child.tagName() == "page") {
+    TreeItem *item2 = createItem(child, item);
+    item2->setIcon(0,KIcon("application-xhtml+xml"));
+    item2->setText(0, child.attribute("name"));
     }
+    else if (child.tagName() == "image") {
+      TreeItem *item2 = createItem(child, item);
+      item2->setText(0, child.attribute("name"));
+      item2->setIcon(0,KIcon("image-gif"));
+    } 
+    else if (child.tagName() == "swf") {
+      TreeItem *item2 = createItem(child, item);
+      item2->setText(0, child.attribute("name"));
+      item2->setIcon(0,KIcon("x-kde-nsplugin-generated"));
+    }
+    else if (child.tagName() == "flv") {
+      TreeItem *item2 = createItem(child, item);
+      item2->setText(0, child.attribute("name"));
+      item2->setIcon(0,KIcon("video-mpeg"));
+    }
+    else if (child.tagName() == "file") {
+      TreeItem *item2 = createItem(child, item);
+      item2->setText(0, child.attribute("name"));
+      item2->setIcon(0,KIcon("application-javascript"));
+    }
+    child = child.nextSiblingElement();
+  }
 }
 
 void ProjectManager2::parseHtmlElement(const QDomElement &element, QTreeWidgetItem *parentItem) {
-    TreeItem *item = createItem(element, parentItem);
-    htmlPage = item;
-    QString title = "HTML document";
-    if (title.isEmpty())
-        title = QObject::tr("Folder");
+  TreeItem *item = createItem(element, parentItem);
+  htmlPage = item;
+  QString title = "HTML document";
+  if (title.isEmpty())
+      title = QObject::tr("Folder");
 
-    item->setFlags(item->flags() | Qt::ItemIsEditable);
-    item->setIcon(0, folderIcon);
-    item->setText(0, title);
+  item->setFlags(item->flags() | Qt::ItemIsEditable);
+  item->setIcon(0, folderIcon);
+  item->setText(0, title);
 
-    bool folded = (element.attribute("folded") != "no");
-    setItemExpanded(item, !folded);
+  bool folded = (element.attribute("folded") != "no");
+  setItemExpanded(item, !folded);
 
-    QDomElement child = element.firstChildElement();
-    while (!child.isNull()) {
-        if (child.tagName() == "folder") {
-            parseFolderElement(child, item);
-        } 
-        else if (child.tagName() == "page") {
-            TreeItem* item2 = createItem(child, item);
-	    //connect (item2, SIGNAL(clicked(QTreeWidgetItem *)), this, SLOT(loadPage(QTreeWidgetItem *)));
-            item2->setText(0, child.attribute("name"));
-            item2->setIcon(0,KIcon("application-xhtml+xml"));
-            if (firstPage == true) {
-	      item2->setSelected(true);
-	      htmlPageChanged(item2, toHTML(domElementForItem.value(item2).text()));
-	      firstPage = false;
-	    }
-        } 
-        child = child.nextSiblingElement();
-    }
+  QDomElement child = element.firstChildElement();
+  while (!child.isNull()) {
+    if (child.tagName() == "folder") 
+      parseFolderElement(child, item);
+    else if (child.tagName() == "page") {
+      TreeItem* item2 = createItem(child, item);
+      item2->setText(0, child.attribute("name"));
+      item2->setIcon(0,KIcon("application-xhtml+xml"));
+      if (firstPage == true) {
+	item2->setSelected(true);
+	htmlPageChanged(item2, toHTML(domElementForItem.value(item2).text()));
+	firstPage = false;
+      }
+    } 
+    child = child.nextSiblingElement();
+  }
 }
 
 void ProjectManager2::parseScriptElement(const QDomElement &element, QTreeWidgetItem *parentItem) {
-    TreeItem *item = createItem(element, parentItem);
-    script = item;
-    QString title = "JavaScripts";
-    if (title.isEmpty())
-        title = QObject::tr("Folder");
+  TreeItem *item = createItem(element, parentItem);
+  script = item;
+  QString title = "JavaScripts";
+  if (title.isEmpty())
+    title = QObject::tr("Folder");
 
-    item->setFlags(item->flags() | Qt::ItemIsEditable);
-    item->setIcon(0, folderIcon);
-    item->setText(0, title);
+  item->setFlags(item->flags() | Qt::ItemIsEditable);
+  item->setIcon(0, folderIcon);
+  item->setText(0, title);
 
-    bool folded = (element.attribute("folded") != "no");
-    setItemExpanded(item, !folded);
+  bool folded = (element.attribute("folded") != "no");
+  setItemExpanded(item, !folded);
 
-    QDomElement child = element.firstChildElement();
-    while (!child.isNull()) {
-        if (child.tagName() == "folder") {
-            parseFolderElement(child, item);
-        } 
-        else if (child.tagName() == "file") {
-            TreeItem *item2 = createItem(child, item);
-            item2->setText(0, child.attribute("name"));
-            item2->setIcon(0,KIcon("application-javascript"));
-        } 
-        child = child.nextSiblingElement();
-    }
+  QDomElement child = element.firstChildElement();
+  while (!child.isNull()) {
+    if (child.tagName() == "folder") 
+      parseFolderElement(child, item);
+    else if (child.tagName() == "file") {
+      TreeItem *item2 = createItem(child, item);
+      item2->setText(0, child.attribute("name"));
+      item2->setIcon(0,KIcon("application-javascript"));
+    } 
+    child = child.nextSiblingElement();
+  }
 }
 
 void ProjectManager2::parseRessourcesElement(const QDomElement &element, QTreeWidgetItem *parentItem) {
-    TreeItem *item = createItem(element, parentItem);
+  TreeItem *item = createItem(element, parentItem);
 
-    QString title = "Ressourses";
-    if (title.isEmpty())
-        title = QObject::tr("Folder");
+  QString title = "Ressourses";
+  if (title.isEmpty())
+    title = QObject::tr("Folder");
 
-    item->setFlags(item->flags() | Qt::ItemIsEditable);
-    item->setIcon(0, folderIcon);
-    item->setText(0, title);
+  item->setFlags(item->flags() | Qt::ItemIsEditable);
+  item->setIcon(0, folderIcon);
+  item->setText(0, title);
 
-    bool folded = (element.attribute("folded") != "no");
-    setItemExpanded(item, !folded);
+  bool folded = (element.attribute("folded") != "no");
+  setItemExpanded(item, !folded);
 
-    QDomElement child = element.firstChildElement();
-    while (!child.isNull()) {
-        if (child.tagName() == "folder") {
-            parseFolderElement(child, item);
-        } 
-        else if (child.tagName() == "image") {
-            TreeItem *item2 = createItem(child, item);
-            item2->setText(0, child.attribute("name"));
-            item2->setIcon(0,KIcon("image-gif"));
-        } 
-        else if (child.tagName() == "swf") {
-            TreeItem *item2 = createItem(child, item);
-            item2->setText(0, child.attribute("name"));
-            item2->setIcon(0,KIcon("x-kde-nsplugin-generated"));
-        }
-        else if (child.tagName() == "flv") {
-           TreeItem *item2 = createItem(child, item);
-           item2->setText(0, child.attribute("name"));
-           item2->setIcon(0,KIcon("video-mpeg"));
-        }
-        else if (child.tagName() == "file") {
-            TreeItem *item2 = createItem(child, item);
-            item2->setText(0, child.attribute("name"));
-        }
-        child = child.nextSiblingElement();
+  QDomElement child = element.firstChildElement();
+  while (!child.isNull()) {
+    if (child.tagName() == "folder") 
+      parseFolderElement(child, item);
+    else if (child.tagName() == "image") {
+      TreeItem *item2 = createItem(child, item);
+      item2->setText(0, child.attribute("name"));
+      item2->setIcon(0,KIcon("image-gif"));
+    } 
+    else if (child.tagName() == "swf") {
+      TreeItem *item2 = createItem(child, item);
+      item2->setText(0, child.attribute("name"));
+      item2->setIcon(0,KIcon("x-kde-nsplugin-generated"));
     }
+    else if (child.tagName() == "flv") {
+      TreeItem *item2 = createItem(child, item);
+      item2->setText(0, child.attribute("name"));
+      item2->setIcon(0,KIcon("video-mpeg"));
+    }
+    else if (child.tagName() == "file") {
+      TreeItem *item2 = createItem(child, item);
+      item2->setText(0, child.attribute("name"));
+    }
+    child = child.nextSiblingElement();
+  }
 }
 
 TreeItem* ProjectManager2::createItem(const QDomElement &element, QTreeWidgetItem *parentItem) {
-    TreeItem* item;
-    if (parentItem) {
-        item = new TreeItem(parentItem);
-    } else {
-        item = new TreeItem(this);
-    }
-    domElementForItem.insert(item, element);
-    return item;
+  TreeItem* item;
+  if (parentItem) 
+    item = new TreeItem(parentItem);
+  else
+    item = new TreeItem(this);
+  domElementForItem.insert(item, element);
+  return item;
 }
 
 QString ProjectManager2::toHTML(QString input) {
-  while (input.indexOf("[[@O@]]") != -1) {
+  while (input.indexOf("[[@O@]]") != -1) 
     input = input.replace(input.indexOf("[[@O@]]"),7,"<");
-  }
-  while (input.indexOf("[[@C@]]") != -1) {
+  while (input.indexOf("[[@C@]]") != -1) 
     input = input.replace(input.indexOf("[[@C@]]"),7,">");
-  }
   return input;
 }
  
 QString ProjectManager2::fromHTML(QString input) {
-  while (input.indexOf("<") != -1) {
+  while (input.indexOf("<") != -1) 
     input = input.replace(input.indexOf("<"),1,"[[@O@]]");
-  }
-  while (input.indexOf(">") != -1) {
+  while (input.indexOf(">") != -1) 
     input = input.replace(input.indexOf(">"),1,"[[@C@]]");
-  }
   return input;
 }
 
@@ -354,12 +329,10 @@ void ProjectManager2::addFolder(QString title, QTreeWidgetItem* parent) {
 
 QDomNode ProjectManager2::getElement(QDomNode &aNode, QString tagName, QString attribute, QString value) {
   QDomNodeList aList = aNode.childNodes();
-  for (int i =0; i < aList.count();i++) {
-    if (aList.item(i).toElement().tagName() == tagName) {
+  for (int i =0; i < aList.count();i++) 
+    if (aList.item(i).toElement().tagName() == tagName) 
       if (aList.item(i).toElement().attribute(attribute) == value)
 	return aList.item(i);
-    }
-  }
   return domElementForItem.value(htmlPage);
 }
 
@@ -369,8 +342,8 @@ QTreeWidgetItem* ProjectManager2::getFolder(QString title/*, QTreeWidgetItem* ba
   qDebug() << "I am looking for: " << title;
   foreach(QDomElement item, domElementForItem) {
     qDebug() << "I am looping" << item.toElement().tagName();
-     if (item.toElement().tagName() == "folder") {
-       qDebug() << "this element is a folder: " << item.toElement().attribute("title");
+    if (item.toElement().tagName() == "folder") {
+      qDebug() << "this element is a folder: " << item.toElement().attribute("title");
       if (item.toElement().attribute("title") == title) {
 	qDebug() << "I am going to return:" << domElementForItem.key(item)->text(0);
 	return domElementForItem.key(item);

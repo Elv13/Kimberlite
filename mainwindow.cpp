@@ -41,11 +41,8 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   setWindowTitle("Kimberlite");
   db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE"));
   db->setDatabaseName( KStandardDirs::locate( "appdata", "kimberlite.db" ));
-  if ( db->open()) 
-    qDebug() << "Database corectly opened";
-  else 
-    qDebug() << "ERROR while opening the database, get ready for a crash";
-  
+  qDebug() << (( db->open())? "Database corectly opened":"ERROR while opening the database, get ready for a crash");
+
   aParser = new HtmlParser();
   tabWMenu = new KTabWidget(this);
   tabWMenu->setMinimumSize(QSize(0, 90));
@@ -253,7 +250,6 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
 
   horizontalLayout_14->addLayout(hlFont,0,1);
   horizontalLayout_14->addLayout(hlTextAtributeButton,1,1);
-
   horizontalLayout_14->addItem(new QSpacerItem(0, 20, QSizePolicy::Expanding, QSizePolicy::Minimum),0,2);
 
   tabWMenu->addTab(menuEdit, "Edit");
@@ -562,7 +558,6 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   connect(ashActions["CSS Class"], SIGNAL(triggered(bool)), treeDock, SLOT(setVisible(bool)));
   connect(treeDock, SIGNAL(visibilityChanged(bool)), ashActions["CSS Class"] , SLOT(setChecked(bool)));
 
-  
   /***************************************************************
   
 			Editing MODE
@@ -1586,10 +1581,7 @@ void MainWindow::reportBug() {
 
 void MainWindow::disableWysiwyg(bool value) {
   QList<QWidget*> aList;
-  aList << cbbFont << cbbFontSize << btnBold << btnUnderline << btnItalic << btnAlignLeft << btnAlignCenter << btnAlignRight 
-  << btnJustify << cbbHeader /* <<btnLink*/ << btnChar /*<< btnTable*/ << btnList << lblTextColor << kcbbTextColor
-  << lblHighlightColor << cbbHighlightColor << lblBackgroundColor << cbbBackgroundColor << btnNewLine 
-  << btnNewTab << btnNewSpace;
+  aList << cbbFont << cbbFontSize << btnBold << btnUnderline << btnItalic << btnAlignLeft << btnAlignCenter << btnAlignRight  << btnJustify << cbbHeader /* <<btnLink*/ << btnChar /*<< btnTable*/ << btnList << lblTextColor << kcbbTextColor << lblHighlightColor << cbbHighlightColor << lblBackgroundColor << cbbBackgroundColor << btnNewLine  << btnNewTab << btnNewSpace;
   for (int i =0; i< aList.size();i++)
     aList[i]->setDisabled(value);
   ashActions["Add Image"]->setDisabled(value);
@@ -1748,19 +1740,15 @@ void MainWindow::saveRecentProject(QString filePath) {
   while (!file2.atEnd())
     recentProjectList << QString(file2.readLine()).toAscii();
   file2.close();
-  
   if (recentProjectList.indexOf(filePath+"\n") != -1)
     return;
-  
   if (recentProjectList.count() >= 5)
     recentProjectList.removeAt(0);
-  
   recentProjectList << filePath;
   
   QString toSave;
-  for (int i =0; i < recentProjectList.count();i++) {
+  for (int i =0; i < recentProjectList.count();i++) 
     toSave += recentProjectList[i].trimmed() + "\n";
-  }
   
   QString path = KStandardDirs::locateLocal( "appdata", "recent.txt" );
   KSaveFile file(path);

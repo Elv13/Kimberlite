@@ -57,19 +57,16 @@ void NewWebPage::addFolder() {
   bool ok;
   QString text = QInputDialog::getText(this, tr("QInputDialog::getText()"), tr("Folder name:"), QLineEdit::Normal,"", &ok);
   if (ok && !text.isEmpty()) {
-      emit addFolder(text,parentRoot);
-       QTreeWidgetItem* child;
-      if (currentPage() == pageEmpty) {
-	child = new QTreeWidgetItem(newPage->tvFolder->topLevelItem(0));
-      }
-      else if (currentPage() == pageTemplate) {
-	child = new QTreeWidgetItem(newTemple->tvFolder->topLevelItem(0));
-      }
-      else {
-	child = new QTreeWidgetItem(newImport->tvFolder->topLevelItem(0));
-      }
-      child->setText(0,text);
-      child->setIcon(0,KIcon("document-open-folder"));
+    emit addFolder(text,parentRoot);
+    QTreeWidgetItem* child;
+    if (currentPage() == pageEmpty) 
+      child = new QTreeWidgetItem(newPage->tvFolder->topLevelItem(0));
+    else if (currentPage() == pageTemplate) 
+      child = new QTreeWidgetItem(newTemple->tvFolder->topLevelItem(0));
+    else 
+      child = new QTreeWidgetItem(newImport->tvFolder->topLevelItem(0));
+    child->setText(0,text);
+    child->setIcon(0,KIcon("document-open-folder"));
   }
 }
   

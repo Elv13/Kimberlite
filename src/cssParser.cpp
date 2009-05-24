@@ -97,8 +97,8 @@ QString CssParser::parseCSS() {
             tmpCSS.remove(0,tmpCSS.indexOf(";")+1);
         }
       }
-        parsedCSS += "}\n\n";
-        tmpCSS.remove(0,tmpCSS.indexOf("}")+1).trimmed();
+      parsedCSS += "}\n\n";
+      tmpCSS.remove(0,tmpCSS.indexOf("}")+1).trimmed();
     }
   return parsedCSS;
 }

@@ -288,7 +288,6 @@ public:
     void newProject(); 
     void newProject(QString name, QString filePath);
     void openProject();
-    void openProject(QString fileName);
     void saveProject();
     void saveProjectAs();
     void saveProjectAs(const QString &outputFileName);
@@ -345,6 +344,7 @@ public:
     void loadPage(QTreeWidgetItem* item, QString text, bool force = false);
     void loadScript(QTreeWidgetItem* anItem, QString text);
     void loadCss(QString text);
+    void openProject(QString fileName);
     
   private:
     /*enum KimberliteMode2 { //TODO make it work

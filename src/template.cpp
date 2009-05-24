@@ -4,45 +4,25 @@
 #include <KTitleWidget>
 #include <KIcon>
 
-const bool operator==(const StringInfo &input, const StringInfo &input2) {
-  return input.index == input2.index;
-}
-const bool operator>=(const StringInfo &input, const StringInfo &input2) {
-  return input.index >= input2.index;
-}
-const bool operator<=(const StringInfo &input, const StringInfo &input2) {
-  return input.index <= input2.index;
-}
-const bool operator<(const StringInfo &input, const StringInfo &input2) {
-  return input.index < input2.index;
-}
-const bool operator>(const StringInfo &input, const StringInfo &input2) {
-  return input.index > input2.index;
-}
-
-
 StringConverter::StringConverter(QWidget* parent) : QDialog(parent),index(0) {
   resize(631, 404);
   verticalLayout_4 = new QVBoxLayout(this);
   verticalLayout_4->setObjectName(QString::fromUtf8("verticalLayout_4"));
   verticalLayout_2 = new QVBoxLayout();
   verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
+  
   label_5 = new KTitleWidget(this);
   label_5->setObjectName(QString::fromUtf8("label_5"));
   label_5->setPixmap(KIcon("tools-wizard"));
-
   verticalLayout_2->addWidget(label_5);
 
   label_2 = new QLabel(this);
   label_2->setObjectName(QString::fromUtf8("label_2"));
-
   verticalLayout_2->addWidget(label_2);
 
   plainTextEdit_2 = new QPlainTextEdit(this);
   plainTextEdit_2->setObjectName(QString::fromUtf8("plainTextEdit_2"));
-
   verticalLayout_2->addWidget(plainTextEdit_2);
-
 
   verticalLayout_4->addLayout(verticalLayout_2);
 
@@ -50,12 +30,10 @@ StringConverter::StringConverter(QWidget* parent) : QDialog(parent),index(0) {
   verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
   label_3 = new QLabel(this);
   label_3->setObjectName(QString::fromUtf8("label_3"));
-
   verticalLayout->addWidget(label_3);
 
   plainTextEdit = new QPlainTextEdit(this);
   plainTextEdit->setObjectName(QString::fromUtf8("plainTextEdit"));
-
   verticalLayout->addWidget(plainTextEdit);
 
   horizontalLayout_2 = new QHBoxLayout();
@@ -67,7 +45,6 @@ StringConverter::StringConverter(QWidget* parent) : QDialog(parent),index(0) {
   sizePolicy.setVerticalStretch(0);
   sizePolicy.setHeightForWidth(label_6->sizePolicy().hasHeightForWidth());
   label_6->setSizePolicy(sizePolicy);
-
   horizontalLayout_2->addWidget(label_6);
 
   sonnet__dictionarycombobox = new Sonnet::DictionaryComboBox(this);
@@ -77,27 +54,20 @@ StringConverter::StringConverter(QWidget* parent) : QDialog(parent),index(0) {
   sizePolicy1.setVerticalStretch(0);
   sizePolicy1.setHeightForWidth(sonnet__dictionarycombobox->sizePolicy().hasHeightForWidth());
   sonnet__dictionarycombobox->setSizePolicy(sizePolicy1);
-
   horizontalLayout_2->addWidget(sonnet__dictionarycombobox);
 
-
   verticalLayout->addLayout(horizontalLayout_2);
-
-
   verticalLayout_4->addLayout(verticalLayout);
 
   verticalLayout_3 = new QVBoxLayout();
   verticalLayout_3->setObjectName(QString::fromUtf8("verticalLayout_3"));
   label_4 = new QLabel(this);
   label_4->setObjectName(QString::fromUtf8("label_4"));
-
   verticalLayout_3->addWidget(label_4);
 
   lineEdit = new QLineEdit(this);
   lineEdit->setObjectName(QString::fromUtf8("lineEdit"));
-
   verticalLayout_3->addWidget(lineEdit);
-
 
   verticalLayout_4->addLayout(verticalLayout_3);
 
@@ -105,17 +75,14 @@ StringConverter::StringConverter(QWidget* parent) : QDialog(parent),index(0) {
   horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
   label = new QLabel(this);
   label->setObjectName(QString::fromUtf8("label"));
-
   horizontalLayout->addWidget(label);
 
   horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
   horizontalLayout->addItem(horizontalSpacer);
 
   pushButton_3 = new QPushButton(this);
   pushButton_3->setObjectName(QString::fromUtf8("pushButton_3"));
   pushButton_3->setVisible(false);
-
   horizontalLayout->addWidget(pushButton_3);
 
   pushButton_2 = new QPushButton(this);
@@ -123,7 +90,6 @@ StringConverter::StringConverter(QWidget* parent) : QDialog(parent),index(0) {
   pushButton_2->setDisabled(true);
   pushButton_2->setIcon(KIcon("go-previous"));
   connect(pushButton_2, SIGNAL(clicked()),this, SLOT(previousTag()));
-
   horizontalLayout->addWidget(pushButton_2);
 
   pushButton = new QPushButton(this);
@@ -138,8 +104,6 @@ StringConverter::StringConverter(QWidget* parent) : QDialog(parent),index(0) {
   btnFinish->setIcon(KIcon("dialog-ok-apply"));
   horizontalLayout->addWidget(btnFinish);
   connect(btnFinish, SIGNAL(clicked()), this, SLOT(finish()));
-  
-
 
   verticalLayout_4->addLayout(horizontalLayout);
 

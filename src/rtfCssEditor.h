@@ -56,9 +56,9 @@ public:
     keywordPatterns << "\\b" + query.value(0).toString() + "\\b";
   }
     foreach (QString pattern, keywordPatterns) {
-        rule.pattern = QRegExp(pattern); //TOTEST QRegExp("<"+pattern+"\b[^>]*>");
-        rule.format = keywordFormat;
-        highlightingRules.append(rule);
+      rule.pattern = QRegExp(pattern); //TOTEST QRegExp("<"+pattern+"\b[^>]*>");
+      rule.format = keywordFormat;
+      highlightingRules.append(rule);
     }
 
     classFormat.setFontWeight(QFont::Bold);
@@ -78,9 +78,9 @@ public:
     QStringList keywordPatterns2;
     keywordPatterns2  << ":" << ";" << "\\{" << "\\}" << "\\$\\{" << "!";
     foreach (QString pattern, keywordPatterns2) {
-        rule.pattern = QRegExp(pattern);
-        rule.format = keywordFormat;
-        highlightingRules.append(rule);
+      rule.pattern = QRegExp(pattern);
+      rule.format = keywordFormat;
+      highlightingRules.append(rule);
     }
 
     multiLineCommentFormat.setForeground(Qt::gray);

@@ -18,7 +18,7 @@
 QT_BEGIN_NAMESPACE
 
 class NewTable : public KDialog {
-public:
+  public:
     NewTable(QWidget* parent);
     QGroupBox *grbNewTable;
     QGridLayout *gridLayout;

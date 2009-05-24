@@ -39,8 +39,6 @@ public:
   QHBoxLayout* hlLayout;
   QPushButton* btnAddPropriety;
   QLabel* lblendClass;
-//private:
-  //QList<bool> isEditable;
 };
 
 #endif
