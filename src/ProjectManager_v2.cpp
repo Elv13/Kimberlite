@@ -25,8 +25,11 @@ bool ProjectManager2::read(QIODevice *device) {
   QString errorStr;
   int errorLine;
   int errorColumn;
+  
+  //fileArray[QString("KimberliteInternalData")] =device->readAll(); //TODO Remove that and implement the real one
+  //device->seek(0);
 
-  if (!domDocument.setContent(device, true, &errorStr, &errorLine,&errorColumn)) {
+  if (!domDocument.setContent(readFile(device), true, &errorStr, &errorLine,&errorColumn)) {
     QMessageBox::information(window(), tr("DOM Bookmarks"),tr("Parse error at line %1, column %2:\n%3").arg(errorLine).arg(errorColumn).arg(errorStr));
     return false;
   }
@@ -336,16 +339,12 @@ QDomNode ProjectManager2::getElement(QDomNode &aNode, QString tagName, QString a
   return domElementForItem.value(htmlPage);
 }
 
-QTreeWidgetItem* ProjectManager2::getFolder(QString title/*, QTreeWidgetItem* base*/) {
+QTreeWidgetItem* ProjectManager2::getFolder(QString title) {
   if (title == "@@@ROOT")
     return htmlPage;
-  qDebug() << "I am looking for: " << title;
   foreach(QDomElement item, domElementForItem) {
-    qDebug() << "I am looping" << item.toElement().tagName();
     if (item.toElement().tagName() == "folder") {
-      qDebug() << "this element is a folder: " << item.toElement().attribute("title");
       if (item.toElement().attribute("title") == title) {
-	qDebug() << "I am going to return:" << domElementForItem.key(item)->text(0);
 	return domElementForItem.key(item);
       }
     }
@@ -366,4 +365,54 @@ void ProjectManager2::saveCss() {
   QDomElement anElement = domDocument.createElement("file");
   anElement.appendChild(newStyle);
   cssPage.replaceChild(anElement ,cssPage.firstChildElement("file"));
+}
+
+//File manager
+QByteArray ProjectManager2::createFile() {
+  QByteArray projectFile,tmpArray,compressedTmpArray;
+  projectFile.append("WKPv01");
+  foreach(QByteArray item, fileArray) {
+    tmpArray.clear();
+    compressedTmpArray.clear();
+    tmpArray.append(getDomDocument()->toString().toAscii());
+    //compressedTmpArray = qCompress(tmpArray);
+    compressedTmpArray = tmpArray;
+    projectFile.append(fileArray.key(item) + "\\\\@" + QString::number(compressedTmpArray.size()) + "\\\\@");
+    projectFile.append(compressedTmpArray);
+  }
+  qDebug() << "Writing:" << projectFile.size();
+  return projectFile;
+}
+
+QByteArray ProjectManager2::readFile(QIODevice *device) {
+  int fileVersion,fileLength;
+  QString tmpName;
+  QByteArray projectFile,tmpArray;
+  device->seek(0);
+  while(!device->atEnd()) 
+    projectFile += device->read(1);
+  
+  
+  if (QString(projectFile.left(3)) != "WKP") {
+    QMessageBox::information(window(), tr("DOM Bookmarks"),tr("This is not a Kimberlite project file"));
+    qDebug() << "Invalid file";
+    return NULL;
+  }
+  tmpArray = projectFile.left(6);
+  projectFile.remove(0,6);
+  fileVersion = tmpArray.right(2).toInt();
+  while (projectFile.size()) {
+    tmpName = projectFile.left(projectFile.indexOf("\\\\@"));
+    projectFile.remove(0,projectFile.indexOf("\\\\@") + 3);
+    fileLength = projectFile.left(projectFile.indexOf("\\\\@")).toInt();
+    projectFile.remove(0,projectFile.indexOf("\\\\@") + 3);
+    tmpArray.clear();
+    tmpArray = projectFile.left(fileLength);
+    projectFile.remove(0,fileLength);
+    //fileArray[tmpName] = qUncompress(tmpArray);
+    fileArray[tmpName] = tmpArray;
+  }
+  if (fileArray.find("KimberliteInternalData") == fileArray.end())
+    return NULL; //ERROR!!!
+  return fileArray["KimberliteInternalData"];
 }

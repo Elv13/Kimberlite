@@ -5,6 +5,7 @@
 #include <QHash>
 #include <QIcon>
 #include <QTreeWidget>
+#include <QByteArray>
 #include "miniClasses.h"
 
 QT_BEGIN_NAMESPACE
@@ -28,6 +29,8 @@ class ProjectManager2 : public QTreeWidget {
     void addHtmlPage(QString title, QString name, QString body = "", QString foldeName = "");
     void addFolder(QString title, QTreeWidgetItem* parent);
     void saveCss();
+    QByteArray createFile();
+    QByteArray readFile(QIODevice *device);
 
   private:
     void parseFolderElement(const QDomElement &element, QTreeWidgetItem *parentItem = 0);
@@ -48,6 +51,7 @@ class ProjectManager2 : public QTreeWidget {
     QIcon bookmarkIcon;
     QString styleSheethName;
     QDomElement cssPage;
+    QHash<QString, QByteArray> fileArray;
     
   signals:
     void htmlPageChanged(QTreeWidgetItem*,QString);

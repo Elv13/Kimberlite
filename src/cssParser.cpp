@@ -78,7 +78,7 @@ QStringList CssParser::getClass(QString className) {
 }
 
 QString CssParser::getPropriety(QString line) {
-  return line.trimmed().left(line.indexOf(":")).trimmed().toLower();
+  return line.trimmed().left(line.trimmed().indexOf(':')).trimmed().toLower();
 }
 
 QString CssParser::parseCSS() {

@@ -160,7 +160,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   cbbHeader->setMaximumSize(QSize(225, 205));
   cbbHeader->setObjectName(QString::fromUtf8("cbbHeader"));
   QStringList headerSize;
-  headerSize << "H1" << "H2" << "H3" << "H4" << "H5" << "H6";
+  headerSize << "Header 1" << "Header 2" << "Header 3" << "Header 4" << "Header 5" << "Header 6";
   cbbHeader->addItems(headerSize);
   connect(cbbHeader, SIGNAL(currentIndexChanged (QString)), this, SLOT(setHeader(QString)));
   hlFont->addWidget(cbbHeader);
@@ -782,17 +782,6 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   rtfCSSEditor = new RtfCssEditor(this);
   rtfCSSEditor->setObjectName(QString::fromUtf8("rtfCSSEditor"));
   new CssSyntaxHighlighter(rtfCSSEditor);
-  
-  QStringList wordList;
-  QSqlQuery query22;
-  query22.exec("SELECT TITLE FROM TCSS_TAG");
-  
-  while (query22.next())
-    wordList <<  query22.value(0).toString();
-
-  cssCompleter = new QCompleter(wordList, rtfCSSEditor);
-  cssCompleter->setCaseSensitivity(Qt::CaseInsensitive);
-  rtfCSSEditor->setCompleter(cssCompleter);
 
   tabWCSSLevel->addTab(rtfCSSEditor, "Expert");
   tabWEditor->addTab(tabWCSSLevel, QString());
@@ -865,7 +854,7 @@ void MainWindow::retranslateUi() {
   grbBorder->setTitle(QApplication::translate("this", "Border", 0, QApplication::UnicodeUTF8));
   grbLayout->setTitle(QApplication::translate("this", "Layout", 0, QApplication::UnicodeUTF8));
   grbOther->setTitle(QApplication::translate("this", "Other", 0, QApplication::UnicodeUTF8));
-  tabWCSSLevel->setTabEnabled(1,false);
+  //tabWCSSLevel->setTabEnabled(1,false);
   tabWEditor->setTabText(tabWEditor->indexOf(tabWCSSLevel), QApplication::translate("this", "CSS", 0, QApplication::UnicodeUTF8));
   Q_UNUSED(this);
 } // retranslateUi
@@ -924,13 +913,16 @@ void MainWindow::newProject(QString name, QString filePath) {
 } //newProject
  
 void MainWindow::saveProjectAs(const QString &outputFileName){
-  changeCssMode(tabWCSSLevel->currentIndex());
+  if (CSS_MODE == CSS_MODE_BEG)
+    changeCssMode(CSS_MODE_BEG);
+  else
+    CssParser::cssFile = rtfCSSEditor->toPlainText();
   aProjectManager->saveCss();
   loadPage(currentHTMLPage,rtfHTMLEditor->toPlainText(),true);
   KSaveFile file(outputFileName);
   file.open();
   QByteArray outputByteArray;
-  outputByteArray.append(aProjectManager->getDomDocument()->toString());
+  outputByteArray.append(aProjectManager->createFile());
   file.write(outputByteArray);
   file.finalize();
   file.close();
@@ -999,23 +991,17 @@ void MainWindow::showInspector(bool state) {
 } //showInspector
 
 void MainWindow::zoomIn() {
-  switch (tabWEditor->currentIndex()) {
-    case 0:
-      webPreview->setZoomFactor(webPreview->zoomFactor()+1);
-      break;
-    case 1:
-      rtfHTMLEditor->zoomIn(1);
-  }
+  if (KIMBERLITE_MODE == MODE_WYSIWYG)
+    webPreview->setZoomFactor(webPreview->zoomFactor()+1);
+  else
+    getCurrentEditor()->zoomIn(1);
 } //zoomIn
 
 void MainWindow::zoomOut() {
-  switch (tabWEditor->currentIndex()) {
-    case 0:
-      webPreview->setZoomFactor(webPreview->zoomFactor()-1);
-      break;
-    case 1:
-      rtfHTMLEditor->zoomOut(1);
-  }
+  if (KIMBERLITE_MODE == MODE_WYSIWYG) 
+    webPreview->setZoomFactor(webPreview->zoomFactor()-1);
+  else
+    getCurrentEditor()->zoomOut(1);
 } //zoomOut
 
 void MainWindow::zoomDefault() {
@@ -1063,9 +1049,9 @@ QTreeWidgetItem* MainWindow::getClassWidget(QString className) {
 } //getClassWidget
 
 void MainWindow::cssClassClicked(QTreeWidgetItem* anItem) {
-  if (tabWCSSLevel->currentIndex() == 0)
+  if (CSS_MODE == CSS_MODE_BEG)
     loadCSSClass(anItem);
-  else if (tabWCSSLevel->currentIndex() == 2) {
+  else if (CSS_MODE == CSS_MODE_EXPERT) {
     QString className = getClassName(anItem);
     setCssCursor(className);
   }
@@ -1101,26 +1087,27 @@ void MainWindow::loadPage(QTreeWidgetItem* item, QString text, bool force) {
   if ((item != currentHTMLPage) || (force)) {
     isModified = false;
     if (currentHTMLPage != NULL) {
-      switch (tabWEditor->currentIndex()) {
-	case 0:
+      switch (KIMBERLITE_MODE) {
+	case MODE_WYSIWYG:
 	  aProjectManager->updateDomElement(currentHTMLPage,webPreview->page()->mainFrame()->toHtml());
 	  break;
-	case 1:
+	case MODE_HTML:
 	  aProjectManager->updateDomElement(currentHTMLPage,rtfHTMLEditor->toPlainText());
 	  break;
       }
     }
     currentHTMLPage = item;
     HtmlData data = HtmlParser::getHtmlData(text);
-    switch (tabWEditor->currentIndex()) {
-      case 0:
+    switch (KIMBERLITE_MODE) {
+      case MODE_WYSIWYG:
 	webPreview->setHtml(HtmlParser::getParsedHtml(data));
 	break;
-      case 1:
+      case MODE_HTML:
 	rtfHTMLEditor->setPlainText(HtmlParser::getParsedHtml(data));
 	break;
       default:
-	tabWEditor->setCurrentIndex(1);
+	if (!force)
+	  tabWEditor->setCurrentIndex(1);
 	rtfHTMLEditor->setPlainText(HtmlParser::getParsedHtml(data));
     }
     updateHtmlTree(data);
@@ -1399,33 +1386,33 @@ void MainWindow::debugHtml() {
 } //debugHtml
 
 void MainWindow::setBold() {
-  switch (tabWEditor->currentIndex()) {
-    case 0:
+  switch (KIMBERLITE_MODE) {
+    case MODE_WYSIWYG:
       webPreview->page()->triggerAction(QWebPage::ToggleBold,true);
       break;
-    case 1:
+    case MODE_HTML:
       addTag("<b>","</b>");
       break;
   }
 } //setBold
 
 void MainWindow::setItalic() {
-  switch (tabWEditor->currentIndex()) {
-    case 0:
+  switch (KIMBERLITE_MODE) {
+    case MODE_WYSIWYG:
       webPreview->page()->triggerAction(QWebPage::ToggleItalic,true);
       break;
-    case 1:
+    case MODE_HTML:
       addTag("<i>","</i>");
       break;
   }
 } //setItalic
 
 void MainWindow::setUnderline() {
-  switch (tabWEditor->currentIndex()) {
-    case 0:
+  switch (KIMBERLITE_MODE) {
+    case MODE_WYSIWYG:
       webPreview->page()->triggerAction(QWebPage::ToggleUnderline,true);
       break;
-    case 1:
+    case MODE_HTML:
       addTag("<u>","</u>");
       break;
   }
@@ -1449,11 +1436,11 @@ void MainWindow::addTag(QString prefix, QString suffix) {
 } //addTag
 
 void MainWindow::addTag(QString prefix, QString suffix, QString cmd, QString arg = "") {
-  switch (tabWEditor->currentIndex()) {
-    case 0:
+  switch (KIMBERLITE_MODE) {
+    case MODE_WYSIWYG:
       execCommand(cmd,arg);
       break;
-    case 1:
+    case MODE_HTML:
       addTag(prefix,suffix);
       break;
   }
@@ -1476,7 +1463,7 @@ void MainWindow::setJustify() {
 } //setJustify
 
 void MainWindow::setHeader(QString text) {
-  addTag("<"+text+">","</"+text+">","formatBlock",text.toLower());
+  addTag("<h"+QString::number(cbbHeader->currentIndex()+1)+">","</h"+QString::number(cbbHeader->currentIndex()+1)+">","formatBlock","h"+QString::number(cbbHeader->currentIndex()+1));
 } //setHeader
 
 void MainWindow::setFont(QString text) {
@@ -1503,30 +1490,24 @@ void MainWindow::setUList() {
 } //setUList
 
 void MainWindow::setBackgroundColor() {
-  if (tabWEditor->currentIndex() == 0)
+  if (KIMBERLITE_MODE == MODE_WYSIWYG)
     rtfHTMLEditor->setPlainText(webPreview->page()->mainFrame()->toHtml());
   QString color = cbbBackgroundColor->color().name();
   HtmlData pageData = aParser->getHtmlData(rtfHTMLEditor->toPlainText());
   HtmlParser::setAttribute(pageData, "body", 0, "bgcolor", color);
   rtfHTMLEditor->setPlainText(aParser->getParsedHtml(pageData));
-  if (tabWEditor->currentIndex() == 0)
+  if (KIMBERLITE_MODE == MODE_WYSIWYG)
     webPreview->setHtml(rtfHTMLEditor->toPlainText());
 } //setBackgroundColor
 
-void MainWindow::insertImage() {
-  /*QString filters;
-  filters += tr("Common Graphics (*.png *.jpg *.jpeg *.gif);;");
-  filters += tr("Portable Network Graphics (PNG) (*.png);;");
-  filters += tr("JPEG (*.jpg *.jpeg);;");
-  filters += tr("Graphics Interchange Format (*.gif);;");
-  filters += tr("All Files (*)");*/
-  QString fn = KFileDialog::getOpenFileName();
-  if (fn.isEmpty())
-    return;
-  if (!QFile::exists(fn))
-    return;
-  QUrl url = QUrl::fromLocalFile(fn);
-  addTag("<img src=\""+url.toString()+"\" \\>","","insertImage", url.toString());
+void MainWindow::insertImage(QString path) {
+  if (path.isEmpty()) {
+    RessrourceManager* aRessounrceManager = new RessrourceManager(this);
+    connect(aRessounrceManager, SIGNAL(finish(QString)), this, SLOT(insertImage(QString)));
+    aRessounrceManager->show();
+  }
+  else
+    addTag("<img src=\""+path+"\" \\>","","insertImage", path);
 } //insertImage
 
 void MainWindow::insertTable() {
@@ -1542,9 +1523,15 @@ void MainWindow::insertTable() {
   frame->evaluateJavaScript(js);
 } //insertTable
 
-void MainWindow::insertLink() {
-  RessrourceManager* aRessounrceManager = new RessrourceManager(this);
-  aRessounrceManager->show();
+void MainWindow::insertLink(QString path) {
+  if (path.isEmpty()) {
+    RessrourceManager* aRessounrceManager = new RessrourceManager(this);
+    connect(aRessounrceManager, SIGNAL(finish(QString)), this, SLOT(insertLink(QString)));
+    aRessounrceManager->show();
+  }
+  else {
+    addTag("<a href=\""+path+"\">","</a>","CreateLink",path);
+  }
 } //insertLink
 
 void MainWindow::insertChar() {
@@ -1594,22 +1581,22 @@ void MainWindow::quit() {
   exit(33);
 } //quit
 
+QTextEdit* MainWindow::getCurrentEditor() {
+  if (KIMBERLITE_MODE == MODE_HTML)
+    return rtfHTMLEditor;
+  else if (KIMBERLITE_MODE == MODE_SCRIPT)
+    return rtfScriptEditor;
+  else if(KIMBERLITE_MODE == MODE_CSS)
+    return rtfCSSEditor;
+}
+
 void MainWindow::print() {
   QPrintDialog* aDialog = new QPrintDialog(this);
   if (aDialog->exec() == QDialog::Accepted) {
-    switch (tabWEditor->currentIndex()) {
-      case 0:
-	webPreview->print(aDialog->printer());
-	break;
-      case 1:
-	rtfHTMLEditor->print(aDialog->printer());
-	break;
-      case 2:
-	rtfScriptEditor->print(aDialog->printer());
-	break;
-      case 3:
-	rtfCSSEditor->print(aDialog->printer());
-    }
+    if (KIMBERLITE_MODE == MODE_WYSIWYG)
+      webPreview->print(aDialog->printer());
+    else
+      getCurrentEditor()->print(aDialog->printer());
   }
 } //print
 
@@ -1621,97 +1608,52 @@ void MainWindow::printPreview() { //BUG Linking error
 } //printPreview
 
 void MainWindow::undo() {
-  switch (tabWEditor->currentIndex()) {
-    case 0:
-      webPreview->page()->triggerAction(QWebPage::Undo,true);
-      break;
-    case 1:
-      rtfHTMLEditor->undo();
-      break;
-    case 2:
-      rtfScriptEditor->undo();
-      break;
-    case 3:
-      rtfCSSEditor->undo();
-  }
+  if (KIMBERLITE_MODE == MODE_WYSIWYG) 
+    webPreview->page()->triggerAction(QWebPage::Undo,true);
+  else
+    getCurrentEditor()->undo();
 } //undo
 
 void MainWindow::redo() {
-  switch (tabWEditor->currentIndex()) {
-    case 0:
-      webPreview->page()->triggerAction(QWebPage::Redo,true);
-      break;
-    case 1:
-      rtfHTMLEditor->redo();
-      break;
-    case 2:
-      rtfScriptEditor->redo();
-      break;
-    case 3:
-      rtfCSSEditor->redo();
-  }
+  if (KIMBERLITE_MODE == MODE_WYSIWYG)
+    webPreview->page()->triggerAction(QWebPage::Redo,true);
+  else
+    getCurrentEditor()->redo();
 } //redo
 
 void MainWindow::copy() {
-  switch (tabWEditor->currentIndex()) {
-    case 0:
-      webPreview->page()->triggerAction(QWebPage::Copy,true);
-      break;
-    case 1:
-      rtfHTMLEditor->copy();
-      break;
-    case 2:
-      rtfScriptEditor->copy();
-      break;
-    case 3:
-      rtfCSSEditor->copy();
-  }
+  if (KIMBERLITE_MODE == MODE_WYSIWYG)
+    webPreview->page()->triggerAction(QWebPage::Copy,true);
+  else
+    getCurrentEditor()->copy();
 } //copy
 
 void MainWindow::cut() {
-  switch (tabWEditor->currentIndex()) {
-    case 0:
-      webPreview->page()->triggerAction(QWebPage::Cut,true);
-      break;
-    case 1:
-      rtfHTMLEditor->cut();
-      break;
-    case 2:
-      rtfScriptEditor->cut();
-      break;
-    case 3:
-      rtfCSSEditor->cut();
-  }
+  if (KIMBERLITE_MODE == MODE_WYSIWYG) 
+    webPreview->page()->triggerAction(QWebPage::Cut,true);
+  else
+    getCurrentEditor()->cut();
 } //cut
 
 void MainWindow::paste() {
-  switch (tabWEditor->currentIndex()) {
-    case MODE_WYSIWYG :
+  if (KIMBERLITE_MODE == MODE_WYSIWYG) 
       webPreview->page()->triggerAction(QWebPage::Paste,true);
-      break;
-    case 1:
-      rtfHTMLEditor->paste();
-      break;
-    case 2:
-      rtfScriptEditor->paste();
-      break;
-    case 3:
-      rtfCSSEditor->paste();
-  }
+  else
+    getCurrentEditor()->paste();
 } //paste
 
 void MainWindow::find() {
-  switch (tabWEditor->currentIndex()) {
-    case 0:
+  switch (KIMBERLITE_MODE) {
+    case MODE_WYSIWYG:
       //webPreview->page()->triggerAction(QWebPage::Paste,true);
       break;
-    case 1:
+    case MODE_HTML:
       rtfHTMLEditor->findText();
       break;
-    case 2:
+    case MODE_SCRIPT:
       //rtfScriptEditor->findText();
       break;
-    case 3:
+    case MODE_CSS:
       //rtfCSSEditor->findText();
       break;
   }
@@ -1804,33 +1746,24 @@ void MainWindow::defaultPageLinkClicked(const QUrl & url) {
 
 void MainWindow::cursorChanged() {
   QTextCursor tc;
-  switch (tabWEditor->currentIndex()) {
-    case 0:
-      //N/A
-      break;
-    case 1:
-      tc = rtfHTMLEditor->textCursor();
-      break;
-    case 2:
-      tc = rtfScriptEditor->textCursor();
-      break;
-    case 3:
-      tc = rtfCSSEditor->textCursor();
+  if ((KIMBERLITE_MODE != MODE_WYSIWYG) && (getCurrentEditor() != rtfCSSEditor))
+    tc = getCurrentEditor()->textCursor();
+  else if (rtfScriptEditor == getCurrentEditor()) {
+    tc = rtfCSSEditor->textCursor();
+    tc.select(QTextCursor::LineUnderCursor);
+    QString currentText = tc.selectedText();
+    while ((currentText.indexOf('{') == -1) && (tc.blockNumber() > 0)) {
+      tc.movePosition(QTextCursor::Up);
       tc.select(QTextCursor::LineUnderCursor);
-      QString currentText = tc.selectedText();
-      while ((currentText.indexOf('{') == -1) && (tc.blockNumber() > 0)) {
-	tc.movePosition(QTextCursor::Up);
-	tc.select(QTextCursor::LineUnderCursor);
-	currentText = tc.selectedText();
+      currentText = tc.selectedText();
+    }
+    if (currentText.indexOf('{') != -1) {
+      QTreeWidgetItem* anItem = getClassWidget(currentText.left(currentText.indexOf('{')).trimmed());
+      if ((anItem) && (CSS_MODE != CSS_MODE_BEG)) {
+	currentClassName = currentText.left(currentText.indexOf('{')).trimmed();
+	treeWidget->setCurrentItem(anItem);
       }
-      if (currentText.indexOf('{') != -1) {
-	QTreeWidgetItem* anItem = getClassWidget(currentText.left(currentText.indexOf('{')).trimmed());
-	if ((anItem) && (tabWCSSLevel->currentIndex() != 0)) {
-	  currentClassName = currentText.left(currentText.indexOf('{')).trimmed();
-	  treeWidget->setCurrentItem(anItem);
-	}
-      }
-      break;
+    }
   }
   lblStatusBar1->setText("Line: " + QString::number(tc.blockNumber()));
 } //cursorChanged
@@ -1839,7 +1772,7 @@ void MainWindow::addClasses() {
   bool ok;
   QString text = QInputDialog::getText(this, "Add class", "Insert the name of the new class", QLineEdit::Normal, "", &ok);
   if (ok && !text.isEmpty()) {
-    if (tabWCSSLevel->currentIndex() == 0) 
+    if (CSS_MODE == CSS_MODE_BEG) 
       CssParser::cssFile = CssParser::setClass(currentClassName, clearCssBeg());
     CssParser::cssFile += text+" {}";
     currentClassName = text;
@@ -1885,7 +1818,7 @@ QFrame* MainWindow::createSpacer() {
   aline->setFrameShadow(QFrame::Sunken);
   aline->setStyleSheet("margin:3px;padding:3px;width:7px;");
   return aline;
-}
+} //createSpacer()
 
 KAction* MainWindow::createAction(QString name, QString icon, QKeySequence shortcut, bool checkable) {
   KAction* newAction = new KAction(this);

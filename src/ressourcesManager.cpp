@@ -55,7 +55,9 @@ RessrourceManager::RessrourceManager(QWidget* parent) : KDialog(parent) {
   QObject::connect(rbCurerent, SIGNAL(toggled(bool)), tvCurrentRessources, SLOT(setEnabled(bool)));
   QObject::connect(rbNew, SIGNAL(toggled(bool)), txtNewRessources, SLOT(setEnabled(bool)));
   QObject::connect(rbUrl, SIGNAL(toggled(bool)), txtUrl, SLOT(setEnabled(bool)));
+  QObject::connect(this,SIGNAL(okClicked()),this,SLOT(finish()));
 
+  
   QMetaObject::connectSlotsByName(this);
 
   setWindowTitle(QApplication::translate("RessrourceManager", "Ressrource Manager", 0, QApplication::UnicodeUTF8));
@@ -67,4 +69,16 @@ RessrourceManager::RessrourceManager(QWidget* parent) : KDialog(parent) {
   ___qtreewidgetitem->setText(0, QApplication::translate("RessrourceManager", "Ressources", 0, QApplication::UnicodeUTF8));
   rbNew->setText(QApplication::translate("RessrourceManager", "New ressources", 0, QApplication::UnicodeUTF8));
   rbUrl->setText(QApplication::translate("RessrourceManager", "Url", 0, QApplication::UnicodeUTF8));
+}
+
+void RessrourceManager::finish() {
+  if (rbCurerent->isChecked()) {
+    
+  }
+  else if (rbNew->isChecked()) {
+    emit finish(txtNewRessources->text());
+  }
+  else {
+    emit finish(txtUrl->text());
+  }
 }

@@ -10,32 +10,40 @@
 #include <QKeyEvent>
 #include <QScrollBar>
 
+#define DEFAULT 0
+#define ALTERNATE 1
+#define VALUE 1
+#define UNIT 0
 
- class RtfCssEditor : public KTextEdit {
-     Q_OBJECT
 
- public:
-     RtfCssEditor(QWidget *parent = 0);
-     ~RtfCssEditor();
+class RtfCssEditor : public KTextEdit {
+  Q_OBJECT
 
-     void setCompleter(QCompleter *c);
-     QCompleter *completer() const;
+  public:
+    RtfCssEditor(QWidget *parent = 0);
+    ~RtfCssEditor();
+    void setCompleter(QCompleter *c);
+    QCompleter *completer() const;
 
- protected:
-     void keyPressEvent(QKeyEvent *e);
-     void focusInEvent(QFocusEvent *e);
+  protected:
+    void keyPressEvent(QKeyEvent *e);
+    void focusInEvent(QFocusEvent *e);
 
- private slots:
-     void insertCompletion(const QString &completion);
-     void insertTabulation();
+  private slots:
+    void insertCompletion(const QString &completion);
+    void insertTabulation();
     void insertBrace();
 
- private:
-     QString textUnderCursor() const;
-
- private:
-     QCompleter *c;
- };
+  private:
+    QString textUnderCursor() const;
+    QCompleter *c;
+    QCompleter *alternateCompleter;
+    QCompleter *standardCompleter;
+    bool currentCompleter;
+    bool isPropriety();
+    bool isUnit();
+    void insertPropriety(bool insertType);
+};
  
  
 class CssSyntaxHighlighter : public QSyntaxHighlighter {

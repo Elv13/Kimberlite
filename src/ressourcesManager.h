@@ -19,6 +19,7 @@
 QT_BEGIN_NAMESPACE
 
 class RessrourceManager : public KDialog {
+  Q_OBJECT
 public:
     RessrourceManager(QWidget* parent);
     QVBoxLayout *verticalLayout;
@@ -31,6 +32,10 @@ public:
     KUrlRequester *txtNewRessources;
     QRadioButton *rbUrl;
     KLineEdit *txtUrl;
+  private slots:
+    void finish();
+  signals:
+    void finish(QString);
 };
 QT_END_NAMESPACE
 

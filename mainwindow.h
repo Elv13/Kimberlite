@@ -109,6 +109,10 @@
 #include "src/ProjectManager_v2.h"
 #include "src/htmlThread.h"
 
+#define KIMBERLITE_MODE tabWEditor->currentIndex()
+#define CSS_MODE tabWCSSLevel->currentIndex()
+#define CSS_MODE_BEG 0 
+#define CSS_MODE_EXPERT 1
 #define MODE_WYSIWYG 0
 #define MODE_HTML 1
 #define MODE_SCRIPT 2
@@ -268,7 +272,7 @@ public:
     KPushButton* createToolButton(QWidget* parent, QString icon, QString toolTip="", bool checkable=false);
     QFrame* createSpacer();
     KAction* createAction(QString name, QString icon, QKeySequence shortcut, bool checkable = false);
-
+    QTextEdit* getCurrentEditor();
     
   private slots:
     void defaultPageLinkClicked(const QUrl& url);
@@ -329,9 +333,9 @@ public:
     void setHighlightColor();
     void setTextColor();
     void setUList();
-    void insertImage();
+    void insertImage(QString path = "");
     void insertTable();
-    void insertLink();
+    void insertLink(QString path = "");
     void insertChar();
     
     void editToolbar();
