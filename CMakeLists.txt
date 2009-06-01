@@ -72,6 +72,7 @@ include(KDE4Defaults)
 	  pixmap/browserLogo/SF.png
 	  pixmap/browserLogo/CR.png
 	  pixmap/browserLogo/OP.png
+	  pixmap/browserLogo/w3c.png
       DESTINATION ${DATA_INSTALL_DIR}/kimberlite/pixmap/browserLogo/ )
       
       install( FILES  

@@ -216,7 +216,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   lblTextColor->setObjectName(QString::fromUtf8("lblTextColor"));
   lblTextColor->setMaximumSize(QSize(25, 24));
   KIcon* icnTextColor = new KIcon("format-text-color");
-  lblTextColor->setPixmap(icnTextColor->pixmap(20,QIcon::Normal,QIcon::On));
+  lblTextColor->setPixmap(icnTextColor->pixmap(18,QIcon::Normal,QIcon::On));
   hlTextAtributeButton->addWidget(lblTextColor);
 
   kcbbTextColor = new KColorCombo(menuEdit);
@@ -478,100 +478,131 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   
   QGridLayout* optToolBarLayout = new QGridLayout(optionToolbarCentral);
   optToolBarLayout->setContentsMargins(0,0,0,0);
-  optToolBarLayout->setSpacing(0);
+  optToolBarLayout->setSpacing(2);
   
   optionsTB = new KToolBar(this);
   optionsTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
-  optToolBarLayout->addWidget(optionsTB,0,0);
+  optToolBarLayout->addWidget(optionsTB,0,0,2,1);
   
-  createAction("Configure Shortcuts", "configure-shortcuts", NULL);
-  connect(ashActions["Configure Shortcuts"], SIGNAL(triggered(bool)), this, SLOT(editShortcut()));
-  optionsTB->addAction(ashActions["Configure Shortcuts"]);
+  createAction("Shortcuts", "configure-shortcuts", NULL);
+  connect(ashActions["Shortcuts"], SIGNAL(triggered(bool)), this, SLOT(editShortcut()));
+  optionsTB->addAction(ashActions["Shortcuts"]);
   
-  optToolBarLayout->addWidget(createSpacer(),0,1);
+  optToolBarLayout->addWidget(createSpacer(),0,1,2,1);
+  
+  QLabel* lblStandard = new QLabel(menuEdit);
+  lblStandard->setText("<img src=\""+KStandardDirs::locate("appdata", "pixmap/browserLogo/w3c.png")+"\" height=16 style=\"padding-right:2px;margin-right:2px;\"> Standard");
+  optToolBarLayout->addWidget(lblStandard,0,2);
   
   QComboBox* cbbLanguage = new QComboBox(this);
+  cbbLanguage->setMaximumSize(9999,25);
   QStringList toAdd;
   toAdd << "HTML 4.01" << "xHTML 1.0.1" << "HTML 5.0";
   cbbLanguage->addItems(toAdd);
-  optToolBarLayout->addWidget(cbbLanguage,0,2);
+  optToolBarLayout->addWidget(cbbLanguage,1,2);
   
-  optToolBarLayout->addWidget(createSpacer(),0,3);
+  optToolBarLayout->addWidget(createSpacer(),0,3,2,1);
   
   QLabel* lblFirefox = new QLabel(menuEdit);
+  lblFirefox->setMaximumSize(20,20);
   KIcon icnFirefox(KStandardDirs::locate("appdata", "pixmap/browserLogo/FF.png"));
   lblFirefox->setPixmap(icnFirefox.pixmap(20,QIcon::Normal,QIcon::On));
   optToolBarLayout->addWidget(lblFirefox,0,4);
-  lblFirefox->setDisabled(true);
+  
+  QLabel* lblFirefox2 = new QLabel(menuEdit);
+  lblFirefox2->setText("Firefox");
+  optToolBarLayout->addWidget(lblFirefox2,0,5);
   
   QComboBox* cbbFirefox = new QComboBox(this);
+  cbbFirefox->setMaximumSize(9999,25);
   toAdd.clear();
-  toAdd << "FF1" << "FF2" << "FF3";
+  toAdd << "--None--" << "Version 1" << "Version 2" << "Version 3";
   cbbFirefox->addItems(toAdd);
-  optToolBarLayout->addWidget(cbbFirefox,0,5);
+  optToolBarLayout->addWidget(cbbFirefox,1,4,1,2);
   cbbFirefox->setDisabled(true);
   
-  optToolBarLayout->addWidget(createSpacer(),0,6);
+  optToolBarLayout->addWidget(createSpacer(),0,6,2,1);
   
   QLabel* lblInternetExplorer = new QLabel(menuEdit);
   KIcon icnInternetExplorer(KStandardDirs::locate("appdata", "pixmap/browserLogo/IE.png"));
   lblInternetExplorer->setPixmap(icnInternetExplorer.pixmap(20,QIcon::Normal,QIcon::On));
   optToolBarLayout->addWidget(lblInternetExplorer,0,7);
-  lblInternetExplorer->setDisabled(true);
+  
+  QLabel* lblInternetExplorer2 = new QLabel(menuEdit);
+  lblInternetExplorer2->setText("Internet Explorer");
+  optToolBarLayout->addWidget(lblInternetExplorer2,0,8);
   
   QComboBox* cbbInternetExplorer = new QComboBox(this);
+  cbbInternetExplorer->setMaximumSize(9999,25);
   toAdd.clear();
-  toAdd << "IE6" << "IE7" << "IE8";
+  toAdd << "--None--" << "Version 6" << "Version 7" << "Version 8";
   cbbInternetExplorer->addItems(toAdd);
-  optToolBarLayout->addWidget(cbbInternetExplorer,0,8);
+  optToolBarLayout->addWidget(cbbInternetExplorer,1,7,1,2);
   cbbInternetExplorer->setDisabled(true);
   
-  optToolBarLayout->addWidget(createSpacer(),0,9);
+  optToolBarLayout->addWidget(createSpacer(),0,9,2,1);
   
   QLabel* lblSafari = new QLabel(menuEdit);
+  lblSafari->setMaximumSize(20,20);
   KIcon icnSafari(KStandardDirs::locate("appdata", "pixmap/browserLogo/SF.png"));
   lblSafari->setPixmap(icnSafari.pixmap(20,QIcon::Normal,QIcon::On));
   optToolBarLayout->addWidget(lblSafari,0,10);
-  lblSafari->setDisabled(true);
+  
+  QLabel* lblSafari2 = new QLabel(menuEdit);
+  lblSafari2->setText("Safari");
+  optToolBarLayout->addWidget(lblSafari2,0,11);
   
   QComboBox* cbbSafari = new QComboBox(this);
+  cbbSafari->setMaximumSize(9999,25);
   toAdd.clear();
-  toAdd << "SF2" << "SF3" << "SF4";
+  toAdd << "--None--" << "Version 2" << "Version 3" << "Version 4";
   cbbSafari->addItems(toAdd);
-  optToolBarLayout->addWidget(cbbSafari,0,11);
+  optToolBarLayout->addWidget(cbbSafari,1,10,1,2);
   cbbSafari->setDisabled(true);
   
-  optToolBarLayout->addWidget(createSpacer(),0,12);
+  optToolBarLayout->addWidget(createSpacer(),0,12,2,1);
   
   QLabel* lblOpera = new QLabel(menuEdit);
+  lblOpera->setMaximumSize(20,20);
   KIcon icnOpera(KStandardDirs::locate("appdata", "pixmap/browserLogo/OP.png"));
   lblOpera->setPixmap(icnOpera.pixmap(20,QIcon::Normal,QIcon::On));
   optToolBarLayout->addWidget(lblOpera,0,13);
-  lblOpera->setDisabled(true);
+  
+  QLabel* lblOpera2 = new QLabel(menuEdit);
+  lblOpera2->setText("Opera");
+  optToolBarLayout->addWidget(lblOpera2,0,14);
   
   QComboBox* cbbOpera = new QComboBox(this);
+  cbbOpera->setMaximumSize(9999,25);
   toAdd.clear();
-  toAdd << "OP7" << "OP8" << "OP9";
+  toAdd << "--None--" << "Version 7" << "Version 8" << "Version 9";
   cbbOpera->addItems(toAdd);
-  optToolBarLayout->addWidget(cbbOpera,0,14);
+  optToolBarLayout->addWidget(cbbOpera,1,13,1,2);
   cbbOpera->setDisabled(true);
   
-  optToolBarLayout->addWidget(createSpacer(),0,15);
+  optToolBarLayout->addWidget(createSpacer(),0,15,2,1);
   
   QLabel* lblKonqueror = new QLabel(menuEdit);
+  lblKonqueror->setMaximumSize(20,20);
   KIcon icnKonqueror(KStandardDirs::locate("appdata", "pixmap/browserLogo/KQ.png"));
   lblKonqueror->setPixmap(icnKonqueror.pixmap(20,QIcon::Normal,QIcon::On));
   optToolBarLayout->addWidget(lblKonqueror,0,16);
-  lblKonqueror->setDisabled(true);
+  
+  QLabel* lblKonqueror2 = new QLabel(menuEdit);
+  lblKonqueror2->setText("Konqueror");
+  optToolBarLayout->addWidget(lblKonqueror2,0,17);
   
   QComboBox* cbbKonqueror = new QComboBox(this);
+  cbbKonqueror->setMaximumSize(9999,25);
   toAdd.clear();
-  toAdd << "Konq3" << "Konq4";
+  toAdd << "--None--" << "Version 3" << "Version 4";
   cbbKonqueror->addItems(toAdd);
-  optToolBarLayout->addWidget(cbbKonqueror,0,17);
+  optToolBarLayout->addWidget(cbbKonqueror,1,16,1,2);
   cbbKonqueror->setDisabled(true);
   
-  optToolBarLayout->addItem(new QSpacerItem(0, 20, QSizePolicy::Expanding, QSizePolicy::Minimum),0,18);
+  optToolBarLayout->addWidget(createSpacer(),0,18,2,1);
+  
+  optToolBarLayout->addItem(new QSpacerItem(0, 20, QSizePolicy::Expanding, QSizePolicy::Minimum),0,19);
 
   /***************************************************************
   
@@ -1944,7 +1975,7 @@ QFrame* MainWindow::createSpacer() {
   aline->setObjectName(QString::fromUtf8("line"));
   aline->setFrameShape(QFrame::VLine);
   aline->setFrameShadow(QFrame::Sunken);
-  aline->setStyleSheet("margin:3px;padding:3px;width:7px;");
+  aline->setMinimumSize(5,0);
   return aline;
 } //createSpacer()
 
