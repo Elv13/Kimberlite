@@ -189,7 +189,7 @@ public:
     QPushButton *btnParse;
     QDockWidget *dockDebug;
     QListWidget* lstDebug;
-    QVBoxLayout *verticalLayout_99;
+    QGridLayout *verticalLayout_99;
     QWidget *dockDebugContents;
     KTextEdit *rtfScriptEditor;
     QTabWidget *tabWCSSLevel;
@@ -299,7 +299,7 @@ public:
     
     void cssClassClicked(QTreeWidgetItem* anItem);    
     void addClasses();
-    void setHtmlCursor(QTreeWidgetItem* item, int column);
+    void setHtmlCursor(QTreeWidgetItem* item);
     void setModified();
     void changeCssMode(int mode);
     void updateClassTree();

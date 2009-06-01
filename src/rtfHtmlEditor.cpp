@@ -96,8 +96,6 @@ void RtfHtmlEditor::insertCompletion(const QString& completion) {
       tc.movePosition(QTextCursor::Left);
       tc.select(QTextCursor::WordUnderCursor);
       QString toAdd;
-      //QString toAdd = ((tc.selectedText()[0] == '<') && (extra == completion.length()))?"":"<";
-      printf("Count: %d %d \n",extra,completion.count());
       if ((tc.selectedText()[0] != '<') && (extra == completion.count()))
 	toAdd = "<";
       tc.setPosition(currentPos);
@@ -209,7 +207,7 @@ void RtfHtmlEditor::insertTabulation() {
       }
     }
     else if (currentText.count() >= i) {
-      if ((currentText[i-1] == '<') && (orphelinTags.indexOf(HtmlParser::getTag(currentText).toUpper()) == -1))
+      if ((currentText[(i > 0)?i-1:0] == '<') && (orphelinTags.indexOf(HtmlParser::getTag(currentText).toUpper()) == -1))
         tab += "   ";
       tc.setPosition(currentPos);
     }
@@ -231,13 +229,11 @@ bool RtfHtmlEditor::isAtribute() {
   tc.select(QTextCursor::LineUnderCursor);
   int open = tc.selectedText().indexOf("<");
   int close = tc.selectedText().indexOf(">");
-  printf("Text: %s, open: %d, close: %d, currentPos: %d \n",tc.selectedText().toStdString().c_str(),open,close,currentPos);
   if ((open != -1) && (close != -1) && (tc.selectedText()[open+1] != '/')) {
     tc.setPosition(currentPos);
     tc.movePosition(QTextCursor::StartOfLine);
     int startposition = tc.position() + open;
     int endposition = tc.position() + close;
-    printf("startPos: %d, endPos: %d",startposition,endposition);
     if ((startposition < currentPos) && (endposition > (currentPos -1)))
       return true;
   }
@@ -251,7 +247,7 @@ QString RtfHtmlEditor::getCurrentAtribute() { //TODO if ="|" != -2 but -1
   int currentPosInLine = currentPos - tc.position();
   tc.select(QTextCursor::LineUnderCursor);
   QString line = tc.selectedText();
-  if ((line[currentPosInLine-1] == '=') || ((line[currentPosInLine-1] == '\"') && (line[currentPosInLine-2] == '='))) {
+  if ((line[(currentPosInLine)?currentPosInLine-1:0] == '=') || ((line[(currentPosInLine)?currentPosInLine-1:0] == '\"') && (line[(currentPosInLine > 1)?currentPosInLine-2:0] == '='))) {
     return line.mid(line.lastIndexOf(" ", currentPosInLine), currentPosInLine - line.lastIndexOf(" ", currentPosInLine)-2);
   }
   else {
@@ -260,12 +256,9 @@ QString RtfHtmlEditor::getCurrentAtribute() { //TODO if ="|" != -2 but -1
 }
 
 void RtfHtmlEditor::completeAttribute(QString attribute, QString tag) {
-  printf("\nThis is the attribute: %s \n",attribute.toStdString().c_str());
   tmpList.clear();
   QCompleter* oldCompleter;
   if (attribute.trimmed() == "CLASS") {
-    //for (int i=0; i < 
-    printf("\nIt is \"CLASS\" \n");
     tmpList = CssParser::getClassList();
   }
   else if (attribute.trimmed() == "STYLE") {
@@ -291,10 +284,8 @@ void RtfHtmlEditor::completeAttribute(QString attribute, QString tag) {
     while (query23.next()) {
       QStringList attributeList = query23.value(0).toString().split(";");
       for (int i =0; i < attributeList.size();i++) {
-	printf("\nI manage to get here3!!! \n");
 	int indexP = attributeList[i].indexOf("(");
 	if (indexP != -1) {
-	  printf("\nI manage to get here2!!! '%s' '%s' \n",attributeList[i].left(indexP).toStdString().c_str(),attribute.toUpper().toStdString().c_str());
 	  if (attributeList[i].left(indexP).trimmed() == attribute.toUpper().trimmed()) {
 	    QStringList valueList = attributeList[i].mid(indexP+1,attributeList[i].indexOf(")") - (indexP+1)).split(",");
 	    for (int j =0; j < valueList.size();j++)
@@ -378,7 +369,6 @@ void RtfHtmlEditor::keyPressEvent(QKeyEvent *e) {
       return;
     }
     else if (isShortcut == true) {
-      printf("Is not in atribute \n");
       static QString eow("~!@#$%^&*()_+{}|:\"<>?,./;'[]\\-="); // end of word
       bool hasModifier = (e->modifiers() != Qt::NoModifier) && !ctrlOrShift;
       QString completionPrefix = textUnderCursor();
@@ -411,7 +401,6 @@ void RtfHtmlEditor::keyPressEvent(QKeyEvent *e) {
       return;
     }
     else if ((e->key() == Qt::Key_Space) && (isInAtribute) && (defaultCompletion == true)) {
-      printf("Is in atribute \n");
       QTextCursor tc = textCursor();
       tc.insertText(" ");
       int currentPos = tc.position();

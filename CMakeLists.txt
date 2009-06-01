@@ -65,6 +65,15 @@ include(KDE4Defaults)
 	  pixmap/showProject.png
       DESTINATION ${DATA_INSTALL_DIR}/kimberlite/pixmap )
       
+      install( FILES 
+	  pixmap/browserLogo/IE.png
+	  pixmap/browserLogo/FF.png
+	  pixmap/browserLogo/KQ.png
+	  pixmap/browserLogo/SF.png
+	  pixmap/browserLogo/CR.png
+	  pixmap/browserLogo/OP.png
+      DESTINATION ${DATA_INSTALL_DIR}/kimberlite/pixmap/browserLogo/ )
+      
       install( FILES  
 	kimberlite.desktop 
       DESTINATION ${XDG_APPS_INSTALL_DIR} )
