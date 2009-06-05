@@ -36,7 +36,7 @@
 #include "src/newProject.h"
 #include "src/debugger.h"
 
-MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(NULL),currentScript(NULL),aProjectManager(NULL),isModified(false) {
+MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(NULL),currentScript(NULL),aProjectManager(NULL),isModified(false),previousCssMode(999) {
   actionCollection = new KActionCollection(this);
   setWindowTitle("Kimberlite");
   db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE"));
@@ -143,7 +143,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   hlFont->setContentsMargins(0,0,0,0);
   hlFont->setSpacing(0);
   
-  cbbFont = new QComboBox(menuEdit);
+  cbbFont = new KFontComboBox(menuEdit);
   cbbFont->setObjectName(QString::fromUtf8("cbbFont"));
   cbbFont->setMinimumSize(QSize(225, 0));
   cbbFont->setMaximumSize(QSize(225, 25));
@@ -159,11 +159,36 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   hlFont->addWidget(cbbFontSize);
 
   cbbHeader = new KComboBox(menuEdit);
-  cbbHeader->setMaximumSize(QSize(225, 25));
+  cbbHeader->setMaximumSize(QSize(175, 25));
+  cbbHeader->setMinimumSize(QSize(175, 25));
   cbbHeader->setObjectName(QString::fromUtf8("cbbHeader"));
   QStringList headerSize;
   headerSize << "Header 1" << "Header 2" << "Header 3" << "Header 4" << "Header 5" << "Header 6";
   cbbHeader->addItems(headerSize);
+  QListWidget* headerList = new QListWidget();
+  headerList->setStyleSheet("QListView::item {\
+     height:35px;\
+     color:transparent;\
+ }\
+ QListView::item:selected {\
+     boder:0px;\
+     background-color:transparent;\
+     height:30px;\
+     min-height:30px;\
+     width:100%;\
+ }\
+");
+  headerList->addItems(headerSize);
+  QLabel* lbltestHesder = new QLabel("<h1>Header 1</h1>");
+  lbltestHesder->setFocusPolicy(Qt::NoFocus);
+  headerList->setItemWidget(headerList->item(0),lbltestHesder);
+  headerList->setItemWidget(headerList->item(1),new QLabel("<h2>Header 2</h2>"));
+  headerList->setItemWidget(headerList->item(2),new QLabel("<h3>Header 3</h3>"));
+  headerList->setItemWidget(headerList->item(3),new QLabel("<h4>Header 4</h4>"));
+  headerList->setItemWidget(headerList->item(4),new QLabel("<h5>Header 5</h5>"));
+  headerList->setItemWidget(headerList->item(5),new QLabel("<h6>Header 6</h6>"));
+  cbbHeader->setView(headerList);
+  cbbHeader->setModel(headerList->model());
   connect(cbbHeader, SIGNAL(currentIndexChanged (QString)), this, SLOT(setHeader(QString)));
   hlFont->addWidget(cbbHeader);
 
@@ -211,45 +236,23 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   hlTextAtributeButton->addWidget(btnChar);
   
   hlTextAtributeButton->addWidget(createSpacer());
-  
-  lblTextColor = new QLabel(menuEdit);
-  lblTextColor->setObjectName(QString::fromUtf8("lblTextColor"));
-  lblTextColor->setMaximumSize(QSize(25, 24));
-  KIcon* icnTextColor = new KIcon("format-text-color");
-  lblTextColor->setPixmap(icnTextColor->pixmap(18,QIcon::Normal,QIcon::On));
-  hlTextAtributeButton->addWidget(lblTextColor);
 
-  kcbbTextColor = new KColorCombo(menuEdit);
-  kcbbTextColor->setMaximumSize(QSize(25, 24));
+  kcbbTextColor = new ColorComboBox(this);
+  kcbbTextColor->setIcon(KIcon("format-text-color"));
   kcbbTextColor->setObjectName(QString::fromUtf8("kcbbTextColor"));
-  connect(kcbbTextColor, SIGNAL(currentIndexChanged(int)), this, SLOT(setTextColor()));
+  connect(kcbbTextColor, SIGNAL(colorChanged(QColor)), this, SLOT(setTextColor(QColor)));
   hlTextAtributeButton->addWidget(kcbbTextColor);
-
-  lblHighlightColor = new QLabel(menuEdit);
-  lblHighlightColor->setObjectName(QString::fromUtf8("lblHighlightColor"));
-  lblHighlightColor->setMaximumSize(QSize(25, 24));
-  KIcon* icnHighlightColor = new KIcon("format-stroke-color");
-  lblHighlightColor->setPixmap(icnHighlightColor->pixmap(18,QIcon::Normal,QIcon::On));
-  hlTextAtributeButton->addWidget(lblHighlightColor);
-
-  cbbHighlightColor = new KColorCombo(menuEdit);
-  cbbHighlightColor->setMaximumSize(QSize(25, 24));
+  
+  cbbHighlightColor = new ColorComboBox(menuEdit);
+  cbbHighlightColor->setIcon(KIcon("format-stroke-color"));
   cbbHighlightColor->setObjectName(QString::fromUtf8("cbbHighlightColor"));
-  //cbbHighlightColor->setStyleSheet("QComboBox QAbstractItemView { min-width:50px;}");
-  connect(cbbHighlightColor, SIGNAL(currentIndexChanged(int)), this, SLOT(setHighlightColor()));
+  connect(cbbHighlightColor, SIGNAL(colorChanged(QColor)), this, SLOT(setHighlightColor(QColor)));
   hlTextAtributeButton->addWidget(cbbHighlightColor);
 
-  lblBackgroundColor = new QLabel(menuEdit);
-  lblBackgroundColor->setMaximumSize(QSize(25, 24));
-  lblBackgroundColor->setObjectName(QString::fromUtf8("lblBackgroundColor"));
-  KIcon* icnBackgroundColor = new KIcon("fill-color");
-  lblBackgroundColor->setPixmap(icnBackgroundColor->pixmap(18,QIcon::Normal,QIcon::On));
-  hlTextAtributeButton->addWidget(lblBackgroundColor);
-
-  cbbBackgroundColor = new KColorCombo(menuEdit);
-  cbbBackgroundColor->setMaximumSize(QSize(25, 24));
+  cbbBackgroundColor = new ColorComboBox(menuEdit);
+  cbbBackgroundColor->setIcon(KIcon("fill-color"));
   cbbBackgroundColor->setObjectName(QString::fromUtf8("cbbBackgroundColor"));
-  connect(cbbBackgroundColor, SIGNAL(currentIndexChanged(int)), this, SLOT(setBackgroundColor()));
+  connect(cbbBackgroundColor, SIGNAL(colorChanged(QColor)), this, SLOT(setBackgroundColor(QColor)));
   hlTextAtributeButton->addWidget(cbbBackgroundColor);
   
   hlTextAtributeButton->addItem(new QSpacerItem(0, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
@@ -341,7 +344,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   connect(ashActions["Add Link"], SIGNAL(triggered(bool)), this, SLOT(insertLink()));
   insertTB->addAction(ashActions["Add Link"]);
 
-  createAction("Add Anchor", "view-refresh", NULL);
+  createAction("Add Anchor", KStandardDirs::locate("appdata", "pixmap/anchor.png"), NULL);
   connect(ashActions["Add Anchor"], SIGNAL(triggered(bool)), this, SLOT(quit()));
   insertTB->addAction(ashActions["Add Anchor"]);
 
@@ -362,16 +365,16 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   aline2->setStyleSheet("margin:3px;padding:3px;width:20px;");
   hlInsert->addWidget(aline2,0,10,2,1);
 
-  btnNewLine = createToolButton(menuInsert,"view-refresh","Add line");
+  btnNewLine = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/br.png"),"Add line");
   hlInsert->addWidget(btnNewLine,0,1);
 
-  btnNewTab = createToolButton(menuInsert,"view-refresh","Add tab");
+  btnNewTab = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/tab.png"),"Add tab");
   hlInsert->addWidget(btnNewTab,1,0);
 
-  btnNewSpace = createToolButton(menuInsert,"view-refresh","Add space");
+  btnNewSpace = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/space.png"),"Add space");
   hlInsert->addWidget(btnNewSpace,0,0);
   
-  KPushButton* btnHr = createToolButton(menuInsert,"view-refresh","Add horizontal line");
+  KPushButton* btnHr = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/hr.png"),"Add horizontal line");
   hlInsert->addWidget(btnHr,1,1);
   
   QFrame* aline = new QFrame(menuEdit);
@@ -382,46 +385,46 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   aline->setStyleSheet("margin:3px;padding:3px;width:20px;");
   hlInsert->addWidget(aline,0,2,2,1);
   
-  KPushButton* btnTextLine = createToolButton(menuInsert,"view-refresh","Add a text field");
+  KPushButton* btnTextLine = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/textline.png"),"Add a text field");
   hlInsert->addWidget(btnTextLine,0,3);
   
-  KPushButton* btnPassword = createToolButton(menuInsert,"view-refresh","Add a password field");
+  KPushButton* btnPassword = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/password.png"),"Add a password field");
   hlInsert->addWidget(btnPassword,1,3);
   
-  KPushButton* btnCheckBox = createToolButton(menuInsert,"view-refresh","Add a checkbox");
+  KPushButton* btnCheckBox = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/checkbox.png"),"Add a checkbox");
   hlInsert->addWidget(btnCheckBox,0,4);
   
-  KPushButton* btnRadioButton = createToolButton(menuInsert,"view-refresh","Add a radio button");
+  KPushButton* btnRadioButton = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/radio.png"),"Add a radio button");
   hlInsert->addWidget(btnRadioButton,1,4);
   
-  KPushButton* btnSubmit = createToolButton(menuInsert,"view-refresh","Add a submit button");
+  KPushButton* btnSubmit = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/submit.png"),"Add a submit button");
   hlInsert->addWidget(btnSubmit,0,5);
   
-  KPushButton* btnReset = createToolButton(menuInsert,"view-refresh","Add a reset button");
+  KPushButton* btnReset = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/reset.png"),"Add a reset button");
   hlInsert->addWidget(btnReset,1,5);
   
-  KPushButton* btnUpload = createToolButton(menuInsert,"view-refresh","Add an upload button");
+  KPushButton* btnUpload = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/upload.png"),"Add an upload button");
   hlInsert->addWidget(btnUpload,0,6);
   
-  KPushButton* btnHidden = createToolButton(menuInsert,"view-refresh","Add an hidden object");
+  KPushButton* btnHidden = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/hidden.png"),"Add an hidden object");
   hlInsert->addWidget(btnHidden,1,6);
   
-  KPushButton* btnButton = createToolButton(menuInsert,"view-refresh","Add a simple button");
+  KPushButton* btnButton = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/button.png"),"Add a simple button");
   hlInsert->addWidget(btnButton,0,7);
   
-  KPushButton* btnTextAera = createToolButton(menuInsert,"view-refresh","Add a text area");
+  KPushButton* btnTextAera = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/textarea.png"),"Add a text area");
   hlInsert->addWidget(btnTextAera,1,7);
   
-  KPushButton* btnHtmlButton = createToolButton(menuInsert,"view-refresh","Add a rich (html) button");
+  KPushButton* btnHtmlButton = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/button.png"),"Add a rich (html) button");
   hlInsert->addWidget(btnHtmlButton,0,8);
   
-  KPushButton* btnSelect = createToolButton(menuInsert,"view-refresh","Add a combo box");
+  KPushButton* btnSelect = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/combobox.png"),"Add a combo box");
   hlInsert->addWidget(btnSelect,1,8);
   
-  KPushButton* btnList = createToolButton(menuInsert,"view-refresh","Add a list");
+  KPushButton* btnList = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/list.png"),"Add a list");
   hlInsert->addWidget(btnList,0,9);
   
-  KPushButton* btnLabel = createToolButton(menuInsert,"view-refresh","Add a label");
+  KPushButton* btnLabel = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/label.png"),"Add a label");
   hlInsert->addWidget(btnLabel,1,9);
 
   /***************************************************************
@@ -650,11 +653,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   connect(dockHtmlTree, SIGNAL(visibilityChanged(bool)), ashActions["HTML Tree"] , SLOT(setChecked(bool)));
 
   
-  /*aHtmlThread = new ParserThread(this); //TODO make it work
-  aHtmlThread->rtfHtml = rtfHTMLEditor;
-  aHtmlThread->treeHtml = treeHtml;
-  connect(rtfHTMLEditor, SIGNAL(textChanged()), aHtmlThread, SLOT(getReady()));
-  aHtmlThread->start();*/
+ 
 
   /***************************************************************
   
@@ -938,6 +937,12 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   scrollArea->setWidget(scrollAreaWidgetContents);
   verticalLayout_8->addWidget(scrollArea);
   tabWCSSLevel->addTab(tabBeginner, "Begginer");
+  
+  aHtmlThread = new ParserThread(this); //TODO make it work
+  aHtmlThread->rtfHtml = rtfHTMLEditor;
+  connect(rtfHTMLEditor, SIGNAL(textChanged()), aHtmlThread, SLOT(getReady()));
+  connect(aHtmlThread, SIGNAL(updateTree(IndexedTreeWidgetItem*,bool)), this, SLOT(updateHtmlTree(IndexedTreeWidgetItem*,bool)));
+  aHtmlThread->start();
   
   /***************************************************************
   
@@ -1641,26 +1646,23 @@ void MainWindow::setFontSize(int size) {
   addTag("<font size=\""+number+"\">","</font>","fontSize",number);
 } //setFontSize
 
-void MainWindow::setTextColor() {
-  QString color = kcbbTextColor->color().name();
-  addTag("<font color=\""+color+"\">","</font>","foreColor", color);
+void MainWindow::setTextColor(QColor aColor) {
+  addTag("<font color=\""+aColor.name()+"\">","</font>","foreColor", aColor.name());
 } //setTextColor
 
-void MainWindow::setHighlightColor() {
-  QString color = cbbHighlightColor->color().name();
-  addTag("<font style=\"background-color:"+color+"\">","</font>","hiliteColor", color);
+void MainWindow::setHighlightColor(QColor aColor) {
+  addTag("<font style=\"background-color:"+aColor.name()+"\">","</font>","hiliteColor", aColor.name());
 } //setHighlightColor
 
 void MainWindow::setUList() {
   addTag("<ul>","</ul>","insertUnorderedList");
 } //setUList
 
-void MainWindow::setBackgroundColor() {
+void MainWindow::setBackgroundColor(QColor aColor) {
   if (KIMBERLITE_MODE == MODE_WYSIWYG)
     rtfHTMLEditor->setPlainText(webPreview->page()->mainFrame()->toHtml());
-  QString color = cbbBackgroundColor->color().name();
   HtmlData pageData = aParser->getHtmlData(rtfHTMLEditor->toPlainText());
-  HtmlParser::setAttribute(pageData, "body", 0, "bgcolor", color);
+  HtmlParser::setAttribute(pageData, "body", 0, "bgcolor", aColor.name());
   rtfHTMLEditor->setPlainText(aParser->getParsedHtml(pageData));
   if (KIMBERLITE_MODE == MODE_WYSIWYG)
     webPreview->setHtml(rtfHTMLEditor->toPlainText());
@@ -1727,7 +1729,7 @@ void MainWindow::reportBug() {
 
 void MainWindow::disableWysiwyg(bool value) {
   QList<QWidget*> aList;
-  aList << cbbFont << cbbFontSize << btnBold << btnUnderline << btnItalic << btnAlignLeft << btnAlignCenter << btnAlignRight  << btnJustify << cbbHeader /* <<btnLink*/ << btnChar /*<< btnTable*/ << btnList << lblTextColor << kcbbTextColor << lblHighlightColor << cbbHighlightColor << lblBackgroundColor << cbbBackgroundColor << btnNewLine  << btnNewTab << btnNewSpace;
+  aList << cbbFont << cbbFontSize << btnBold << btnUnderline << btnItalic << btnAlignLeft << btnAlignCenter << btnAlignRight  << btnJustify << cbbHeader /* <<btnLink*/ << btnChar /*<< btnTable*/ << btnList << kcbbTextColor  << cbbHighlightColor << cbbBackgroundColor << btnNewLine  << btnNewTab << btnNewSpace;
   for (int i =0; i< aList.size();i++)
     aList[i]->setDisabled(value);
   ashActions["Add Image"]->setDisabled(value);
@@ -1989,3 +1991,11 @@ KAction* MainWindow::createAction(QString name, QString icon, QKeySequence short
   ashActions[name] = newAction;
   return newAction;
 } //createAction
+
+void MainWindow::updateHtmlTree(IndexedTreeWidgetItem* topItem,bool clear) {
+  if (clear)
+    treeHtml->clear();
+  if ((!topItem->text(0).isEmpty()) || ((topItem->child(0)) && (topItem->text(0).isEmpty())))
+    treeHtml->addTopLevelItem(topItem);
+  treeHtml->expandAll();
+}

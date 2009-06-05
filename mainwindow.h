@@ -56,7 +56,6 @@
 #include <QtWebKit/QWebView>
 #include <QDomDocument>
 #include <QFontComboBox>
-#include "kcolorcombo.h"
 #include "kcombobox.h"
 #include "knuminput.h"
 #include "kpushbutton.h"
@@ -102,12 +101,14 @@
 #include <QPrintDialog>
 #include <KPrintPreview>
 #include <QPrinter>
+#include <KFontComboBox>
 
 #include "src/CSSbeginnerWidget.h"
 #include "src/rtfCssEditor.h"
 #include "src/rtfHtmlEditor.h"
 #include "src/ProjectManager_v2.h"
 #include "src/htmlThread.h"
+#include "src/colorComboBox.h"
 
 #define KIMBERLITE_MODE tabWEditor->currentIndex()
 #define CSS_MODE tabWCSSLevel->currentIndex()
@@ -136,7 +137,7 @@ public:
     QSpacerItem *horizontalSpacer_3;
     QVBoxLayout *vlTextAtribute;
     QHBoxLayout *hlFont;
-    QComboBox *cbbFont;
+    KFontComboBox *cbbFont;
     KIntSpinBox *cbbFontSize;
     QHBoxLayout *hlTextAtributeButton;
     KPushButton *btnBold;
@@ -157,11 +158,11 @@ public:
     KPushButton *btnList;
     QGridLayout *vlColor;
     QLabel *lblTextColor;
-    KColorCombo *kcbbTextColor;
+    ColorComboBox *kcbbTextColor;
     QLabel *lblHighlightColor;
-    KColorCombo *cbbHighlightColor;
+    ColorComboBox *cbbHighlightColor;
     QLabel *lblBackgroundColor;
-    KColorCombo *cbbBackgroundColor;
+    ColorComboBox *cbbBackgroundColor;
     QWidget *menuInsert;
     QGridLayout* hlInsert;
     KPushButton* btnNewLine;
@@ -329,9 +330,9 @@ public:
     void setHeader(QString text);
     void setFont(QString text);
     void setFontSize(int size);
-    void setBackgroundColor();
-    void setHighlightColor();
-    void setTextColor();
+    void setBackgroundColor(QColor aColor = QColor());
+    void setHighlightColor(QColor aColor = QColor());
+    void setTextColor(QColor aColor = QColor());
     void setUList();
     void insertImage(QString path = "");
     void insertTable();
@@ -343,6 +344,7 @@ public:
     void aboutKimberlite();
     void reportBug();
     void cursorChanged();
+    void updateHtmlTree(IndexedTreeWidgetItem* topItem,bool clear);
     
   public slots:
     void loadPage(QTreeWidgetItem* item, QString text, bool force = false);

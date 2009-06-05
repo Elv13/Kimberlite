@@ -28,6 +28,7 @@ include(KDE4Defaults)
       src/debugger.cpp
       src/htmlThread.cpp
       src/miniClasses.h
+      src/colorComboBox.cpp
       )
 
       kde4_add_executable(kimberlite ${kimberlite_SRCS})
@@ -63,7 +64,28 @@ include(KDE4Defaults)
 	  pixmap/showHTML.png
 	  pixmap/showInspector.png
 	  pixmap/showProject.png
+	  pixmap/anchor.png
       DESTINATION ${DATA_INSTALL_DIR}/kimberlite/pixmap )
+      
+      install( FILES 
+	  pixmap/tags/br.png
+	  pixmap/tags/hr.png
+	  pixmap/tags/space.png
+	  pixmap/tags/tab.png
+	  pixmap/tags/textarea.png
+	  pixmap/tags/checkbox.png
+	  pixmap/tags/radio.png
+	  pixmap/tags/password.png
+	  pixmap/tags/button.png
+	  pixmap/tags/combobox.png
+	  pixmap/tags/hidden.png
+	  pixmap/tags/label.png
+	  pixmap/tags/list.png
+	  pixmap/tags/reset.png
+	  pixmap/tags/submit.png
+	  pixmap/tags/upload.png
+	  pixmap/tags/textline.png
+      DESTINATION ${DATA_INSTALL_DIR}/kimberlite/pixmap/tags/ )
       
       install( FILES 
 	  pixmap/browserLogo/IE.png

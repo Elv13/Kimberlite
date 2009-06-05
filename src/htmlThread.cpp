@@ -17,7 +17,6 @@ void ParserThread::run() {
       timeOver = false;
       HtmlData someData = HtmlParser::getHtmlData(rtfHtml->toPlainText());
       updateHtmlTree(someData);
-      treeHtml->expandAll();
     }
     else
       sleep(1);
@@ -33,10 +32,12 @@ void ParserThread::updateHtmlTree(HtmlData &pageData) {
   IndexedTreeWidgetItem* previousNode(NULL);
   IndexedTreeWidgetItem* aNode(NULL);
   int index(0), size(pageData.tagList.size());
-  treeHtml->clear();
+  QVector<IndexedTreeWidgetItem*> topLvlItem;
   for (int j=0; j < size;j++) {
-    if (pageData.levelList[j] == 0)
-      aNode = new IndexedTreeWidgetItem(treeHtml,QStringList(pageData.tagList[j]),index);
+    if (pageData.levelList[j] == 0) {
+      aNode = new IndexedTreeWidgetItem((QTreeWidget*)0,QStringList(pageData.tagList[j]),index);
+      topLvlItem.push_back(aNode);
+    }
     else if (pageData.levelList[j] > pageData.levelList[(j > 0)?j-1:0]) 
       aNode = new IndexedTreeWidgetItem(previousNode,QStringList(pageData.tagList[j]),index);
     else if (pageData.levelList[j] == pageData.levelList[(j > 0)?j-1:0]) 
@@ -46,5 +47,7 @@ void ParserThread::updateHtmlTree(HtmlData &pageData) {
     previousNode = aNode;
     index += pageData.tagList[j].count()+1 + (3*(pageData.levelList[j+((size-1!=j)?1:0)]));
   }
-  treeHtml->expandAll();
+  
+  for (int i=0; i<topLvlItem.size();i++)
+    emit updateTree(topLvlItem[i],(i)?false:true);
 }
