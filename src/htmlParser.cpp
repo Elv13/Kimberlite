@@ -100,7 +100,7 @@ QString HtmlParser::getParsedHtml(HtmlData &pageData) {
     if ((htmlInfo.noNewLineTags.indexOf(tag2) != -1) || (pageData.tagList[j][0] != '<')) {
       if ((pageData.tagList[j][0] == '<') && (htmlInfo.needNewLineOnOpen.indexOf(tag2) != -1) && (parsedHTML[parsedHTML.size()-1] != '\n') && (pageData.tagList[j].left(2) != "</"))
         parsedHTML += "\n" + tab;
-      if (parsedHTML[parsedHTML.size()-1] == '\n')
+      if (parsedHTML[(parsedHTML.size())?parsedHTML.size()-1:0] == '\n')
         parsedHTML += tab + pageData.tagList[j];
       else 
         parsedHTML += pageData.tagList[j];

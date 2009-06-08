@@ -88,6 +88,12 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   fileTB->addAction(ashActions["Print Preview"]);
 
   fileTB->addSeparator();
+  
+  createAction("Export", "document-export", Qt::CTRL + Qt::Key_Q);
+  connect(ashActions["Export"], SIGNAL(triggered(bool)),this, SLOT(exportProject()));
+  fileTB->addAction(ashActions["Export"]);
+  
+  fileTB->addSeparator();
 
   createAction("Quit", "application-exit", Qt::CTRL + Qt::Key_Q);
   connect(ashActions["Quit"], SIGNAL(triggered(bool)),this, SLOT(quit()));
@@ -158,37 +164,10 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   connect(cbbFontSize, SIGNAL(valueChanged(int)), this, SLOT(setFontSize(int)));
   hlFont->addWidget(cbbFontSize);
 
-  cbbHeader = new KComboBox(menuEdit);
+  cbbHeader = new HeaderComboBox(menuEdit);
   cbbHeader->setMaximumSize(QSize(175, 25));
   cbbHeader->setMinimumSize(QSize(175, 25));
   cbbHeader->setObjectName(QString::fromUtf8("cbbHeader"));
-  QStringList headerSize;
-  headerSize << "Header 1" << "Header 2" << "Header 3" << "Header 4" << "Header 5" << "Header 6";
-  cbbHeader->addItems(headerSize);
-  QListWidget* headerList = new QListWidget();
-  headerList->setStyleSheet("QListView::item {\
-     height:35px;\
-     color:transparent;\
- }\
- QListView::item:selected {\
-     boder:0px;\
-     background-color:transparent;\
-     height:30px;\
-     min-height:30px;\
-     width:100%;\
- }\
-");
-  headerList->addItems(headerSize);
-  QLabel* lbltestHesder = new QLabel("<h1>Header 1</h1>");
-  lbltestHesder->setFocusPolicy(Qt::NoFocus);
-  headerList->setItemWidget(headerList->item(0),lbltestHesder);
-  headerList->setItemWidget(headerList->item(1),new QLabel("<h2>Header 2</h2>"));
-  headerList->setItemWidget(headerList->item(2),new QLabel("<h3>Header 3</h3>"));
-  headerList->setItemWidget(headerList->item(3),new QLabel("<h4>Header 4</h4>"));
-  headerList->setItemWidget(headerList->item(4),new QLabel("<h5>Header 5</h5>"));
-  headerList->setItemWidget(headerList->item(5),new QLabel("<h6>Header 6</h6>"));
-  cbbHeader->setView(headerList);
-  cbbHeader->setModel(headerList->model());
   connect(cbbHeader, SIGNAL(currentIndexChanged (QString)), this, SLOT(setHeader(QString)));
   hlFont->addWidget(cbbHeader);
 
@@ -366,15 +345,19 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   hlInsert->addWidget(aline2,0,10,2,1);
 
   btnNewLine = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/br.png"),"Add line");
+  connect(btnNewLine, SIGNAL(clicked()), this, SLOT(addNewLine()));
   hlInsert->addWidget(btnNewLine,0,1);
 
   btnNewTab = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/tab.png"),"Add tab");
+  connect(btnNewTab, SIGNAL(clicked()), this, SLOT(addNewTab()));
   hlInsert->addWidget(btnNewTab,1,0);
 
   btnNewSpace = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/space.png"),"Add space");
+  connect(btnNewSpace, SIGNAL(clicked()), this, SLOT(addNewSpace()));
   hlInsert->addWidget(btnNewSpace,0,0);
   
   KPushButton* btnHr = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/hr.png"),"Add horizontal line");
+  connect(btnHr, SIGNAL(clicked()), this, SLOT(addAddHr()));
   hlInsert->addWidget(btnHr,1,1);
   
   QFrame* aline = new QFrame(menuEdit);
@@ -384,47 +367,61 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   aline->setMinimumSize(6,0);
   aline->setStyleSheet("margin:3px;padding:3px;width:20px;");
   hlInsert->addWidget(aline,0,2,2,1);
-  
+
   KPushButton* btnTextLine = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/textline.png"),"Add a text field");
+  connect(btnTextLine, SIGNAL(clicked()), this, SLOT(addTextLine()));
   hlInsert->addWidget(btnTextLine,0,3);
   
   KPushButton* btnPassword = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/password.png"),"Add a password field");
+  connect(btnPassword, SIGNAL(clicked()), this, SLOT(addPasswordLine()));
   hlInsert->addWidget(btnPassword,1,3);
   
   KPushButton* btnCheckBox = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/checkbox.png"),"Add a checkbox");
+  connect(btnCheckBox, SIGNAL(clicked()), this, SLOT(addCheckBox()));
   hlInsert->addWidget(btnCheckBox,0,4);
   
   KPushButton* btnRadioButton = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/radio.png"),"Add a radio button");
+  connect(btnRadioButton, SIGNAL(clicked()), this, SLOT(addRadioButton()));
   hlInsert->addWidget(btnRadioButton,1,4);
   
   KPushButton* btnSubmit = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/submit.png"),"Add a submit button");
+  connect(btnSubmit, SIGNAL(clicked()), this, SLOT(addSubmitButton()));
   hlInsert->addWidget(btnSubmit,0,5);
   
   KPushButton* btnReset = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/reset.png"),"Add a reset button");
+  connect(btnReset, SIGNAL(clicked()), this, SLOT(addResetButton()));
   hlInsert->addWidget(btnReset,1,5);
   
   KPushButton* btnUpload = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/upload.png"),"Add an upload button");
+  connect(btnUpload, SIGNAL(clicked()), this, SLOT(addUploadButton()));
   hlInsert->addWidget(btnUpload,0,6);
   
   KPushButton* btnHidden = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/hidden.png"),"Add an hidden object");
+  connect(btnHidden, SIGNAL(clicked()), this, SLOT(addHiddenField()));
   hlInsert->addWidget(btnHidden,1,6);
   
   KPushButton* btnButton = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/button.png"),"Add a simple button");
+  connect(btnButton, SIGNAL(clicked()), this, SLOT(addButton()));
   hlInsert->addWidget(btnButton,0,7);
   
   KPushButton* btnTextAera = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/textarea.png"),"Add a text area");
+  connect(btnTextAera, SIGNAL(clicked()), this, SLOT(addTextAera()));
   hlInsert->addWidget(btnTextAera,1,7);
   
   KPushButton* btnHtmlButton = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/button.png"),"Add a rich (html) button");
+  connect(btnHtmlButton, SIGNAL(clicked()), this, SLOT(addHtmlButton()));
   hlInsert->addWidget(btnHtmlButton,0,8);
   
   KPushButton* btnSelect = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/combobox.png"),"Add a combo box");
+  connect(btnSelect, SIGNAL(clicked()), this, SLOT(addSelect()));
   hlInsert->addWidget(btnSelect,1,8);
   
   KPushButton* btnList = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/list.png"),"Add a list");
+  connect(btnList, SIGNAL(clicked()), this, SLOT(addListControl()));
   hlInsert->addWidget(btnList,0,9);
   
   KPushButton* btnLabel = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/label.png"),"Add a label");
+  connect(btnLabel, SIGNAL(clicked()), this, SLOT(addLabel()));
   hlInsert->addWidget(btnLabel,1,9);
 
   /***************************************************************
@@ -1658,6 +1655,78 @@ void MainWindow::setUList() {
   addTag("<ul>","</ul>","insertUnorderedList");
 } //setUList
 
+void MainWindow::addTextLine() {
+  addTag("<input type=\"text\" name=\"\" />","","inserthtml","<input type=\\\"text\\\" name=\\\"\\\" value=\\\"test\\\" />");
+} //addTextLine
+
+void MainWindow::addPasswordLine() {
+  addTag("<input type=\"password\" name=\"\" />","","inserthtml","<input type=\\\"password\\\" name=\\\"\\\" value=\\\"password\\\" />");
+} //addPasswordLine
+
+void MainWindow::addCheckBox() {
+  addTag("<input type=\"checkbox\" name=\"\" />","","inserthtml","<input type=\\\"checkbox\\\" name=\\\"\\\" />");
+} //addCheckBox
+
+void MainWindow::addRadioButton() {
+  addTag("<input type=\"radio\" name=\"\" />","","inserthtml","<input type=\\\"radio\\\" name=\\\"\\\" />");
+} //addRadioButton
+
+void MainWindow::addSubmitButton() {
+  addTag("<input type=\"submit\" name=\"\" />","","inserthtml","<input type=\\\"submit\\\" name=\\\"\\\" />");
+} //addSubmitButton
+
+void MainWindow::addResetButton() {
+  addTag("<input type=\"reset\" name=\"\" />","","inserthtml","<input type=\\\"reset\\\" name=\\\"\\\" />");
+} //addResetButton
+
+void MainWindow::addUploadButton() {
+  addTag("<input type=\"file\" name=\"\" />","","inserthtml","<input type=\\\"file\\\" name=\\\"\\\" />");
+} //addUploadButton
+
+void MainWindow::addHiddenField() {
+  addTag("<input type=\"hidden\" name=\"\" />","","inserthtml","<input type=\\\"hidden\\\" name=\\\"\\\" />");
+} //addHiddenField
+
+void MainWindow::addButton() {
+  addTag("<input type=\"button\" name=\"\" />","","inserthtml","<input type=\\\"button\\\" name=\\\"\\\" value=\\\"Button\\\" />");
+} //addButton
+
+void MainWindow::addTextAera() {
+  addTag("<textarea>","</textarea>","inserthtml","<textarea></textarea>");
+} //addTextAera
+
+void MainWindow::addHtmlButton() {
+  addTag("<button>","</button>","inserthtml","<button></button>");
+} //addHtmlButton
+
+void MainWindow::addSelect() {
+  addTag("<select>","</select>","inserthtml","<select><option>--SELECT--</option></select>");
+} //addSelect
+
+void MainWindow::addListControl() {
+  addTag("<select multiple=\"yes\" size=5>","</select>","inserthtml","<select multiple=\"yes\" size=5><option>--SELECT--</option><option>--SELECT--</option></select>");
+} //addListControl
+
+void MainWindow::addLabel() {
+  addTag("<label>","</label>","inserthtml","<label>Label</label>");
+} //addLabel
+
+void MainWindow::addNewLine() {
+  addTag("<br />","","inserthtml","<br />");
+} //addNewLine
+
+void MainWindow::addNewTab() {
+  addTag("<pre>	</pre>","","inserthtml","<pre>	</pre>"); //BUG Find better
+} //addNewTab
+
+void MainWindow::addNewSpace() {
+  addTag("&nbsp","","inserthtml","&nbsp");
+} //addNewSpace
+
+void MainWindow::addAddHr() {
+  addTag("<hr />","","inserthtml","<hr />");
+} //addAddHr
+
 void MainWindow::setBackgroundColor(QColor aColor) {
   if (KIMBERLITE_MODE == MODE_WYSIWYG)
     rtfHTMLEditor->setPlainText(webPreview->page()->mainFrame()->toHtml());
@@ -1998,4 +2067,10 @@ void MainWindow::updateHtmlTree(IndexedTreeWidgetItem* topItem,bool clear) {
   if ((!topItem->text(0).isEmpty()) || ((topItem->child(0)) && (topItem->text(0).isEmpty())))
     treeHtml->addTopLevelItem(topItem);
   treeHtml->expandAll();
-}
+} //updateHtmlTree
+
+void MainWindow::exportProject() {
+  QString path = KFileDialog::getExistingDirectory(QUrl(""),this);
+  aProjectManager->exportProject(path + "/" + aProjectManager->getProjectName() + "/");
+} //exportProject
+

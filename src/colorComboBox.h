@@ -6,15 +6,7 @@
 #include <QGridLayout>
 #include <QPushButton>
 #include <QColor>
-
-class HidingFrame : public QFrame {
-  public:
-    HidingFrame(QWidget* parent = NULL, Qt::WindowFlags f = 0 ) : QFrame(parent,f) {
-      //setFocusPolicy(Qt::StrongFocus);
-    }
-  protected:
-    virtual void focusOutEvent(QFocusEvent* event);
-};
+#include <QListWidget>
 
 class ColorButton : public QPushButton {
   Q_OBJECT
@@ -45,17 +37,21 @@ class ColorComboBox : public QComboBox {
     virtual void showPopup();
     virtual void hidePopup();
     void setIcon(QIcon anIcon) {
-      clear();
-      addItem(anIcon,QString::fromUtf8("■"));
+      ((QListWidget*)view())->item(0)->setIcon(anIcon);
     }
     
   private:
-    HidingFrame* frmColor;
+    QFrame* frmColor;
     ColorButton* currentButton;
     QHash<QString,ColorButton *> buttonHash;
+    QGridLayout* mainLayout;
+    int maxPerLine;
+    int curRow;
+    int curCol;
 
   private slots:
     void colorClicked(QColor);
+    void addCustomColor();
   signals:
     void colorChanged(QColor);
 };

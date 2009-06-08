@@ -109,6 +109,7 @@
 #include "src/ProjectManager_v2.h"
 #include "src/htmlThread.h"
 #include "src/colorComboBox.h"
+#include "src/headerComboBox.h"
 
 #define KIMBERLITE_MODE tabWEditor->currentIndex()
 #define CSS_MODE tabWCSSLevel->currentIndex()
@@ -150,7 +151,7 @@ public:
     KPushButton *btnJustify;
     QSpacerItem *horizontalSpacer_2;
     QVBoxLayout *vlOther;
-    KComboBox *cbbHeader;
+    HeaderComboBox *cbbHeader;
     QHBoxLayout *hlOther;
     KPushButton *btnLink;
     KPushButton *btnChar;
@@ -297,6 +298,7 @@ public:
     void saveProjectAs();
     void saveProjectAs(const QString &outputFileName);
     void saveFile();
+    void exportProject();
     
     void cssClassClicked(QTreeWidgetItem* anItem);    
     void addClasses();
@@ -338,6 +340,24 @@ public:
     void insertTable();
     void insertLink(QString path = "");
     void insertChar();
+    void addTextLine();
+    void addPasswordLine();
+    void addCheckBox();
+    void addRadioButton();
+    void addSubmitButton();
+    void addResetButton();
+    void addUploadButton();
+    void addHiddenField();
+    void addButton();
+    void addTextAera();
+    void addHtmlButton();
+    void addSelect();
+    void addListControl();
+    void addLabel();
+    void addNewLine();
+    void addNewTab();
+    void addNewSpace();
+    void addAddHr();
     
     void editToolbar();
     void editShortcut();

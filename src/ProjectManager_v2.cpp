@@ -5,6 +5,7 @@
 #include <KIcon>
 #include <QDebug>
 #include "cssParser.h"
+#include "htmlParser.h"
 
 ProjectManager2::ProjectManager2(QWidget *parent) : QTreeWidget(parent),firstPage(true) {
   setHeaderHidden(true);
@@ -360,6 +361,10 @@ void ProjectManager2::setProjectName(QString name) {
     anItem->setText(0,name);
 }
 
+QString ProjectManager2::getProjectName() {
+  return domDocument.documentElement().firstChildElement("project").attribute("title");
+}
+
 void ProjectManager2::saveCss() {
   QDomText newStyle = domDocument.createTextNode(CssParser::cssFile);
   QDomElement anElement = domDocument.createElement("file");
@@ -415,4 +420,45 @@ QByteArray ProjectManager2::readFile(QIODevice *device) {
   if (fileArray.find("KimberliteInternalData") == fileArray.end())
     return NULL; //ERROR!!!
   return fileArray["KimberliteInternalData"];
+}
+
+void  ProjectManager2::exportProject(QString path,QTreeWidgetItem* parent) {
+  QTreeWidgetItem* topItem;
+  if (!parent)
+    topItem = topLevelItem(0);
+  else
+    topItem = parent;
+
+  QDir aQDir;
+  aQDir.mkpath(path);
+  
+  for (int i = 0; i < topItem->childCount();i++) {
+    if (domElementForItem[topItem->child(i)].tagName() ==  "folder")
+      exportProject(path + domElementForItem[topItem->child(i)].attribute("title") + "/",topItem->child(i));
+    else if (domElementForItem[topItem->child(i)].tagName() ==  "style") {
+      qDebug() << "I am in style";
+      QFile aFile(path+"StyleSheet.css");
+      aFile.open(QIODevice::WriteOnly);
+      aFile.write(CssParser::cssFile.toStdString().c_str());
+      aFile.close();
+    }
+    else if (domElementForItem[topItem->child(i)].tagName() ==  "html") {
+      exportProject(path,topItem->child(i));
+    }
+    else if (domElementForItem[topItem->child(i)].tagName() ==  "script") {
+      exportProject(path + "scripts/",topItem->child(i));
+    }
+    else if (domElementForItem[topItem->child(i)].tagName() ==  "page") {
+      QFile aFile(path+domElementForItem[topItem->child(i)].attribute("name"));
+      aFile.open(QIODevice::WriteOnly);
+      aFile.write(HtmlParser::getParsedHtml(toHTML(domElementForItem[topItem->child(i)].text())).toStdString().c_str());
+      aFile.close();
+    }
+    else if (domElementForItem[topItem->child(i)].tagName() ==  "file") {
+      QFile aFile(path+domElementForItem[topItem->child(i)].attribute("name"));
+      aFile.open(QIODevice::WriteOnly);
+      aFile.write(HtmlParser::getParsedHtml(toHTML(domElementForItem[topItem->child(i)].text())).toStdString().c_str());
+      aFile.close();
+    }
+  }
 }

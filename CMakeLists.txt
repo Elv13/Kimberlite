@@ -29,6 +29,7 @@ include(KDE4Defaults)
       src/htmlThread.cpp
       src/miniClasses.h
       src/colorComboBox.cpp
+      src/headerComboBox.cpp
       )
 
       kde4_add_executable(kimberlite ${kimberlite_SRCS})

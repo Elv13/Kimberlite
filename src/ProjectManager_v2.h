@@ -22,6 +22,8 @@ class ProjectManager2 : public QTreeWidget {
     TreeItem* htmlPage;
     TreeItem* script;
     QString projectTitle;
+    void exportProject(QString path,QTreeWidgetItem* parent =0);
+    QString getProjectName();
 
   public slots:
     void updateDomElement(QTreeWidgetItem *item, QString html);
