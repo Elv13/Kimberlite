@@ -3,9 +3,11 @@ Better dugugger
 Bring javascript on par with HTML and CSS editor
 JavaScript based WYSIWYG feature for DIV and d&d
 Support for specific standard and browser
+Rewrite the database to better support different version on CSS/HTML (and because the current one suck, but work
 
 0.3
 Template and optimisation for certain type of site
+KHotNewStuff integration
 
 0.4
 Integration with web services and some CMS

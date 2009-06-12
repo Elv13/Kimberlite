@@ -1,8 +1,11 @@
 #include "htmlThread.h"
+#include "../mainwindow.h"
 
 ParserThread::ParserThread(QObject *parent) : QThread(parent),needUpdate(false),timeOver(false) {
   aTimer = new QTimer(this);
+  aTimerCss = new QTimer(this);
   connect(aTimer, SIGNAL(timeout()), this, SLOT(timerDone()));
+  connect(aTimerCss, SIGNAL(timeout()), this, SLOT(timerDoneCss()));
 }
 
 void ParserThread::getReady() {
@@ -17,6 +20,11 @@ void ParserThread::run() {
       timeOver = false;
       HtmlData someData = HtmlParser::getHtmlData(rtfHtml->toPlainText());
       updateHtmlTree(someData);
+    }
+    else if ((timeOverCss == true) && (needUpdateCss == true)) { //They will never be true at the same time
+      needUpdateCss = false;
+      timeOverCss = false;
+      updateClassTree();
     }
     else
       sleep(1);
@@ -51,3 +59,26 @@ void ParserThread::updateHtmlTree(HtmlData &pageData) {
   for (int i=0; i<topLvlItem.size();i++)
     emit updateTree(topLvlItem[i],(i)?false:true);
 }
+
+void ParserThread::getReadyCss() {
+  aTimerCss->start(2000);
+  needUpdateCss = true;
+}
+
+void ParserThread::timerDoneCss() {
+  timeOverCss = true;
+  aTimerCss->stop();
+}
+
+void ParserThread::updateClassTree() {
+  CssParser::cssFile = rtfCss->toPlainText();
+  QTreeWidgetItem* anItem =  new QTreeWidgetItem();
+  anItem->setText(0,"Style");
+  
+  QStringList classList = CssParser::getClassList();
+
+  for (int j = 0; j < classList.count(); j++) {
+    MainWindow::splitSubClass(classList[j], anItem);
+  }
+  emit updateCssTree(anItem,true);
+} //updateClassTree

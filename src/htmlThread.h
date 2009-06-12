@@ -6,6 +6,7 @@
 #include <KTextEdit>
 #include <QTreeWidget>
 #include "htmlParser.h"
+#include "cssParser.h"
 
 class ParserThread : public QThread {
     Q_OBJECT
@@ -15,18 +16,23 @@ class ParserThread : public QThread {
       ~ParserThread() {}
       void run();
       KTextEdit* rtfHtml;
+      KTextEdit* rtfCss;
     public slots:
       void getReady();
       void timerDone();
+      void getReadyCss();
+      void timerDoneCss();
     private:
       QTimer* aTimer;
+      QTimer* aTimerCss;
       bool needUpdate;
+      bool needUpdateCss;
       bool timeOver;
+      bool timeOverCss;
       void updateHtmlTree(HtmlData &pageData);
+      void updateClassTree();
     signals:
       void updateTree(IndexedTreeWidgetItem*,bool);
+      void updateCssTree(QTreeWidgetItem*,bool);
 };
 #endif
-
-//TODO Use the ID of the treeItem to find the modifier one and\
-go down from there until 10 consecutive match if operation is not "PASTE"

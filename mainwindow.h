@@ -130,6 +130,8 @@ public:
     ~MainWindow();
     void retranslateUi();
     void fillCSSBegMode(QString className);
+    static KIcon getRightIcon(QString text);
+    static void splitSubClass(QString name, QTreeWidgetItem* parent);
     KActionCollection* actionCollection;
     QWidget *centralwidget;
     KTabWidget *tabWMenu;
@@ -258,8 +260,6 @@ public:
     //QString setClass(QString className, QString content);
     QString clearCssBeg();
     void disableWidget(bool value);
-    void splitSubClass(QString name, QTreeWidgetItem* parent);
-    KIcon getRightIcon(QString text);
     void updateHtmlTree(QString &file);
     void updateHtmlTree(HtmlData &pageData);
     void disableWysiwyg(bool value);
@@ -336,10 +336,12 @@ public:
     void setHighlightColor(QColor aColor = QColor());
     void setTextColor(QColor aColor = QColor());
     void setUList();
+    void setOList();
     void insertImage(QString path = "");
     void insertTable();
     void insertLink(QString path = "");
     void insertChar();
+    void addAnchor();
     void addTextLine();
     void addPasswordLine();
     void addCheckBox();
@@ -358,6 +360,8 @@ public:
     void addNewTab();
     void addNewSpace();
     void addAddHr();
+    void addIndent();
+    void addOutdent();
     
     void editToolbar();
     void editShortcut();
@@ -365,6 +369,7 @@ public:
     void reportBug();
     void cursorChanged();
     void updateHtmlTree(IndexedTreeWidgetItem* topItem,bool clear);
+    void updateCssTree(QTreeWidgetItem* topItem, bool clear);
     
   public slots:
     void loadPage(QTreeWidgetItem* item, QString text, bool force = false);

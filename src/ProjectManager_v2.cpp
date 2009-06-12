@@ -343,6 +343,8 @@ QDomNode ProjectManager2::getElement(QDomNode &aNode, QString tagName, QString a
 QTreeWidgetItem* ProjectManager2::getFolder(QString title) {
   if (title == "@@@ROOT")
     return htmlPage;
+  else if (title == "@@@ROOTJS")
+    return script;
   foreach(QDomElement item, domElementForItem) {
     if (item.toElement().tagName() == "folder") {
       if (item.toElement().attribute("title") == title) {
@@ -461,4 +463,21 @@ void  ProjectManager2::exportProject(QString path,QTreeWidgetItem* parent) {
       aFile.close();
     }
   }
+}
+
+void ProjectManager2::addScript(QString name, QString language, QString foldeName) {
+  QDomElement anElement = domDocument.createElement("file");
+  anElement.setAttribute("language", language);
+  anElement.setAttribute("name", name);
+  QDomElement newContentElement = domDocument.createElement("content");
+  QDomText newContentText;
+  newContentText= domDocument.createTextNode("");
+  newContentElement.appendChild(newContentText);
+  anElement.appendChild(newContentElement);
+  QDomElement element2 = domElementForItem.value(getFolder(foldeName));
+  element2.appendChild(anElement);
+  TreeItem* anItem = createItem(anElement,getFolder(foldeName));
+  anItem->setText(0,name);
+  anItem->setIcon(0, KIcon("application-javascript"));
+  setCurrentItem(anItem);
 }

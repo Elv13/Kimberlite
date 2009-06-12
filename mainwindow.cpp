@@ -43,11 +43,16 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   db->setDatabaseName( KStandardDirs::locate( "appdata", "kimberlite.db" ));
   qDebug() << (( db->open())? "Database corectly opened":"ERROR while opening the database, get ready for a crash");
 
+  KTipDatabase* aTipDB = new KTipDatabase();
+  KTipDialog* aTipDialog = new KTipDialog(aTipDB, this);
+  aTipDialog->setShowOnStart(true);
+  aTipDialog->showTip(this, QString(), true);
+
   aParser = new HtmlParser();
   tabWMenu = new KTabWidget(this);
   tabWMenu->setMinimumSize(QSize(0, 90));
   tabWMenu->setMaximumSize(QSize(9999999, 90));
-  
+
   /***************************************************************
   
 			File toolbar
@@ -212,7 +217,18 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   hlTextAtributeButton->addWidget(btnList);
   
   btnChar = createToolButton(menuEdit,"format-list-ordered","Create an ordered list");
+  connect(btnChar, SIGNAL(clicked()), this, SLOT(setOList()));
   hlTextAtributeButton->addWidget(btnChar);
+  
+  hlTextAtributeButton->addWidget(createSpacer());
+  
+  KPushButton* btnIndent = createToolButton(menuEdit,"format-indent-more","Indent selected text");
+  connect(btnIndent, SIGNAL(clicked()), this, SLOT(addIndent()));
+  hlTextAtributeButton->addWidget(btnIndent);
+  
+  KPushButton* btnUnIndent = createToolButton(menuEdit,"format-indent-less","Outdent selected text");
+  connect(btnUnIndent, SIGNAL(clicked()), this, SLOT(addOutdent()));
+  hlTextAtributeButton->addWidget(btnUnIndent);
   
   hlTextAtributeButton->addWidget(createSpacer());
 
@@ -324,7 +340,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   insertTB->addAction(ashActions["Add Link"]);
 
   createAction("Add Anchor", KStandardDirs::locate("appdata", "pixmap/anchor.png"), NULL);
-  connect(ashActions["Add Anchor"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+  connect(ashActions["Add Anchor"], SIGNAL(triggered(bool)), this, SLOT(addAnchor()));
   insertTB->addAction(ashActions["Add Anchor"]);
 
   insertTB->addSeparator();
@@ -628,7 +644,7 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   createAction("Report A Bug", "tools-report-bug", NULL);
   connect(ashActions["Report A Bug"], SIGNAL(triggered(bool)), this, SLOT(reportBug()));
   helpTB->addAction(ashActions["Report A Bug"]);
-
+  
   setMenuWidget(tabWMenu);
   
   /***************************************************************
@@ -935,12 +951,6 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   verticalLayout_8->addWidget(scrollArea);
   tabWCSSLevel->addTab(tabBeginner, "Begginer");
   
-  aHtmlThread = new ParserThread(this); //TODO make it work
-  aHtmlThread->rtfHtml = rtfHTMLEditor;
-  connect(rtfHTMLEditor, SIGNAL(textChanged()), aHtmlThread, SLOT(getReady()));
-  connect(aHtmlThread, SIGNAL(updateTree(IndexedTreeWidgetItem*,bool)), this, SLOT(updateHtmlTree(IndexedTreeWidgetItem*,bool)));
-  aHtmlThread->start();
-  
   /***************************************************************
   
 			CSS EXPERT mode
@@ -955,6 +965,16 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   tabWEditor->addTab(tabWCSSLevel, QString());
     
   connect(rtfCSSEditor, SIGNAL(cursorPositionChanged()), this, SLOT(cursorChanged()));
+  
+  aHtmlThread = new ParserThread(this); 
+  aHtmlThread->rtfHtml = rtfHTMLEditor;
+  aHtmlThread->rtfCss = rtfCSSEditor;
+  connect(rtfHTMLEditor, SIGNAL(textChanged()), aHtmlThread, SLOT(getReady()));
+  connect(rtfCSSEditor, SIGNAL(textChanged()), aHtmlThread, SLOT(getReadyCss()));
+  connect(aHtmlThread, SIGNAL(updateTree(IndexedTreeWidgetItem*,bool)), this, SLOT(updateHtmlTree(IndexedTreeWidgetItem*,bool)));
+  connect(aHtmlThread, SIGNAL(updateCssTree(QTreeWidgetItem*,bool)), this, SLOT(updateCssTree(QTreeWidgetItem*,bool)));
+
+  aHtmlThread->start();
   
   /***************************************************************
   
@@ -1305,6 +1325,7 @@ void MainWindow::addHtmlPage() {
 void MainWindow::addScript() {
   NewScript* aScript = new NewScript(this,aProjectManager->script);
   aScript->show();
+  connect(aScript, SIGNAL(addScript(QString,QString,QString)), aProjectManager, SLOT(addScript(QString,QString,QString)));
 } //addScript
 
 QString MainWindow::clearCssBeg() {
@@ -1655,6 +1676,18 @@ void MainWindow::setUList() {
   addTag("<ul>","</ul>","insertUnorderedList");
 } //setUList
 
+void MainWindow::addIndent() {
+  addTag("<blockquote>","</blockquote>","indent");
+} //setOList
+
+void MainWindow::addOutdent() {
+  addTag("","","outdent");
+} //setUList
+
+void MainWindow::setOList() {
+  addTag("<ol>","</ol>","insertOrderedList");
+} //setOList
+
 void MainWindow::addTextLine() {
   addTag("<input type=\"text\" name=\"\" />","","inserthtml","<input type=\\\"text\\\" name=\\\"\\\" value=\\\"test\\\" />");
 } //addTextLine
@@ -1978,7 +2011,7 @@ void MainWindow::cursorChanged() {
   QTextCursor tc;
   if ((KIMBERLITE_MODE != MODE_WYSIWYG) && (getCurrentEditor() != rtfCSSEditor))
     tc = getCurrentEditor()->textCursor();
-  else if (rtfScriptEditor == getCurrentEditor()) {
+  else if (rtfCSSEditor == getCurrentEditor()) {
     tc = rtfCSSEditor->textCursor();
     tc.select(QTextCursor::LineUnderCursor);
     QString currentText = tc.selectedText();
@@ -2031,8 +2064,8 @@ void MainWindow::webPageCursorMoved() {
 
 KPushButton* MainWindow::createToolButton(QWidget* parent, QString icon, QString toolTip, bool checkable) {
   KPushButton* aButton = new KPushButton(parent);
-  aButton->setMinimumSize(QSize(26, 26));
-  aButton->setMaximumSize(QSize(26, 26));
+  aButton->setMinimumSize(QSize(28, 26));
+  aButton->setMaximumSize(QSize(28, 26));
   aButton->setIcon(KIcon(icon));
   aButton->setIconSize(QSize(16,16));
   aButton->setToolTip(toolTip);
@@ -2074,3 +2107,30 @@ void MainWindow::exportProject() {
   aProjectManager->exportProject(path + "/" + aProjectManager->getProjectName() + "/");
 } //exportProject
 
+
+void MainWindow::addAnchor() {
+  bool ok;
+  QString text = QInputDialog::getText(this, "Add anchor", "Set the name of the anchor", QLineEdit::Normal, "", &ok);
+  if (ok && !text.isEmpty()) {
+    addTag("<a name=\""+text+"\"></a>","","inserthtml","<a name=\""+text+"\"></a>");
+    KMessageBox::error(this,"<b>Copy and paste this text in the html code where you want the link to be:</b><br><pre>&it;a href=\"\"&gt;\\</a\\></pre>");
+  }
+}
+
+void MainWindow::updateCssTree(QTreeWidgetItem* topItem, bool clear) {
+  if (clear) {
+    treeWidget->clear();
+    styleSheetName = topItem;
+  }
+  treeWidget->addTopLevelItem(topItem);
+
+  if (currentClassName.isEmpty()) {
+    QStringList classList = CssParser::getClassList();
+    if (!classList.isEmpty())
+      currentClassName = classList[0];
+  }
+  QTreeWidgetItem* toSelect = getClassWidget(currentClassName);
+  if (toSelect)
+    treeWidget->setCurrentItem(toSelect);
+  treeWidget->expandAll();
+} //updateCssTree

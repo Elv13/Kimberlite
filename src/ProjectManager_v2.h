@@ -29,6 +29,7 @@ class ProjectManager2 : public QTreeWidget {
     void updateDomElement(QTreeWidgetItem *item, QString html);
     void loadPage(QTreeWidgetItem* anItem);
     void addHtmlPage(QString title, QString name, QString body = "", QString foldeName = "");
+    void addScript(QString name, QString language, QString foldeName);
     void addFolder(QString title, QTreeWidgetItem* parent);
     void saveCss();
     QByteArray createFile();

@@ -60,37 +60,14 @@ public:
     keywordFormat.setForeground(Qt::darkBlue);
     //keywordFormat.setFontWeight(QFont::Bold);
     QStringList keywordPatterns;
-
-  //while (query.next()) {
-    /*keywordPatterns << "value=";
-    keywordPatterns << "name=";
-    keywordPatterns << "style=";
-    keywordPatterns << "href=";
-    keywordPatterns << "class=";
-    keywordPatterns << "align=";
-    keywordPatterns << "valign=";
-    keywordPatterns << "height=";
-    keywordPatterns << "onmouseover=";
-    keywordPatterns << "onmouseout=";
-    keywordPatterns << "onclick=";
-    keywordPatterns << "rel=";
-    keywordPatterns << "frame=";
-    keywordPatterns << "rules=";
-
-  //}
-    foreach (QString pattern, keywordPatterns) {
-        rule.pattern = QRegExp(pattern);
-        rule.format = keywordFormat;
-        highlightingRules.append(rule);
-    }*/
-
+    
     rule.pattern = QRegExp(" [a-zA-Z]*\\=");
     rule.format = keywordFormat;
     highlightingRules.append(rule);
 
     classFormat.setFontWeight(QFont::Bold);
     classFormat.setForeground(Qt::darkMagenta);
-    rule.pattern = QRegExp("<\\/?[a-zA-Z]+ ?>?");
+    rule.pattern = QRegExp("<\\/?[a-zA-Z!][a-zA-Z0-9]+ ?>?");
     rule.format = classFormat;
     highlightingRules.append(rule);
 

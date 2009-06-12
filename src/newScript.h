@@ -279,8 +279,10 @@ class NewScript : public KDialog {
     void setupFolder(QTreeWidget* aTreeWidget, QTreeWidgetItem* rootItem);
   private slots:
     void addFolder();
+    void okClicked2();
   signals:
     void addFolder(QString,QTreeWidgetItem*);
+    void addScript(QString,QString,QString);
 };
 
 #endif
