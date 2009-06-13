@@ -1678,11 +1678,11 @@ void MainWindow::setUList() {
 
 void MainWindow::addIndent() {
   addTag("<blockquote>","</blockquote>","indent");
-} //setOList
+} //addIndent
 
 void MainWindow::addOutdent() {
   addTag("","","outdent");
-} //setUList
+} //addOutdent
 
 void MainWindow::setOList() {
   addTag("<ol>","</ol>","insertOrderedList");
