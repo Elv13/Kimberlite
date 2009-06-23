@@ -15,10 +15,11 @@ class ParserThread : public QThread {
       ParserThread(QObject *parent = 0);
       ~ParserThread() {}
       void run();
+      void updateClassTree(bool useDefault = false);
       KTextEdit* rtfHtml;
       KTextEdit* rtfCss;
     public slots:
-      void getReady();
+      void getReady(uint time = 2000);
       void timerDone();
       void getReadyCss();
       void timerDoneCss();
@@ -30,7 +31,6 @@ class ParserThread : public QThread {
       bool timeOver;
       bool timeOverCss;
       void updateHtmlTree(HtmlData &pageData);
-      void updateClassTree();
     signals:
       void updateTree(IndexedTreeWidgetItem*,bool);
       void updateCssTree(QTreeWidgetItem*,bool);

@@ -8,8 +8,8 @@ ParserThread::ParserThread(QObject *parent) : QThread(parent),needUpdate(false),
   connect(aTimerCss, SIGNAL(timeout()), this, SLOT(timerDoneCss()));
 }
 
-void ParserThread::getReady() {
-  aTimer->start(2000);
+void ParserThread::getReady(uint time) {
+  aTimer->start(time);
   needUpdate = true;
 }
 
@@ -70,8 +70,9 @@ void ParserThread::timerDoneCss() {
   aTimerCss->stop();
 }
 
-void ParserThread::updateClassTree() {
-  CssParser::cssFile = rtfCss->toPlainText();
+void ParserThread::updateClassTree(bool useDefault) {
+  if (!useDefault)
+    CssParser::cssFile = rtfCss->toPlainText();
   QTreeWidgetItem* anItem =  new QTreeWidgetItem();
   anItem->setText(0,"Style");
   

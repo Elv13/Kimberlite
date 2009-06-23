@@ -176,43 +176,50 @@ void RtfHtmlEditor::insertTabulation() {
       i++;
     }
     
+    QString lastTag;
+    if ((currentText.indexOf('<') != -1) && (currentText.indexOf('>') != -1))
+      lastTag = currentText.mid(currentText.lastIndexOf('<'), currentText.lastIndexOf('>') - currentText.lastIndexOf('<') +1);
+      
+    qDebug() << lastTag;
+    
     if (endPos > currentPos) {
       tc.setPosition(currentPos);
       tc.select(QTextCursor::LineUnderCursor);
       tc.removeSelectedText();
       //tc.removeText();
-      if ((currentText.right(endPos - currentPos)[0] == '<') &&(currentText.right(endPos - currentPos)[1] != '/')) //TODO add a gettag to check orphelin tags
-        tab += "   ";
+      if ((currentText.right(endPos - currentPos)[0] == '<') && (currentText.right(endPos - currentPos)[1] != '/') && (HtmlParser::htmlInfo.orphelinTags.indexOf(HtmlParser::getTag(lastTag.trimmed())) == -1))
+      {  tab += "   "; qDebug() << "I shound not be here1";}
       tc.insertText(currentText.left(currentText.count() - (endPos - currentPos)) + "\n" + tab + currentText.right(endPos - currentPos)); //TODO there must be a better way to do that :/
       setTextCursor(tc);
       return;
     }
     
-    if ((currentText.indexOf("</") != -1) && (tab.count() >=3)) {
-      bool exit2 = false;
-      int i2 =0;
-      while ((exit2 == false) && (i2 < nextLine.count())) {
-        if (nextLine[i2] != ' ') 
-          exit2 = true;
-        i2++;
+    //if (HtmlParser::htmlInfo.orphelinTags.indexOf(HtmlParser::getTag(currentText)) == -1)
+      if (((currentText.indexOf("</") != -1) && (tab.count() >=3))) {
+	bool exit2 = false;
+	int i2 =0;
+	while ((exit2 == false) && (i2 < nextLine.count())) {
+	  if (nextLine[i2] != ' ') 
+	    exit2 = true;
+	  i2++;
+	}
+	printf("This is the difference: %d \n",(i -i2));
+	if ((i - i2) != 3) {
+	  tc.removeSelectedText();
+	  currentText = currentText.remove(0,3);
+	  tc.insertText(currentText);
+	  tab =tab.remove(0,3);
+	  tc.setPosition(currentPos);
+	  tc.movePosition(QTextCursor::Up);
+	}
       }
-      printf("This is the difference: %d \n",(i -i2));
-      if ((i - i2) != 3) {
-        tc.removeSelectedText();
-        currentText = currentText.remove(0,3);
-        tc.insertText(currentText);
-        tab =tab.remove(0,3);
-        tc.setPosition(currentPos);
-        tc.movePosition(QTextCursor::Up);
+      else if ((currentText.count() >= i) && (HtmlParser::htmlInfo.orphelinTags.indexOf(HtmlParser::getTag(lastTag)) == -1)) {
+	if (currentText[(i > 0)?i-1:0] == '<')
+	  tab += "   ";
+	tc.setPosition(currentPos);
       }
-    }
-    else if (currentText.count() >= i) {
-      if ((currentText[(i > 0)?i-1:0] == '<') && (orphelinTags.indexOf(HtmlParser::getTag(currentText).toUpper()) == -1))
-        tab += "   ";
-      tc.setPosition(currentPos);
-    }
-    else
-      tc.setPosition(currentPos);
+      else
+	tc.setPosition(currentPos);
       
     
     //tc.setPosition(currentPos);
@@ -330,6 +337,9 @@ void RtfHtmlEditor::keyPressEvent(QKeyEvent *e) {
       if (completionPrefix[0] == '<') {
           completionPrefix = completionPrefix.remove(0,1);
       }
+      else if (e->key() == Qt::Key_Greater) {
+	c->popup()->setHidden(true);
+      }
       //completionPrefix.chop(1);
       if (completionPrefix != c->completionPrefix()) {
          c->setCompletionPrefix(completionPrefix);
@@ -343,7 +353,6 @@ void RtfHtmlEditor::keyPressEvent(QKeyEvent *e) {
       delete tmpCompleter;
       this->setFocus();
     }
-    
     
     if (isInAtribute && isShortcut/*&& (defaultCompletion == true)*/) {
       QTextCursor tc = textCursor();
@@ -398,6 +407,7 @@ void RtfHtmlEditor::keyPressEvent(QKeyEvent *e) {
       QRect cr = cursorRect();
       cr.setWidth(c->popup()->sizeHintForColumn(0) + c->popup()->verticalScrollBar()->sizeHint().width());
       c->complete(cr); 
+      c->popup()->setHidden(false);
       return;
     }
     else if ((e->key() == Qt::Key_Space) && (isInAtribute) && (defaultCompletion == true)) {

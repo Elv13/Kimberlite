@@ -67,7 +67,7 @@ public:
 
     classFormat.setFontWeight(QFont::Bold);
     classFormat.setForeground(Qt::darkMagenta);
-    rule.pattern = QRegExp("<\\/?[a-zA-Z!][a-zA-Z0-9]+ ?>?");
+    rule.pattern = QRegExp("<\\/?[a-zA-Z!]?[a-zA-Z0-9]+ ?>?");
     rule.format = classFormat;
     highlightingRules.append(rule);
 

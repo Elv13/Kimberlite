@@ -36,7 +36,7 @@
 #include "src/newProject.h"
 #include "src/debugger.h"
 
-MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(NULL),currentScript(NULL),aProjectManager(NULL),isModified(false),previousCssMode(999) {
+MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NULL),currentScript(NULL),aProjectManager(NULL),isModified(false),previousCssMode(999) {
   actionCollection = new KActionCollection(this);
   setWindowTitle("Kimberlite");
   db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE"));
@@ -666,8 +666,6 @@ MainWindow::MainWindow(QWidget* parent)  : KMainWindow(parent),currentHTMLPage(N
   connect(dockHtmlTree, SIGNAL(visibilityChanged(bool)), ashActions["HTML Tree"] , SLOT(setChecked(bool)));
 
   
- 
-
   /***************************************************************
   
 			Project Dock
@@ -1068,7 +1066,6 @@ MainWindow::~MainWindow() {
 
 void MainWindow::reParse() {
   HtmlData data = HtmlParser::getHtmlData(rtfHTMLEditor->toPlainText());
-  updateHtmlTree(data);
   rtfHTMLEditor->setPlainText(aParser->getParsedHtml(data));
 } //reParse
 
@@ -1297,9 +1294,7 @@ void MainWindow::loadPage(QTreeWidgetItem* item, QString text, bool force) {
 	if (!force)
 	  tabWEditor->setCurrentIndex(1);
 	rtfHTMLEditor->setPlainText(HtmlParser::getParsedHtml(data));
-    }
-    updateHtmlTree(data);
-    
+    }    
     QString completeName;
     QTreeWidgetItem* parent = item->parent();
     completeName += parent->text(0) + "/";
@@ -1355,10 +1350,8 @@ void MainWindow::disableWidget(bool value) {
 } //disableWidget
 
 void MainWindow::changeCssMode(int mode) {
-  if (previousCssMode == 2) {
-    CssParser::cssFile = rtfCSSEditor->toPlainText();
-    updateClassTree();
-  }
+  if (previousCssMode == 2)
+    aHtmlThread->updateClassTree();
   else if (previousCssMode == 0)
     CssParser::cssFile = CssParser::setClass(currentClassName, clearCssBeg());
   
@@ -1366,39 +1359,11 @@ void MainWindow::changeCssMode(int mode) {
     rtfCSSEditor->setPlainText(CssParser::parseCSS());
     setCssCursor(currentClassName);
   }
-  else if (mode == 1) {}
-  else if (mode == 2) {
-    //setCssCursor(currentClassName);
-  }
   previousCssMode = mode;
 } //changeCssMode
 
-void MainWindow::updateClassTree() {
-  QTreeWidgetItem* anItem =  new QTreeWidgetItem();
-  (*anItem) = (*styleSheetName);
-  treeWidget->clear();
-  treeWidget->addTopLevelItem(anItem);
-  styleSheetName = anItem;
-  
-  QStringList classList = CssParser::getClassList();
-
-  for (int j = 0; j < classList.count(); j++) {
-    splitSubClass(classList[j], styleSheetName);
-  }
-  treeWidget->expandAll();
-  
-  if (classList.count() > 0) {
-    if (currentClassName.isEmpty())
-      currentClassName = classList[0];
-    fillCSSBegMode(currentClassName);
-    QTreeWidgetItem* toSelect = getClassWidget(currentClassName);
-    if (toSelect)
-      treeWidget->setCurrentItem(toSelect);
-  }
-} //updateClassTree
-
 void MainWindow::splitSubClass(QString name, QTreeWidgetItem* parent) {
-  if (((name.indexOf(":") != -1) && (name.indexOf(" ") == -1)) /*|| (((name.indexOf(":") < (name.indexOf(" ")) && ((name.indexOf(" ") != -1)))))*/ && ((name.indexOf(":") != 0))) {
+  if (((name.indexOf(":") != -1) && (name.indexOf(" ") == -1)) && ((name.indexOf(":") != 0))) {
     bool found = false;
     for (int i =0; i < parent->childCount(); i++) {
       if (parent->child(i)->text(0) ==  name.left(name.indexOf(":"))) {
@@ -1411,7 +1376,6 @@ void MainWindow::splitSubClass(QString name, QTreeWidgetItem* parent) {
       QTreeWidgetItem* aTreeViewWidgetItem = new  QTreeWidgetItem(parent);
       aTreeViewWidgetItem->setText(0,name.left(name.indexOf(":")));
       aTreeViewWidgetItem->setIcon(0,getRightIcon(name.left(name.indexOf(":"))));
-      //aTreeViewWidgetItem->setIconSize(0,QSize(22,22));
       splitSubClass( ":" + name.right(name.count() - name.indexOf(":") -1), aTreeViewWidgetItem);
     }
   }
@@ -1428,14 +1392,12 @@ void MainWindow::splitSubClass(QString name, QTreeWidgetItem* parent) {
         found = true;
       }
     }
-    
     if (found == false) {
       QTreeWidgetItem* aTreeViewWidgetItem = new  QTreeWidgetItem(parent);
       aTreeViewWidgetItem->setText(0,name.left(name.indexOf(" ")));
       aTreeViewWidgetItem->setIcon(0,getRightIcon(name.left(name.indexOf(" "))));
       splitSubClass(name.right(name.count() - name.indexOf(" ") -1), aTreeViewWidgetItem);
     }
-    
   }
   else {
     QTreeWidgetItem* aTreeViewWidgetItem = new  QTreeWidgetItem(parent);
@@ -1475,7 +1437,7 @@ void MainWindow::loadCss(QString text) {
   rtfCSSEditor->setPlainText(CssParser::parseCSS());
   styleSheetName = new  QTreeWidgetItem(treeWidget);
   styleSheetName->setText(0,"Style");
-  updateClassTree();
+  aHtmlThread->updateClassTree(true);
 } //loadCss
 
 void MainWindow::modeChanged(int index) {
@@ -1524,31 +1486,6 @@ void MainWindow::modeChanged(int index) {
   }
 } //modeChanged
 
-void MainWindow::updateHtmlTree(QString &file) {
-  HtmlData pageData = aParser->getHtmlData(file);
-  updateHtmlTree(pageData);
-} //updateHtmlTree
-
-void MainWindow::updateHtmlTree(HtmlData &pageData) {
-  IndexedTreeWidgetItem* previousNode(NULL);
-  IndexedTreeWidgetItem* aNode(NULL);
-  int index(0), size(pageData.tagList.size());
-  treeHtml->clear();
-  for (int j=0; j < size;j++) {
-    if (pageData.levelList[j] == 0)
-      aNode = new IndexedTreeWidgetItem(treeHtml,QStringList(pageData.tagList[j]),index);
-    else if (pageData.levelList[j] > pageData.levelList[(j > 0)?j-1:0]) 
-      aNode = new IndexedTreeWidgetItem(previousNode,QStringList(pageData.tagList[j]),index);
-    else if (pageData.levelList[j] == pageData.levelList[(j > 0)?j-1:0]) 
-      aNode = new IndexedTreeWidgetItem(previousNode->parent(),QStringList(pageData.tagList[j]),index);
-    else 
-      aNode = new IndexedTreeWidgetItem(previousNode->parent()->parent(),QStringList(pageData.tagList[j]),index);
-    previousNode = aNode;
-    index += pageData.tagList[j].count()+1 + (3*(pageData.levelList[j+((size-1!=j)?1:0)]));
-  }
-  treeHtml->expandAll();
-} //updateHtmlTree
-
 void MainWindow::setHtmlCursor(QTreeWidgetItem* item) {
   QTextCursor tc = rtfHTMLEditor->textCursor();
   tc.setPosition(((IndexedTreeWidgetItem*) item)->index);
@@ -1560,7 +1497,6 @@ void MainWindow::debugHtml() {
   dockDebug->setVisible(true);
   lstDebug->clear();
   HtmlData pageData = HtmlParser::getHtmlData(rtfHTMLEditor->toPlainText());
-  updateHtmlTree(pageData);
   QVector<debugItem> debugVector = HtmlDebugger::debug(pageData);
   for (int i =0; i < debugVector.size(); i++) {
     QListWidgetItem* anItem = new QListWidgetItem("["+QString::number(debugVector[i].line)+"] "+debugVector[i].message);
@@ -1749,7 +1685,7 @@ void MainWindow::addNewLine() {
 } //addNewLine
 
 void MainWindow::addNewTab() {
-  addTag("<pre>	</pre>","","inserthtml","<pre>	</pre>"); //BUG Find better
+  addTag("<pre>	</pre>","","inserthtml","<pre>	</pre>"); //BUG Does not work
 } //addNewTab
 
 void MainWindow::addNewSpace() {
@@ -2037,9 +1973,13 @@ void MainWindow::addClasses() {
   if (ok && !text.isEmpty()) {
     if (CSS_MODE == CSS_MODE_BEG) 
       CssParser::cssFile = CssParser::setClass(currentClassName, clearCssBeg());
+    else {
+      rtfCSSEditor->append(text+" {}");
+      return;
+    }
     CssParser::cssFile += text+" {}";
     currentClassName = text;
-    updateClassTree();
+    aHtmlThread->updateClassTree(true);
     fillCSSBegMode(currentClassName);
   }
 } //addClasses
@@ -2107,7 +2047,6 @@ void MainWindow::exportProject() {
   aProjectManager->exportProject(path + "/" + aProjectManager->getProjectName() + "/");
 } //exportProject
 
-
 void MainWindow::addAnchor() {
   bool ok;
   QString text = QInputDialog::getText(this, "Add anchor", "Set the name of the anchor", QLineEdit::Normal, "", &ok);
@@ -2115,7 +2054,7 @@ void MainWindow::addAnchor() {
     addTag("<a name=\""+text+"\"></a>","","inserthtml","<a name=\""+text+"\"></a>");
     KMessageBox::error(this,"<b>Copy and paste this text in the html code where you want the link to be:</b><br><pre>&it;a href=\"\"&gt;\\</a\\></pre>");
   }
-}
+} //addAnchor
 
 void MainWindow::updateCssTree(QTreeWidgetItem* topItem, bool clear) {
   if (clear) {

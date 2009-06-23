@@ -260,8 +260,8 @@ public:
     //QString setClass(QString className, QString content);
     QString clearCssBeg();
     void disableWidget(bool value);
-    void updateHtmlTree(QString &file);
-    void updateHtmlTree(HtmlData &pageData);
+    //void updateHtmlTree(QString &file);
+    //void updateHtmlTree(HtmlData &pageData);
     void disableWysiwyg(bool value);
     QString getClassName(QTreeWidgetItem* anItem);
     QTreeWidgetItem* getClassWidget(QString className);
@@ -305,7 +305,7 @@ public:
     void setHtmlCursor(QTreeWidgetItem* item);
     void setModified();
     void changeCssMode(int mode);
-    void updateClassTree();
+    //void updateClassTree();
     void debugHtml();
     
     void showInspector(bool state);

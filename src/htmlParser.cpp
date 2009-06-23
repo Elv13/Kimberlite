@@ -9,8 +9,8 @@ HtmlParser::HtmlParser()  {
   query.exec("SELECT NAME,IFNEEDNEWLINE FROM THTML_TAG WHERE IFNEEDNEWLINE <> 1");
   while (query.next()) {
     htmlInfo.noNewLineTags << query.value(0).toString();
-    if ((query.value(0).toInt() >= 2)&&(query.value(0).toInt() <= 3))
-      (query.value(0).toInt() == 2)?htmlInfo.noNewLineTags:htmlInfo.noNewLineTags << query.value(0).toString();
+    if ((query.value(1).toInt() >= 2) && (query.value(1).toInt() <= 3))
+      ((query.value(1).toInt() == 2)?htmlInfo.needNewLineOnClose:htmlInfo.needNewLineOnOpen) << query.value(0).toString();
   }
 }
 
@@ -96,9 +96,9 @@ QString HtmlParser::getParsedHtml(HtmlData &pageData) {
     tag2 = getTag(pageData.tagList[j]);
     tab.clear();
     for (int k =0; k < pageData.levelList[j]; k++) 
-        tab += "   ";
+      tab += "   ";
     if ((htmlInfo.noNewLineTags.indexOf(tag2) != -1) || (pageData.tagList[j][0] != '<')) {
-      if ((pageData.tagList[j][0] == '<') && (htmlInfo.needNewLineOnOpen.indexOf(tag2) != -1) && (parsedHTML[parsedHTML.size()-1] != '\n') && (pageData.tagList[j].left(2) != "</"))
+      if ((pageData.tagList[j][0] == '<') && (htmlInfo.needNewLineOnOpen.indexOf(tag2) != -1) && (parsedHTML[(parsedHTML.size() !=0)?parsedHTML.size()-1:0] != '\n') && (pageData.tagList[j].left(2) != "</") && (parsedHTML.size() !=0))
         parsedHTML += "\n" + tab;
       if (parsedHTML[(parsedHTML.size())?parsedHTML.size()-1:0] == '\n')
         parsedHTML += tab + pageData.tagList[j];

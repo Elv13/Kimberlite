@@ -7,6 +7,7 @@ NewProject::NewProject(QWidget* parent):KDialog(parent) {
   QWidget* mainWidget = new QWidget(this);
   mainUi->setupUi(mainWidget);
   this->setMainWidget(mainWidget);
+  mainUi->lstTemplate->setDisabled(true);
   connect(this,SIGNAL(okClicked()),this,SLOT(newProject()));
 }
 
