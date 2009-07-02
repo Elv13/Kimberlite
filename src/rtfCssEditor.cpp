@@ -52,7 +52,8 @@ void RtfCssEditor::insertCompletion(const QString& completion) {
       QColor aColor;
       int result = aDialog.getColor( aColor );
       if ( result == KColorDialog::Accepted ) {
-	tc.insertText(aColor.name());
+	tc.insertText(aColor.name().toUpper());
+	customColorList.push_back(aColor.name().toUpper());
       }
     }
     else {
@@ -275,6 +276,33 @@ void  RtfCssEditor::insertPropriety(bool insertType) {
     
   while (query.next()) {
     propList = query.value(0).toString().split(";");
+  }
+  
+  int i =0;
+  while (i < propList.count()) {
+    if (propList[i].left(3) == "TAG") {
+      QString toFetch = propList[i].right(propList[i].size()-3);
+      QSqlQuery query2;
+      query2.exec("SELECT "+ QString((insertType)?"VALUE":"UNIT") +" FROM TCSS_TAG WHERE TITLE = '"+ toFetch +"'");
+      propList.removeAt(i);
+      while (query2.next()) {
+	propList += query2.value(0).toString().split(";");
+      }
+    }
+    else if (propList[i].left(4) == "UNIT")
+      propList.removeAt(i);
+    else
+      i++;
+  }
+  
+  if (propList.indexOf("color") != -1) {
+    propList += customColorList;
+    QSqlQuery query2;
+    query2.exec("SELECT NAME FROM TCOLOR");
+    while (query2.next()) {
+      qDebug() << "I am here";
+      propList += query2.value(0).toString();
+    }
   }
 
   if (propList.count()) {

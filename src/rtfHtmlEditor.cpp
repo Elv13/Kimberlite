@@ -322,7 +322,7 @@ QString RtfHtmlEditor::textUnderCursor() const {
  
 void RtfHtmlEditor::focusInEvent(QFocusEvent *e) {
      if (c)
-         c->setWidget(this);
+      c->setWidget(this);
      QTextEdit::focusInEvent(e);
 }
  
@@ -331,8 +331,10 @@ void RtfHtmlEditor::keyPressEvent(QKeyEvent *e) {
     bool isShortcut = ((e->modifiers() == Qt::ControlModifier) && (e->key() == Qt::Key_Space)); // CTRL+S
     bool ctrlOrShift = e->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier);
     
+    if (( e->key() == Qt::Key_Space ) || ( e->key() == Qt::Key_Backspace ))
+      c->popup()->setVisible(false);
+    
     if (c->popup()->isVisible()) {
-      //c->popup()->setHidden(true);
       QString completionPrefix = textUnderCursor();
       if (completionPrefix[0] == '<') {
           completionPrefix = completionPrefix.remove(0,1);
@@ -340,7 +342,6 @@ void RtfHtmlEditor::keyPressEvent(QKeyEvent *e) {
       else if (e->key() == Qt::Key_Greater) {
 	c->popup()->setHidden(true);
       }
-      //completionPrefix.chop(1);
       if (completionPrefix != c->completionPrefix()) {
          c->setCompletionPrefix(completionPrefix);
          c->popup()->setCurrentIndex(c->completionModel()->index(0, 0));

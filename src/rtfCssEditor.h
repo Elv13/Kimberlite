@@ -39,6 +39,7 @@ class RtfCssEditor : public KTextEdit {
     QCompleter *c;
     QCompleter *alternateCompleter;
     QCompleter *standardCompleter;
+    QStringList customColorList;
     bool currentCompleter;
     bool isPropriety();
     bool isUnit();

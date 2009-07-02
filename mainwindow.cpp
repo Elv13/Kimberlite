@@ -36,7 +36,7 @@
 #include "src/newProject.h"
 #include "src/debugger.h"
 
-MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NULL),currentScript(NULL),aProjectManager(NULL),isModified(false),previousCssMode(999) {
+MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NULL),currentScript(NULL),aProjectManager(NULL),isModified(false),previousCssMode(999),previousKimberliteMode(MODE_WYSIWYG) {
   actionCollection = new KActionCollection(this);
   setWindowTitle("Kimberlite");
   db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE"));
@@ -60,6 +60,8 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   ***************************************************************/
 
   fileTB = new KToolBar(this);
+  fileTB->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+  fileTB->setIconSize(QSize(22,22));
   tabWMenu->addTab(fileTB, "Files");
   QPalette aPalette;
   fileTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
@@ -117,6 +119,8 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   horizontalLayout_14->setContentsMargins(0,0,0,0);
   horizontalLayout_14->setSpacing(0);
   editTB = new KToolBar(this);
+  editTB->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+  editTB->setIconSize(QSize(22,22));
   editTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
   horizontalLayout_14->addWidget(editTB,0,0,2,1);
 
@@ -265,6 +269,8 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   ***************************************************************/
 
   viewTB = new KToolBar(this);
+  viewTB->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+  viewTB->setIconSize(QSize(22,22));
   tabWMenu->addTab(viewTB, "View");
   viewTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
 
@@ -314,6 +320,8 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   hlInsert->setSpacing(0);
 
   insertTB = new KToolBar(this);
+  insertTB->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+  insertTB->setIconSize(QSize(22,22));
   insertTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
   hlInsert->addWidget(insertTB,0,11,0,2);
 
@@ -447,6 +455,8 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   ***************************************************************/
   
   toolsTB = new KToolBar(this);
+  toolsTB->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+  toolsTB->setIconSize(QSize(22,22));
   tabWMenu->addTab(toolsTB, "Tools");
   toolsTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
 
@@ -497,6 +507,8 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   optToolBarLayout->setSpacing(2);
   
   optionsTB = new KToolBar(this);
+  optionsTB->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+  optionsTB->setIconSize(QSize(22,22));
   optionsTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
   optToolBarLayout->addWidget(optionsTB,0,0,2,1);
   
@@ -627,6 +639,8 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   ***************************************************************/
 
   helpTB = new KToolBar(this);
+  helpTB->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+  helpTB->setIconSize(QSize(22,22));
   tabWMenu->addTab(helpTB, "Help");
   helpTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
 
@@ -1117,7 +1131,14 @@ void MainWindow::saveProjectAs(const QString &outputFileName){
 } //saveProjectAs
  
 void MainWindow::saveProjectAs(){
-  saveProjectAs(KFileDialog::getSaveFileName());
+  QString name = KFileDialog::getSaveFileName();
+  if (QFile::exists(name)) {
+    int result = KMessageBox::questionYesNo(this, name + " exist. Do you want to overwrite it?", "Overwrite?");
+    if (result == KMessageBox::Yes)
+      saveProjectAs(name);
+  }
+  else
+    saveProjectAs(name);
 } //saveProjectAs
  
 void MainWindow::saveProject(){
@@ -1150,6 +1171,8 @@ void MainWindow::openProject(QString fileName) {
       aProjectManager->read(&file);
     aProjectManager->expandAll();
     setWindowTitle("Kimberlite - "+aProjectManager->projectTitle);
+    setupTmpDir(true);
+    modeChanged(MODE_WYSIWYG);
     webPreview->page()->setContentEditable(true);
     tabWEditor->setTabEnabled(1,true);
     tabWEditor->setTabEnabled(2,true);
@@ -1285,7 +1308,7 @@ void MainWindow::loadPage(QTreeWidgetItem* item, QString text, bool force) {
     HtmlData data = HtmlParser::getHtmlData(text);
     switch (KIMBERLITE_MODE) {
       case MODE_WYSIWYG:
-	webPreview->setHtml(HtmlParser::getParsedHtml(data));
+	webPreview->setHtml(HtmlParser::getParsedHtml(data),setupTmpDir());
 	break;
       case MODE_HTML:
 	rtfHTMLEditor->setPlainText(HtmlParser::getParsedHtml(data));
@@ -1350,14 +1373,24 @@ void MainWindow::disableWidget(bool value) {
 } //disableWidget
 
 void MainWindow::changeCssMode(int mode) {
-  if (previousCssMode == 2)
+  updateCssFile(MODE_CSS,previousCssMode);
+ /* if (previousCssMode == CSS_MODE_BEG) {
     aHtmlThread->updateClassTree();
-  else if (previousCssMode == 0)
-    CssParser::cssFile = CssParser::setClass(currentClassName, clearCssBeg());
+  }
+  else */if (previousCssMode == CSS_MODE_EXPERT) {
+    clearCssBeg();
+    fillCSSBegMode(getClassName(treeWidget->currentItem()));
+  }
   
-  if ((previousCssMode == 0) && (mode ==2) && (treeWidget->currentItem() != NULL)) {
+  qDebug() << CssParser::cssFile;
+  
+  if (((previousCssMode == CSS_MODE_BEG) || (previousCssMode == 999)) && (mode == CSS_MODE_EXPERT) && (treeWidget->currentItem() != NULL)) {
+    //qDebug() << "I am suppose to enter here" << CssParser::cssFile;
+    disconnect(rtfCSSEditor, SIGNAL(cursorPositionChanged()), this, SLOT(cursorChanged()));
     rtfCSSEditor->setPlainText(CssParser::parseCSS());
-    setCssCursor(currentClassName);
+    QString className = getClassName(treeWidget->currentItem());
+    setCssCursor(className);
+    connect(rtfCSSEditor, SIGNAL(cursorPositionChanged()), this, SLOT(cursorChanged()));
   }
   previousCssMode = mode;
 } //changeCssMode
@@ -1440,19 +1473,33 @@ void MainWindow::loadCss(QString text) {
   aHtmlThread->updateClassTree(true);
 } //loadCss
 
+QString MainWindow::setupTmpDir(bool initial) {
+  QDir aDir;
+  if (initial) {
+    if (aDir.exists(QDir::tempPath() + "/kimberlite/project/" + aProjectManager->getProjectName() + "/"))
+      aDir.remove(QDir::tempPath() + "/kimberlite/project/" + aProjectManager->getProjectName() + "/");
+  }
+  QString path2;
+  path2 = QDir::tempPath() + "/kimberlite/project/" + aProjectManager->getProjectName() + "/";
+  aDir.mkpath(path2);
+  QFile aFile(path2+"StyleSheet.css");
+  aFile.open(QIODevice::WriteOnly);
+  aFile.write(CssParser::parseCSS().toStdString().c_str());
+  aFile.close();
+  return path2;
+}
+
 void MainWindow::modeChanged(int index) {
   tableDock->setVisible(true);
+  
+  if (previousKimberliteMode == MODE_CSS)
+    updateCssFile(MODE_CSS);
+  
   switch (index) {
-    case 0: { //Don't ask me about this {, I don't even understant it myself
-      QString path2;
-      QDir aDir;
-      path2 = QDir::tempPath() + "/kimberlite/project/";
-      aDir.mkpath(path2);
-      QFile aFile(path2+"StyleSheet.css");
-      aFile.open(QIODevice::WriteOnly);
-      aFile.write(CssParser::parseCSS().toStdString().c_str());
-      aFile.close();
-      webPreview->setHtml(rtfHTMLEditor->toPlainText(),path2);
+    case MODE_WYSIWYG: { 
+      qDebug() << "i am suppose to work";
+      if (previousKimberliteMode == MODE_HTML)
+	webPreview->setHtml(rtfHTMLEditor->toPlainText(),setupTmpDir());
       disableWysiwyg(false);
       ashActions["Zoom 1:1"]->setEnabled(true);
       treeDock->setVisible(false);
@@ -1460,7 +1507,7 @@ void MainWindow::modeChanged(int index) {
       pbStatusBar->setEnabled(true);
       break;
     }
-    case 1:
+    case MODE_HTML:
       //if (webPreview->isModified()) //Too dangerous
       rtfHTMLEditor->setPlainText(aParser->getParsedHtml(webPreview->page()->mainFrame()->toHtml()));
       disableWysiwyg(false);
@@ -1469,21 +1516,23 @@ void MainWindow::modeChanged(int index) {
       treeDock->setVisible(false);
       pbStatusBar->setEnabled(false);
       break;
-    case 2:
+    case MODE_SCRIPT:
       ashActions["Zoom 1:1"]->setEnabled(true);
       disableWysiwyg(true);
       dockHtmlTree->setVisible(false);
       treeDock->setVisible(false);
       pbStatusBar->setEnabled(false);
       break;
-    case 3:
+    case MODE_CSS:
       disableWysiwyg(true);
       ashActions["Zoom 1:1"]->setEnabled(false);
       dockHtmlTree->setVisible(false);
       tableDock->setVisible(false);
       treeDock->setVisible(true);
       pbStatusBar->setEnabled(false);
+      fillCSSBegMode(getClassName(getClassWidget(currentClassName)));
   }
+  previousKimberliteMode = index;
 } //modeChanged
 
 void MainWindow::setHtmlCursor(QTreeWidgetItem* item) {
@@ -1703,7 +1752,7 @@ void MainWindow::setBackgroundColor(QColor aColor) {
   HtmlParser::setAttribute(pageData, "body", 0, "bgcolor", aColor.name());
   rtfHTMLEditor->setPlainText(aParser->getParsedHtml(pageData));
   if (KIMBERLITE_MODE == MODE_WYSIWYG)
-    webPreview->setHtml(rtfHTMLEditor->toPlainText());
+    webPreview->setHtml(rtfHTMLEditor->toPlainText(),setupTmpDir());
 } //setBackgroundColor
 
 void MainWindow::insertImage(QString path) {
@@ -2069,7 +2118,21 @@ void MainWindow::updateCssTree(QTreeWidgetItem* topItem, bool clear) {
       currentClassName = classList[0];
   }
   QTreeWidgetItem* toSelect = getClassWidget(currentClassName);
-  if (toSelect)
+  if (toSelect) {
+    fillCSSBegMode(getClassName(getClassWidget(currentClassName)));
     treeWidget->setCurrentItem(toSelect);
+  }
   treeWidget->expandAll();
 } //updateCssTree
+
+void MainWindow::updateCssFile(int forceMode, int forceCssMode) {
+  int lastMode((forceMode != 99)?forceMode:KIMBERLITE_MODE), lastCssMode((forceCssMode != 99)?forceCssMode:CSS_MODE);
+  switch (lastMode) {
+    case MODE_CSS:
+      if ((lastCssMode == CSS_MODE_BEG) || (lastCssMode == 999))
+	CssParser::cssFile = CssParser::setClass(currentClassName, clearCssBeg());
+      else /*CSS_MODE_EXPERT*/
+	CssParser::cssFile = rtfCSSEditor->toPlainText();
+      break;
+  }
+} //updateCssFile

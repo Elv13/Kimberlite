@@ -252,16 +252,15 @@ public:
     QString currentClassName;
     ParserThread* aHtmlThread;
     int previousCssMode;
+    int previousKimberliteMode;
     QTreeWidgetItem* currentHTMLPage;
     QLabel* lblStatusBar1;
     QLabel* lblStatusBar2;
     QLabel* lblStatusBar3;
     QProgressBar* pbStatusBar;
-    //QString setClass(QString className, QString content);
     QString clearCssBeg();
     void disableWidget(bool value);
-    //void updateHtmlTree(QString &file);
-    //void updateHtmlTree(HtmlData &pageData);
+    QString setupTmpDir(bool initial=false);
     void disableWysiwyg(bool value);
     QString getClassName(QTreeWidgetItem* anItem);
     QTreeWidgetItem* getClassWidget(QString className);
@@ -370,6 +369,7 @@ public:
     void cursorChanged();
     void updateHtmlTree(IndexedTreeWidgetItem* topItem,bool clear);
     void updateCssTree(QTreeWidgetItem* topItem, bool clear);
+    void updateCssFile(int forceMode = 99, int forceCssMode = 99);
     
   public slots:
     void loadPage(QTreeWidgetItem* item, QString text, bool force = false);

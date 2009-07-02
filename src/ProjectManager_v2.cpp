@@ -306,7 +306,7 @@ void ProjectManager2::addHtmlPage(QString title, QString name, QString body, QSt
   QDomElement newContentElement = domDocument.createElement("content");
   QDomText newContentText;
   if (body.isEmpty())
-    newContentText= domDocument.createTextNode(fromHTML("<html><head><title>"+title+"</title></head><body></body></html>"));
+    newContentText= domDocument.createTextNode(fromHTML("<html><head><link rel=\"stylesheet\" href=\"./StyleSheet.css\" type=\"text/css\"><title>"+title+"</title></head><body></body></html>"));
   else
     newContentText= domDocument.createTextNode(fromHTML(body));
   newContentElement.appendChild(newContentText);
