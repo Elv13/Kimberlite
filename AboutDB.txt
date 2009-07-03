@@ -16,7 +16,7 @@ sqlite3 kimberlite.db  "create table TCSS_TAG (TCSS_TAG_KEY  INTEGER PRIMARY KEY
   sqlite3 kimberlite.db  "insert into TCSS_TAG (TITLE,VALUE,UNIT) values ('border-bottom-color','TAGborder-color','');"  
   sqlite3 kimberlite.db  "insert into TCSS_TAG (TITLE,VALUE,UNIT) values ('border-bottom-style','TAGborder-style','');"  
   sqlite3 kimberlite.db  "insert into TCSS_TAG (TITLE,VALUE,UNIT) values ('border-bottom-width','thin;medium;thick;UNITlength','px;%;cm;in;mm;pc;pt');"  
-  sqlite3 kimberlite.db  "insert into TCSS_TAG (TITLE,VALUE,UNIT) values ('border-color','color;transparent;UNITMany color','');"  
+  sqlite3 kimberlite.db  "insert into TCSS_TAG (TITLE,VALUE,UNIT) values ('border-color','color;transparent','');"  
   sqlite3 kimberlite.db  "insert into TCSS_TAG (TITLE,VALUE,UNIT) values ('border-left','TAGborder-left-width;TAGborder-style;TAGborder-color','px;%;cm;in;mm;pc;pt');"  
   sqlite3 kimberlite.db  "insert into TCSS_TAG (TITLE,VALUE,UNIT) values ('border-left-color','TAGborder-color','');"  
   sqlite3 kimberlite.db  "insert into TCSS_TAG (TITLE,VALUE,UNIT) values ('border-left-style','TAGborder-style','');"  

@@ -97,6 +97,33 @@ include(KDE4Defaults)
 	  pixmap/browserLogo/OP.png
 	  pixmap/browserLogo/w3c.png
       DESTINATION ${DATA_INSTALL_DIR}/kimberlite/pixmap/browserLogo/ )
+
+      install( FILES 
+	  pixmap/about/bar-bottom-middle.png
+	  pixmap/about/box-top-right.png
+	  pixmap/about/kde_infopage_rtl.css
+	  pixmap/about/box-top-middle.png
+	  pixmap/about/bottom-right.png
+	  pixmap/about/box-bottom-right.png
+	  pixmap/about/bar-top-left.png
+	  pixmap/about/bar-middle-right.png
+	  pixmap/about/bar-top-middle.png
+	  pixmap/about/bar-bottom-right.png
+	  pixmap/about/bar-middle-left.png
+	  pixmap/about/box-bottom-middle.png
+	  pixmap/about/bottom-left.png
+	  pixmap/about/top-middle.png
+	  pixmap/about/bottom-middle.png
+	  pixmap/about/bar-bottom-left.png
+	  pixmap/about/box-middle-left.png
+	  pixmap/about/box-middle-right.png
+	  pixmap/about/kde_infopage.css
+	  pixmap/about/box-bottom-left.png
+	  pixmap/about/box-top-left.png
+	  pixmap/about/top-right.png
+	  pixmap/about/bar-top-right.png
+      DESTINATION ${DATA_INSTALL_DIR}/kimberlite/pixmap/about/ )
+
       
       install( FILES  
 	kimberlite.desktop 

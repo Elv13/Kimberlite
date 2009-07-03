@@ -46,11 +46,8 @@
 #include <QtGui/QPushButton>
 #include <QtGui/QScrollArea>
 #include <QtGui/QSpacerItem>
-#include <KStatusBar>
 #include <QtGui/QTabWidget>
 #include <QtGui/QTableWidget>
-#include <QtGui/QTableWidget>
-#include <QtGui/QTreeWidget>
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QWidget>
 #include <QtWebKit/QWebView>
@@ -96,12 +93,12 @@
 #include <KAboutApplicationDialog>
 #include <KBugReport>
 #include <KAboutData>
-#include <KStatusBar>
 #include <ktip.h>
 #include <QPrintDialog>
 #include <KPrintPreview>
 #include <QPrinter>
 #include <KFontComboBox>
+#include <KSqueezedTextLabel>
 
 #include "src/CSSbeginnerWidget.h"
 #include "src/rtfCssEditor.h"
@@ -226,7 +223,6 @@ public:
     RtfCssEditor *rtfCSSEditor;
     QCompleter* cssCompleter;
     QTreeWidgetItem* styleSheetName;
-    KStatusBar *statusbar;
     QTextEdit* txtOtherTags;
     QDockWidget* dockHtmlTree;
     QTreeWidget* treeHtml;
@@ -256,7 +252,7 @@ public:
     QTreeWidgetItem* currentHTMLPage;
     QLabel* lblStatusBar1;
     QLabel* lblStatusBar2;
-    QLabel* lblStatusBar3;
+    KSqueezedTextLabel* lblStatusBar3;
     QProgressBar* pbStatusBar;
     QString clearCssBeg();
     void disableWidget(bool value);

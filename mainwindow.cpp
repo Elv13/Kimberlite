@@ -863,6 +863,7 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   tabBeginner->setObjectName(QString::fromUtf8("tabBeginner"));
   verticalLayout_8 = new QVBoxLayout(tabBeginner);
   verticalLayout_8->setObjectName(QString::fromUtf8("verticalLayout_8"));
+  verticalLayout_8->setContentsMargins(0,0,0,0);
   scrollArea = new QScrollArea(tabBeginner);
   scrollArea->setObjectName(QString::fromUtf8("scrollArea"));
   scrollArea->setWidgetResizable(true);
@@ -994,31 +995,34 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   
   ***************************************************************/
 
-  statusbar = new KStatusBar(this);
-  statusbar->setObjectName(QString::fromUtf8("statusbar"));
-  this->setStatusBar(statusbar);
+  QWidget* statusWidget = new QWidget();
+  QHBoxLayout* statusLayout = new QHBoxLayout(statusWidget);
+  statusLayout->setContentsMargins(0,0,0,0);
   
-  lblStatusBar3 = new QLabel();
+  lblStatusBar3 = new KSqueezedTextLabel();
+  lblStatusBar3->setMinimumSize(100,0);
   lblStatusBar3->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding);
-  statusBar()->addWidget(lblStatusBar3,100);
+  statusLayout->addWidget(lblStatusBar3);
   
   lblStatusBar1 = new QLabel();
   lblStatusBar1->setText("");
   lblStatusBar1->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum);
   lblStatusBar1->setFrameShape(QFrame::StyledPanel);
   lblStatusBar1->setFrameShadow(QFrame::Sunken);
-  statusBar()->addWidget(lblStatusBar1);
+  statusLayout->addWidget(lblStatusBar1);
   
   lblStatusBar2 = new QLabel();
   lblStatusBar2->setText("HTMLv4");
   lblStatusBar2->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum);
   lblStatusBar2->setFrameShape(QFrame::StyledPanel);
   lblStatusBar2->setFrameShadow(QFrame::Sunken);
-  statusBar()->addWidget(lblStatusBar2);
+  statusLayout->addWidget(lblStatusBar2);
   
   pbStatusBar = new QProgressBar();
   pbStatusBar->setMaximumSize(100,999);
-  statusBar()->addWidget(pbStatusBar);
+  statusLayout->addWidget(pbStatusBar);
+  
+  tabWEditor->setCornerWidget(statusWidget);
   
   /***************************************************************
   
@@ -1172,7 +1176,6 @@ void MainWindow::openProject(QString fileName) {
     aProjectManager->expandAll();
     setWindowTitle("Kimberlite - "+aProjectManager->projectTitle);
     setupTmpDir(true);
-    modeChanged(MODE_WYSIWYG);
     webPreview->page()->setContentEditable(true);
     tabWEditor->setTabEnabled(1,true);
     tabWEditor->setTabEnabled(2,true);
@@ -1530,7 +1533,8 @@ void MainWindow::modeChanged(int index) {
       tableDock->setVisible(false);
       treeDock->setVisible(true);
       pbStatusBar->setEnabled(false);
-      fillCSSBegMode(getClassName(getClassWidget(currentClassName)));
+      if (!currentClassName.isEmpty())
+	fillCSSBegMode(getClassName(getClassWidget(currentClassName)));
   }
   previousKimberliteMode = index;
 } //modeChanged
@@ -1960,7 +1964,7 @@ void MainWindow::loadDefaultPage() {
   file2.open(QIODevice::ReadOnly);
   QString page;
   page = file2.readAll();
-  page = page.arg( KStandardDirs::locate( "data", "kdeui/about/" ) );
+  page = page.arg( KStandardDirs::locate( "appdata", "pixmap/about/" ) );
   page = page.arg(new_path);
   page = page.arg(open_path);
   page = page.arg("Kimberlite");
@@ -1981,6 +1985,9 @@ void MainWindow::loadDefaultPage() {
 
   file2.close();
   webPreview->setHtml(page);
+  qDebug() << page;
+  //sleep(30);
+  
 } //loadDefaultPage
 
 void MainWindow::defaultPageLinkClicked(const QUrl & url) {
