@@ -47,6 +47,8 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   KTipDialog* aTipDialog = new KTipDialog(aTipDB, this);
   aTipDialog->setShowOnStart(true);
   aTipDialog->showTip(this, QString(), true);
+  
+  configSkeleton.readConfig();
 
   aParser = new HtmlParser();
   tabWMenu = new KTabWidget(this);
@@ -99,6 +101,7 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   createAction("Export", "document-export", Qt::CTRL + Qt::Key_Q);
   connect(ashActions["Export"], SIGNAL(triggered(bool)),this, SLOT(exportProject()));
   fileTB->addAction(ashActions["Export"]);
+  ashActions["Export"]->setDisabled(true);
   
   fileTB->addSeparator();
 
@@ -732,10 +735,12 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   btnTreeAdd = new KPushButton(treeDockCentral);
   btnTreeAdd->setObjectName(QString::fromUtf8("btnTreeAdd"));
   verticalLayout_5->addWidget(btnTreeAdd,1,0);
+  btnTreeAdd->setIcon(KIcon("list-add"));
   
   btnTreeRemove = new KPushButton(treeDockCentral);
   btnTreeRemove->setObjectName(QString::fromUtf8("btnTreeRemove"));
   verticalLayout_5->addWidget(btnTreeRemove,1,1);
+  btnTreeRemove->setIcon(KIcon("list-remove"));
   
   connect(treeWidget, SIGNAL(itemClicked(QTreeWidgetItem* , int)), this, SLOT(cssClassClicked(QTreeWidgetItem*)));
   connect(btnTreeAdd, SIGNAL(clicked()), this, SLOT(addClasses()));
@@ -1131,7 +1136,7 @@ void MainWindow::saveProjectAs(const QString &outputFileName){
   file.close();
 
   fileName = outputFileName;
-  saveRecentProject(fileName);
+  saveRecentProject(fileName, aProjectManager->getProjectName());
 } //saveProjectAs
  
 void MainWindow::saveProjectAs(){
@@ -1190,8 +1195,9 @@ void MainWindow::openProject(QString fileName) {
     ashActions["Save As"]->setDisabled(false);
     ashActions["Print"]->setDisabled(false);
     ashActions["Print Preview"]->setDisabled(false);
+    ashActions["Export"]->setDisabled(false);
     tableDock->setVisible(true);
-    saveRecentProject(fileName);
+    saveRecentProject(fileName, aProjectManager->getProjectName());
     this->fileName = fileName;
   }
 } //openProject
@@ -1911,54 +1917,43 @@ void MainWindow::find() {
   }
 } //find
 
-QStringList MainWindow::loadRecentProjectList() {
-  QStringList toReturn;
-  QString path = KStandardDirs::locateLocal( "appdata", "recent.txt" );
-  QFile file(path);
-  file.open(QIODevice::ReadOnly);
-  while (!file.atEnd()) {
-    QString line = file.readLine();
-    toReturn << "<a href=\"load:" + line + "\">" + line + "</a>";
+void MainWindow::saveRecentProject(QString filePath, QString projectTitle) {
+  QList<QStringList> recentProjects;
+  bool done = false;
+  recentProjects << configSkeleton.recentP1 << configSkeleton.recentP2 << configSkeleton.recentP3 << configSkeleton.recentP4 << configSkeleton.recentP5;
+  for (int i=0;i<recentProjects.size();i++) {
+    if (recentProjects[i][1].isEmpty()) {
+      recentProjects[i][0] = projectTitle;
+      recentProjects[i][1] = filePath;
+      done = true;
+      break;
+    }
   }
-  while (toReturn.count() < 5)
-    toReturn << "";
-  file.close();
-  return toReturn;
-} //loadRecentProjectList
-
-void MainWindow::saveRecentProject(QString filePath) {
-  QStringList recentProjectList;
-  QString path2 = KStandardDirs::locateLocal( "appdata", "recent.txt" );
-  QFile file2(path2);
-  file2.open(QIODevice::ReadOnly);
-  while (!file2.atEnd())
-    recentProjectList << QString(file2.readLine()).toAscii();
-  file2.close();
-  if (recentProjectList.indexOf(filePath+"\n") != -1)
-    return;
-  if (recentProjectList.count() >= 5)
-    recentProjectList.removeAt(0);
-  recentProjectList << filePath;
-  
-  QString toSave;
-  for (int i =0; i < recentProjectList.count();i++) 
-    toSave += recentProjectList[i].trimmed() + "\n";
-  
-  QString path = KStandardDirs::locateLocal( "appdata", "recent.txt" );
-  KSaveFile file(path);
-  file.open();
-  QByteArray outputByteArray;
-  outputByteArray.append(toSave);
-  file.write(outputByteArray);
-  file.finalize();
-  file.close();
+  if (!done)
+    for (int i=0;i<recentProjects.size();i++) {
+      if (recentProjects[i][1] == filePath) {
+	recentProjects.removeAt(i);
+	recentProjects.push_back(QStringList() << projectTitle << filePath);
+	done = true;
+	break;
+      }
+    }
+  if (!done) {
+    recentProjects.removeAt(0);
+    recentProjects.push_back(QStringList() << projectTitle << filePath);
+  }  
+  configSkeleton.recentP1 = recentProjects[0];
+  configSkeleton.recentP2 = recentProjects[1];
+  configSkeleton.recentP3 = recentProjects[2];
+  configSkeleton.recentP4 = recentProjects[3];
+  configSkeleton.recentP5 = recentProjects[4];
+  configSkeleton.writeConfig();
 } //saveRecentProject
 
 void MainWindow::loadDefaultPage() {
   KIconLoader *iconloader = KIconLoader::global();
   QString new_path = iconloader->iconPath("document-new", KIconLoader::Desktop );
   QString open_path = iconloader->iconPath("document-open", KIconLoader::Desktop );
-  QStringList recentProject = loadRecentProjectList();
   QString path = KStandardDirs::locate("appdata", "data/home.htm");//KStandardDirs::locate("data", "konqueror/about/launch.html");
   QFile file2(path);
   file2.open(QIODevice::ReadOnly);
@@ -1975,11 +1970,11 @@ void MainWindow::loadDefaultPage() {
   page = page.arg("Open an existing project");
   page = page.arg("News:");
   page = page.arg("Recent project:");
-  page = page.arg(recentProject[0]);
-  page = page.arg(recentProject[1]);
-  page = page.arg(recentProject[2]);
-  page = page.arg(recentProject[3]);
-  page = page.arg(recentProject[4]);
+  page = page.arg(configSkeleton.recentP1[1]).arg(configSkeleton.recentP1[0]);
+  page = page.arg(configSkeleton.recentP2[1]).arg(configSkeleton.recentP2[0]);
+  page = page.arg(configSkeleton.recentP3[1]).arg(configSkeleton.recentP3[0]);
+  page = page.arg(configSkeleton.recentP4[1]).arg(configSkeleton.recentP4[0]);
+  page = page.arg(configSkeleton.recentP5[1]).arg(configSkeleton.recentP5[0]);
   page = page.arg("Kimberlite 0.1 realised (2009/06/12)<br>The first official version of Kimberlite is now availible. Test, use it, crash it and report bugs!<br>Good Luck ;)");
   page = page.arg(KStandardDirs::locate("appdata", "pixmap/logo.png"));
 

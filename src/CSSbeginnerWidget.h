@@ -31,6 +31,8 @@
 #include <QtGui/QHBoxLayout>
 #include <QList>
 #include <kcombobox.h>
+#include <QPushButton>
+#include <KIcon>
 
 QT_BEGIN_NAMESPACE
 
@@ -45,11 +47,14 @@ public:
   QCheckBox *ckbName;
   QComboBox *cbbValue;
   QComboBox *cbbUnit;
+  QPushButton* btnColor;
 private:
   QList<bool> isEditable;
+  void fetchColorName();
 
 private slots:
   void ckbName_checked(int state);
   void cbbValue_changed(int index);
+  void selectColor();
 };
 #endif

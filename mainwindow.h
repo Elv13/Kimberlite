@@ -107,6 +107,7 @@
 #include "src/htmlThread.h"
 #include "src/colorComboBox.h"
 #include "src/headerComboBox.h"
+#include "src/configSkeleton.h"
 
 #define KIMBERLITE_MODE tabWEditor->currentIndex()
 #define CSS_MODE tabWCSSLevel->currentIndex()
@@ -262,14 +263,13 @@ public:
     QTreeWidgetItem* getClassWidget(QString className);
     void setCssCursor(QString className);
     void loadCSSClass(QTreeWidgetItem* anItem);
-
-    QStringList loadRecentProjectList();
-    void saveRecentProject(QString filePath);
+    void saveRecentProject(QString filePath, QString projectTitle);
     void loadDefaultPage();
     KPushButton* createToolButton(QWidget* parent, QString icon, QString toolTip="", bool checkable=false);
     QFrame* createSpacer();
     KAction* createAction(QString name, QString icon, QKeySequence shortcut, bool checkable = false);
     QTextEdit* getCurrentEditor();
+    KimberliteConfigSkeleton configSkeleton;
     
   private slots:
     void defaultPageLinkClicked(const QUrl& url);

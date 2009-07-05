@@ -28,8 +28,9 @@
 #include <QStringList>
 #include <QtSql>
 #include <QLineEdit>
+#include <KColorDialog>
 
-CSSBeginnerWidget::CSSBeginnerWidget(QWidget* parent, QString tagName) : QWidget (parent) {
+CSSBeginnerWidget::CSSBeginnerWidget(QWidget* parent, QString tagName) : QWidget (parent),btnColor(NULL) {
   hlCbbTag = new QHBoxLayout(this);
   hlCbbTag->setObjectName(QString::fromUtf8("hlCbbTag"));
   hlCbbTag->setContentsMargins(0,0,0,0);
@@ -62,6 +63,33 @@ CSSBeginnerWidget::CSSBeginnerWidget(QWidget* parent, QString tagName) : QWidget
 	cbbValue->addItem(possibleValues[i].remove(0,4));
 	isEditable.push_back(true);
       }
+      else if (possibleValues[i] == "color") {
+	cbbValue->addItem(possibleValues[i]);
+	fetchColorName();
+      }
+      else if (possibleValues[i].left(3) == "TAG") {
+	QString toFetch = possibleValues[i].right(possibleValues[i].size()-3);
+	QSqlQuery query2;
+	query2.exec("SELECT VALUE,UNIT FROM TCSS_TAG WHERE TITLE = '"+ toFetch +"'");
+	while (query2.next()) {
+	  QStringList itemList = query2.value(0).toString().split(";");
+	  foreach (QString aValue, itemList) {
+	    if (aValue.left(4) == "UNIT") {
+	      cbbValue->addItem(aValue.remove(0,4));
+	      isEditable.push_back(true);
+	    }
+	    else if (possibleValues[i] == "color") {
+	      fetchColorName();
+	    }
+	    else {
+	      cbbValue->addItem(aValue);
+	      isEditable.push_back(false);
+	    }
+	  }
+	  if (!query2.value(1).toString().isEmpty()) //TODO prevent duplicate
+	    cbbUnit->addItems(query2.value(1).toString().split(";"));
+	}
+      }
       else {
 	cbbValue->addItem(possibleValues[i]);
 	isEditable.push_back(false);
@@ -72,6 +100,8 @@ CSSBeginnerWidget::CSSBeginnerWidget(QWidget* parent, QString tagName) : QWidget
       if (possibleUnit[i].isEmpty() == false)
 	cbbUnit->addItem(possibleUnit[i]);
   }
+  
+  cbbValue_changed(0);
   ckbName->setText(tagName);
   cbbUnit->setEnabled(false);
   cbbValue->setEnabled(false);
@@ -87,15 +117,26 @@ void CSSBeginnerWidget::ckbName_checked(int state) {
       cbbValue->setEditable(true);
       cbbValue->clearEditText();
     }
-      cbbValue->setFocus();
+    cbbValue->setFocus();
+    if (btnColor)
+      btnColor->setEnabled(true);
   }
   else if (state == Qt::Unchecked) {
     cbbUnit->setEnabled(false);
     cbbValue->setEnabled(false);
+    if (btnColor)
+      btnColor->setEnabled(false);
   }
 }
 
 void CSSBeginnerWidget::cbbValue_changed(int index) {
+  if (btnColor) {
+    if (btnColor->isVisible() == true) {
+      btnColor->setVisible(false);
+      cbbUnit->setVisible(true);
+    }
+  }
+  
   if (isEditable[index] == true) {
     cbbValue->setEditable(true);
     if (cbbUnit->count() != 0)
@@ -107,11 +148,31 @@ void CSSBeginnerWidget::cbbValue_changed(int index) {
 	cbbValue->lineEdit()->setText(cbbValue->lineEdit()->text().remove(cbbValue->itemText(index).indexOf("(")+1, (cbbValue->itemText(index).indexOf(")") - (cbbValue->itemText(index).indexOf("(")+1))));
       cbbValue->lineEdit()->setCursorPosition(cbbValue->itemText(index).indexOf("(")+1);
     }
-      cbbValue->setFocus();
+    if (cbbValue->itemText(index) == "color") {
+      if (!btnColor) {
+	btnColor = new QPushButton(this);
+	btnColor->setText("Color");
+	btnColor->setIcon(KIcon("fill-color"));
+	hlCbbTag->addWidget(btnColor);
+	btnColor->setMinimumSize(QSize(75, 0));
+	btnColor->setMaximumSize(QSize(75, 99));
+	connect( btnColor, SIGNAL( clicked() ), this, SLOT( selectColor() ) );
+	if (ckbName->isChecked() == false)
+	  btnColor->setDisabled(true);
+      }
+      else {
+	btnColor->setVisible(true);
+	btnColor->setEnabled(true);
+      }
+      cbbUnit->setVisible(false);
+    }
+    cbbValue->setFocus();
   }
   else {
     cbbValue->setEditable(false);
     cbbUnit->setEnabled(false);
+    if (btnColor)
+      btnColor->setEnabled(false);
   }
 }
 
@@ -159,4 +220,23 @@ void CSSBeginnerWidget::clear() {
   cbbValue->setCurrentIndex(0);
   cbbValue->setStyleSheet(QString::fromUtf8(""));
   cbbUnit->setCurrentIndex(0);
+}
+
+void CSSBeginnerWidget::fetchColorName() {
+  isEditable.push_back(true);
+  QSqlQuery query2;
+  query2.exec("SELECT NAME FROM TCOLOR");
+  while (query2.next()) {
+    cbbValue->addItem(query2.value(0).toString());
+    isEditable.push_back(false);
+  }
+}
+
+void CSSBeginnerWidget::selectColor() {
+  KColorDialog aDialog(this,true);
+  QColor aColor;
+  int result = aDialog.getColor( aColor );
+  if ( result == KColorDialog::Accepted ) {
+    cbbValue->lineEdit()->setText(aColor.name());
+  }
 }
