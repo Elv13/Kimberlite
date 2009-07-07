@@ -54,6 +54,20 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   tabWMenu = new KTabWidget(this);
   tabWMenu->setMinimumSize(QSize(0, 90));
   tabWMenu->setMaximumSize(QSize(9999999, 90));
+  tabWMenu->setStyleSheet("/*Make the tab bar look less like a tab bar*/\
+    QTabWidget {\
+      border-right:0px;\
+      margin-right:0px;\
+      border-left:0px;\
+      margin-left:0px;\
+    }\
+    QTabWidget::tab-bar {\
+      left:0px;\
+    }\
+    QTabWidget::pane {\
+      border: 0px solid #C2C7CB;\
+    }\
+    ");
 
   /***************************************************************
   
@@ -66,7 +80,7 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   fileTB->setIconSize(QSize(22,22));
   tabWMenu->addTab(fileTB, "Files");
   QPalette aPalette;
-  fileTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
+  fileTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:transparent;");
 
   createAction("New Project", "document-new", Qt::CTRL + Qt::Key_N);
   connect(ashActions["New Project"], SIGNAL(triggered(bool)),this, SLOT(newProject()));
@@ -124,7 +138,7 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   editTB = new KToolBar(this);
   editTB->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
   editTB->setIconSize(QSize(22,22));
-  editTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
+  editTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:transparent;");
   horizontalLayout_14->addWidget(editTB,0,0,2,1);
 
   createAction("Undo", "edit-undo", Qt::CTRL + Qt::Key_Z);
@@ -275,7 +289,7 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   viewTB->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
   viewTB->setIconSize(QSize(22,22));
   tabWMenu->addTab(viewTB, "View");
-  viewTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
+  viewTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:transparent;");
 
   createAction("Project", KStandardDirs::locate("appdata", "pixmap/showProject.png"), NULL,true);
   viewTB->addAction(ashActions["Project"]);
@@ -325,7 +339,7 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   insertTB = new KToolBar(this);
   insertTB->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
   insertTB->setIconSize(QSize(22,22));
-  insertTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
+  insertTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:transparent;");
   hlInsert->addWidget(insertTB,0,11,0,2);
 
   createAction("New Page", "document-new", Qt::CTRL + Qt::ALT + Qt::Key_N);
@@ -461,7 +475,7 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   toolsTB->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
   toolsTB->setIconSize(QSize(22,22));
   tabWMenu->addTab(toolsTB, "Tools");
-  toolsTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
+  toolsTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:transparent;");
 
   createAction("Parse", "format-indent-more", Qt::CTRL + Qt::Key_P);
   connect(ashActions["Parse"], SIGNAL(triggered(bool)), this, SLOT(reParse()));
@@ -512,7 +526,7 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   optionsTB = new KToolBar(this);
   optionsTB->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
   optionsTB->setIconSize(QSize(22,22));
-  optionsTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
+  optionsTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:transparent;");
   optToolBarLayout->addWidget(optionsTB,0,0,2,1);
   
   createAction("Shortcuts", "configure-shortcuts", NULL);
@@ -645,7 +659,7 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   helpTB->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
   helpTB->setIconSize(QSize(22,22));
   tabWMenu->addTab(helpTB, "Help");
-  helpTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:" + aPalette.window().color().name () +";");
+  helpTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:transparent;");
 
   createAction("Manual", "help-contents", NULL);
   connect(ashActions["Manual"], SIGNAL(triggered(bool)), this, SLOT(quit()));
@@ -1141,6 +1155,11 @@ void MainWindow::saveProjectAs(const QString &outputFileName){
  
 void MainWindow::saveProjectAs(){
   QString name = KFileDialog::getSaveFileName();
+  if (name.size() < 5)
+    name += ".wpk";
+  else if (name.right(4).toLower() != ".wpk")
+    name += ".wpk";
+    
   if (QFile::exists(name)) {
     int result = KMessageBox::questionYesNo(this, name + " exist. Do you want to overwrite it?", "Overwrite?");
     if (result == KMessageBox::Yes)
@@ -1922,7 +1941,9 @@ void MainWindow::saveRecentProject(QString filePath, QString projectTitle) {
   bool done = false;
   recentProjects << configSkeleton.recentP1 << configSkeleton.recentP2 << configSkeleton.recentP3 << configSkeleton.recentP4 << configSkeleton.recentP5;
   for (int i=0;i<recentProjects.size();i++) {
-    if (recentProjects[i][1].isEmpty()) {
+    if (recentProjects[i][1] == filePath)
+      break; //Dirty hack to prevent a bug, need rewriting, some day
+    else if (recentProjects[i][1].isEmpty()) {
       recentProjects[i][0] = projectTitle;
       recentProjects[i][1] = filePath;
       done = true;
