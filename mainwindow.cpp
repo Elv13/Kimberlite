@@ -769,15 +769,6 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
 
   /***************************************************************
   
-			Tag Editor Dock
-  
-  ***************************************************************/
-  
-  TagEditor* aTagEditor = new TagEditor(this);
-  addDockWidget(Qt::RightDockWidgetArea, aTagEditor);
-  
-  /***************************************************************
-  
 			Editing MODE
   
   ***************************************************************/
@@ -828,6 +819,17 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   
   connect(rtfHTMLEditor, SIGNAL(textChanged()), this, SLOT(setModified()));
   connect(rtfHTMLEditor, SIGNAL(cursorPositionChanged()), this, SLOT(cursorChanged()));
+  
+  /***************************************************************
+  
+			Tag Editor Dock
+  
+  ***************************************************************/
+  
+  TagEditor* aTagEditor = new TagEditor(this);
+  addDockWidget(Qt::RightDockWidgetArea, aTagEditor);
+  connect(rtfHTMLEditor, SIGNAL(currentTagChanged(QString)),aTagEditor,SLOT(displayAttribute(QString)));
+  connect(aTagEditor, SIGNAL(setAttribute(QString,QString)),rtfHTMLEditor,SLOT(setAttribute(QString, QString)));
 
   /***************************************************************
   

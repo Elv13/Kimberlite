@@ -31,6 +31,8 @@ RtfHtmlEditor::RtfHtmlEditor(QWidget *parent) : KTextEdit(parent), c(0),defaultC
     htmlCompleter->setCaseSensitivity(Qt::CaseInsensitive);
     //cssCompleter->setWidget(rtfCSSEditor);
     setCompleter(htmlCompleter);
+    
+    connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(inspectLine()));
  }
  
 RtfHtmlEditor::~RtfHtmlEditor() {
@@ -456,4 +458,21 @@ void RtfHtmlEditor::keyPressEvent(QKeyEvent *e) {
  
 void RtfHtmlEditor::findText() {
  slotFind(); 
+}
+
+void RtfHtmlEditor::inspectLine() {
+  QTextCursor tc = textCursor();
+  int currentPos = tc.position();
+  tc.select(QTextCursor::LineUnderCursor);
+  QString tag = HtmlParser::getTag(tc.selectedText()).toUpper();
+  
+  emit currentTagChanged(tc.selectedText());
+}
+
+void RtfHtmlEditor::setAttribute(QString name, QString value) {
+  QTextCursor tc = textCursor();
+  int currentPos = tc.position();
+  tc.select(QTextCursor::LineUnderCursor);
+  QString newTag = HtmlParser::setAttribute(tc.selectedText(), name, value);
+  tc.insertText(newTag);
 }

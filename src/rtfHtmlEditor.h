@@ -13,25 +13,27 @@
 
 
  class RtfHtmlEditor : public KTextEdit {
-     Q_OBJECT
+    Q_OBJECT
 
  public:
-     RtfHtmlEditor(QWidget *parent = 0);
-     ~RtfHtmlEditor();
+    RtfHtmlEditor(QWidget *parent = 0);
+    ~RtfHtmlEditor();
 
-     void setCompleter(QCompleter *c);
-     QCompleter *completer() const;
+    void setCompleter(QCompleter *c);
+    QCompleter *completer() const;
 
  protected:
-     void keyPressEvent(QKeyEvent *e);
-     void focusInEvent(QFocusEvent *e);
+    void keyPressEvent(QKeyEvent *e);
+    void focusInEvent(QFocusEvent *e);
 
  private slots:
-     void insertCompletion(const QString &completion);
-      void insertTabulation();
+    void insertCompletion(const QString &completion);
+    void insertTabulation();
     QString getCurrentAtribute();
+    void inspectLine();
  public slots:
-     void findText();
+    void findText();
+    void setAttribute(QString name, QString value);
  private:
     QWidget* parent;
     QString textUnderCursor() const;
@@ -46,9 +48,11 @@
     QCompleter* htmlCompleter;
     QCompleter* tmpCompleter;
     bool is3rdLvlCompleter;
+  signals:
+    void currentTagChanged(QString tag); 
 
  private:
-     QCompleter *c;
+    QCompleter *c;
  };
 
 

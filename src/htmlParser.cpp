@@ -121,14 +121,19 @@ void HtmlParser::setAttribute(HtmlData &pageData, QString tag, uint index, QStri
   for (int j =0; j < pageData.tagList.size(); j++)
     if ((HtmlParser::getTag(pageData.tagList[j]).toUpper() == tag.toUpper()) && (pageData.tagList[j][1] != '/'))
       if (i == index) {
-	if (getAttribute(pageData.tagList[j],attribute) == NULL)
-	  pageData.tagList[j].insert(pageData.tagList[j].count() - 1, " " + attribute + "=\"" + value + "\"");
-	else
-	  pageData.tagList[j].replace(getAttribute(pageData.tagList[j],attribute),value);
+	pageData.tagList[j] = setAttribute(pageData.tagList[j],attribute,value);
 	break;
       }
       else
 	i++;
+}
+
+QString HtmlParser::setAttribute(QString tag, QString attribute, QString value) {
+  if (getAttribute(tag,attribute) == NULL)
+    tag.insert(tag.count() - 1, " " + attribute + "=\"" + value + "\"");
+  else
+    tag.replace(getAttribute(tag,attribute),value);
+  return tag;
 }
 
 QString HtmlParser::getAttribute(QString tag, QString attribute) {
