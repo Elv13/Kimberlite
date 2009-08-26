@@ -35,6 +35,7 @@
 #include "src/newScript.h"
 #include "src/newProject.h"
 #include "src/debugger.h"
+#include "src/tagEditor.h"
 
 MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NULL),currentScript(NULL),aProjectManager(NULL),isModified(false),previousCssMode(999),previousKimberliteMode(MODE_WYSIWYG) {
   actionCollection = new KActionCollection(this);
@@ -175,7 +176,8 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   hlFont->setContentsMargins(0,0,0,0);
   hlFont->setSpacing(0);
   
-  cbbFont = new KFontComboBox(menuEdit);
+  //cbbFont = new KFontComboBox(menuEdit);
+  cbbFont = new QComboBox(menuEdit);
   cbbFont->setObjectName(QString::fromUtf8("cbbFont"));
   cbbFont->setMinimumSize(QSize(225, 0));
   cbbFont->setMaximumSize(QSize(225, 25));
@@ -190,7 +192,11 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   connect(cbbFontSize, SIGNAL(valueChanged(int)), this, SLOT(setFontSize(int)));
   hlFont->addWidget(cbbFontSize);
 
-  cbbHeader = new HeaderComboBox(menuEdit);
+  //cbbHeader = new HeaderComboBox(menuEdit);
+  cbbHeader = new QComboBox(menuEdit);
+  QStringList headerSize;
+  headerSize << "H1" <<"H2"<<"H3"<<"H4"<<"H5";
+  cbbHeader->addItems(headerSize);
   cbbHeader->setMaximumSize(QSize(175, 25));
   cbbHeader->setMinimumSize(QSize(175, 25));
   cbbHeader->setObjectName(QString::fromUtf8("cbbHeader"));
@@ -397,7 +403,7 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   connect(btnNewSpace, SIGNAL(clicked()), this, SLOT(addNewSpace()));
   hlInsert->addWidget(btnNewSpace,0,0);
   
-  KPushButton* btnHr = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/hr.png"),"Add horizontal line");
+  btnHr = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/hr.png"),"Add horizontal line");
   connect(btnHr, SIGNAL(clicked()), this, SLOT(addAddHr()));
   hlInsert->addWidget(btnHr,1,1);
   
@@ -409,59 +415,59 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   aline->setStyleSheet("margin:3px;padding:3px;width:20px;");
   hlInsert->addWidget(aline,0,2,2,1);
 
-  KPushButton* btnTextLine = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/textline.png"),"Add a text field");
+  btnTextLine = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/textline.png"),"Add a text field");
   connect(btnTextLine, SIGNAL(clicked()), this, SLOT(addTextLine()));
   hlInsert->addWidget(btnTextLine,0,3);
   
-  KPushButton* btnPassword = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/password.png"),"Add a password field");
+  btnPassword = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/password.png"),"Add a password field");
   connect(btnPassword, SIGNAL(clicked()), this, SLOT(addPasswordLine()));
   hlInsert->addWidget(btnPassword,1,3);
   
-  KPushButton* btnCheckBox = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/checkbox.png"),"Add a checkbox");
+  btnCheckBox = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/checkbox.png"),"Add a checkbox");
   connect(btnCheckBox, SIGNAL(clicked()), this, SLOT(addCheckBox()));
   hlInsert->addWidget(btnCheckBox,0,4);
   
-  KPushButton* btnRadioButton = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/radio.png"),"Add a radio button");
+  btnRadioButton = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/radio.png"),"Add a radio button");
   connect(btnRadioButton, SIGNAL(clicked()), this, SLOT(addRadioButton()));
   hlInsert->addWidget(btnRadioButton,1,4);
   
-  KPushButton* btnSubmit = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/submit.png"),"Add a submit button");
+  btnSubmit = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/submit.png"),"Add a submit button");
   connect(btnSubmit, SIGNAL(clicked()), this, SLOT(addSubmitButton()));
   hlInsert->addWidget(btnSubmit,0,5);
   
-  KPushButton* btnReset = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/reset.png"),"Add a reset button");
+  btnReset = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/reset.png"),"Add a reset button");
   connect(btnReset, SIGNAL(clicked()), this, SLOT(addResetButton()));
   hlInsert->addWidget(btnReset,1,5);
   
-  KPushButton* btnUpload = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/upload.png"),"Add an upload button");
+  btnUpload = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/upload.png"),"Add an upload button");
   connect(btnUpload, SIGNAL(clicked()), this, SLOT(addUploadButton()));
   hlInsert->addWidget(btnUpload,0,6);
   
-  KPushButton* btnHidden = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/hidden.png"),"Add an hidden object");
+  btnHidden = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/hidden.png"),"Add an hidden object");
   connect(btnHidden, SIGNAL(clicked()), this, SLOT(addHiddenField()));
   hlInsert->addWidget(btnHidden,1,6);
   
-  KPushButton* btnButton = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/button.png"),"Add a simple button");
+  btnButton = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/button.png"),"Add a simple button");
   connect(btnButton, SIGNAL(clicked()), this, SLOT(addButton()));
   hlInsert->addWidget(btnButton,0,7);
   
-  KPushButton* btnTextAera = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/textarea.png"),"Add a text area");
+  btnTextAera = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/textarea.png"),"Add a text area");
   connect(btnTextAera, SIGNAL(clicked()), this, SLOT(addTextAera()));
   hlInsert->addWidget(btnTextAera,1,7);
   
-  KPushButton* btnHtmlButton = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/button.png"),"Add a rich (html) button");
+  btnHtmlButton = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/button.png"),"Add a rich (html) button");
   connect(btnHtmlButton, SIGNAL(clicked()), this, SLOT(addHtmlButton()));
   hlInsert->addWidget(btnHtmlButton,0,8);
   
-  KPushButton* btnSelect = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/combobox.png"),"Add a combo box");
+  btnSelect = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/combobox.png"),"Add a combo box");
   connect(btnSelect, SIGNAL(clicked()), this, SLOT(addSelect()));
   hlInsert->addWidget(btnSelect,1,8);
   
-  KPushButton* btnList = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/list.png"),"Add a list");
+  btnList = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/list.png"),"Add a list");
   connect(btnList, SIGNAL(clicked()), this, SLOT(addListControl()));
   hlInsert->addWidget(btnList,0,9);
   
-  KPushButton* btnLabel = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/label.png"),"Add a label");
+  btnLabel = createToolButton(menuInsert,KStandardDirs::locate("appdata", "pixmap/tags/label.png"),"Add a label");
   connect(btnLabel, SIGNAL(clicked()), this, SLOT(addLabel()));
   hlInsert->addWidget(btnLabel,1,9);
 
@@ -761,6 +767,15 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   connect(ashActions["CSS Class"], SIGNAL(triggered(bool)), treeDock, SLOT(setVisible(bool)));
   connect(treeDock, SIGNAL(visibilityChanged(bool)), ashActions["CSS Class"] , SLOT(setChecked(bool)));
 
+  /***************************************************************
+  
+			Tag Editor Dock
+  
+  ***************************************************************/
+  
+  TagEditor* aTagEditor = new TagEditor(this);
+  addDockWidget(Qt::RightDockWidgetArea, aTagEditor);
+  
   /***************************************************************
   
 			Editing MODE
@@ -1845,7 +1860,7 @@ void MainWindow::reportBug() {
 
 void MainWindow::disableWysiwyg(bool value) {
   QList<QWidget*> aList;
-  aList << cbbFont << cbbFontSize << btnBold << btnUnderline << btnItalic << btnAlignLeft << btnAlignCenter << btnAlignRight  << btnJustify << cbbHeader /* <<btnLink*/ << btnChar /*<< btnTable*/ << btnList << kcbbTextColor  << cbbHighlightColor << cbbBackgroundColor << btnNewLine  << btnNewTab << btnNewSpace;
+  aList << cbbFont << cbbFontSize << btnBold << btnUnderline << btnItalic << btnAlignLeft << btnAlignCenter << btnAlignRight  << btnJustify << cbbHeader /* <<btnLink*/ << btnChar /*<< btnTable*/ << btnList << kcbbTextColor  << cbbHighlightColor << cbbBackgroundColor << btnNewLine  << btnNewTab << btnNewSpace /*<< btnUnIndent << btnIndent*/ << btnHr << btnTextLine << btnPassword << btnCheckBox << btnRadioButton << btnSubmit << btnReset << btnUpload << btnHidden << btnButton << btnTextAera << btnHtmlButton << btnSelect << btnLabel;
   for (int i =0; i< aList.size();i++)
     aList[i]->setDisabled(value);
   ashActions["Add Image"]->setDisabled(value);

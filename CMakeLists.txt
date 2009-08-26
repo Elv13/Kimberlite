@@ -31,6 +31,7 @@ include(KDE4Defaults)
       src/colorComboBox.cpp
       src/headerComboBox.cpp
       src/configSkeleton.h
+      src/tagEditor.cpp
       )
 
       kde4_add_executable(kimberlite ${kimberlite_SRCS})
