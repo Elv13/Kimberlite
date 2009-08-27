@@ -131,15 +131,26 @@ void HtmlParser::setAttribute(HtmlData &pageData, QString tag, uint index, QStri
 QString HtmlParser::setAttribute(QString tag, QString attribute, QString value) {
   if (getAttribute(tag,attribute) == NULL)
     tag.insert(tag.count() - 1, " " + attribute + "=\"" + value + "\"");
-  else
-    tag.replace(getAttribute(tag,attribute),value);
+  else {
+    int start,length;
+    getAttribute(tag,attribute,start,length);
+    tag.replace(start,length,value);
+  }
   return tag;
 }
 
-QString HtmlParser::getAttribute(QString tag, QString attribute) {
+QString HtmlParser::getAttribute(QString tag, QString attribute, int &start, int &length) {
   int position = tag.toLower().indexOf(attribute.toLower());
-  if (tag[position+attribute.count()] == '=')
-    return (position == -1)?NULL:tag.mid(tag.indexOf("=",position)+2,tag.indexOf((tag.indexOf(" ",position) != -1)?" ":">",position)-2 - (position+1+attribute.count()));
+  if (tag[position+attribute.count()] == '=') {
+    start = tag.indexOf("=",position)+2;
+    length = tag.indexOf((tag.indexOf(" ",position) != -1)?" ":">",position)-2 - (position+1+attribute.count());
+    return (position == -1)?NULL:tag.mid(start,length);
+  }
   else
     return NULL; //It is just safer than checking position == -1 in if
+}
+
+QString HtmlParser::getAttribute(QString tag, QString attribute) {
+  int start,length;
+  return HtmlParser::getAttribute(tag, attribute, start, length);
 }

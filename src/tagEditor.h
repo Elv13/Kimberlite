@@ -8,6 +8,8 @@
 #include <QVBoxLayout>
 #include <QLineEdit>
 #include <QHash>
+#include <KPushButton>
+#include <QStringList>
 #include "htmlParser.h"
 
 class AttrComboBox : public QComboBox {
@@ -31,11 +33,19 @@ class TagEditor : public QDockWidget {
   public:
     TagEditor(QWidget* parent);
   private:
-    AttrComboBox* createAttribute(QString name);
+    AttrComboBox* createAttribute(QString name, QTreeWidgetItem* parent = NULL);
+    void loadTagAttr(QString tagName);
     QTreeWidget* subTagTree;
     QHash<QString, QTreeWidgetItem*> hshAttribute;
+    KPushButton* btnExecute;
+    QStringList normalAttr;
+    QStringList styleAttr;
+    QStringList specificAttr;
+    QTreeWidgetItem* tviSpecific;
+    QString currentTag;
   private slots:
     void setTagAttribute(QString attribute, QString text);
+    void setAttrTest();
   public slots:
     void displayAttribute(QString tag);
   signals:

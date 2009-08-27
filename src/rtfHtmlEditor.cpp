@@ -473,6 +473,10 @@ void RtfHtmlEditor::setAttribute(QString name, QString value) {
   QTextCursor tc = textCursor();
   int currentPos = tc.position();
   tc.select(QTextCursor::LineUnderCursor);
+  qDebug() << "Current text: " << tc.selectedText();
   QString newTag = HtmlParser::setAttribute(tc.selectedText(), name, value);
+  qDebug() << "New text: " << newTag;
   tc.insertText(newTag);
+  tc.setPosition(currentPos);
+  setTextCursor(tc);
 }
