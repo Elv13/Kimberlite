@@ -305,6 +305,9 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
 
   createAction("HTML Tree", KStandardDirs::locate("appdata", "pixmap/showHTML.png"), NULL, true);
   viewTB->addAction(ashActions["HTML Tree"]);
+  
+  createAction("Attributes", KStandardDirs::locate("appdata", "pixmap/showHTML.png"), NULL, true);
+  viewTB->addAction(ashActions["Attributes"]);
 
   createAction("Debugger", KStandardDirs::locate("appdata", "pixmap/showDebugger.png"), NULL, true);
   viewTB->addAction(ashActions["Debugger"]);
@@ -827,9 +830,11 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   ***************************************************************/
   
   TagEditor* aTagEditor = new TagEditor(this);
+  aTagEditor->setVisible(false);
   addDockWidget(Qt::RightDockWidgetArea, aTagEditor);
   connect(rtfHTMLEditor, SIGNAL(currentTagChanged(QString)),aTagEditor,SLOT(displayAttribute(QString)));
   connect(aTagEditor, SIGNAL(setAttribute(QString,QString)),rtfHTMLEditor,SLOT(setAttribute(QString, QString)));
+  connect(ashActions["Attributes"], SIGNAL(triggered(bool)), aTagEditor, SLOT(setVisible(bool)));
 
   /***************************************************************
   

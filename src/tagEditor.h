@@ -10,6 +10,8 @@
 #include <QHash>
 #include <KPushButton>
 #include <QStringList>
+#include <QPainter>
+#include <QItemDelegate>
 #include "htmlParser.h"
 
 class AttrComboBox : public QComboBox {
@@ -28,6 +30,31 @@ class AttrComboBox : public QComboBox {
     void textChanged(QString, QString);
 };
 
+class RichTreeWidget : public QTreeWidget {
+  Q_OBJECT
+  public:
+    RichTreeWidget(QWidget* parent) : QTreeWidget(parent) {}
+  public:
+    void drawRow(QPainter* p, const QStyleOptionViewItem &opt, const QModelIndex &idx) const {
+      QTreeWidget::drawRow(p, opt, idx);
+      for (int col = 0; col < columnCount(); ++col) {
+	QModelIndex s = idx.sibling(idx.row(), col);
+	if (s.isValid()) {
+	  QRect rect = visualRect(s);
+	  p->setPen(Qt::DotLine);
+	  p->drawRect(rect);
+	}
+      }
+    }
+    /*void paint(QPainter* p, const QStyleOptionViewItem &opt, const QModelIndex &idx) const {
+	QItemDelegate::paint(p, opt, idx);
+	if (idx.isValid()) {
+	    p->setPen(Qt::DotLine);
+	    p->drawRect(opt.rect);
+	}
+    }*/
+};
+
 class TagEditor : public QDockWidget {
   Q_OBJECT
   public:
@@ -35,7 +62,7 @@ class TagEditor : public QDockWidget {
   private:
     AttrComboBox* createAttribute(QString name, QTreeWidgetItem* parent = NULL);
     void loadTagAttr(QString tagName);
-    QTreeWidget* subTagTree;
+    RichTreeWidget* subTagTree;
     QHash<QString, QTreeWidgetItem*> hshAttribute;
     KPushButton* btnExecute;
     QStringList normalAttr;

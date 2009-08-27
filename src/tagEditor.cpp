@@ -1,5 +1,8 @@
 #include "tagEditor.h"
+#include "qtpropertybrowser-2.5-opensource/src/QtTreePropertyBrowser"
 #include <QtSql>
+#include "qtpropertybrowser-2.5-opensource/src/QtProperty"
+#include "qtpropertybrowser-2.5-opensource/src/QtBoolPropertyManager"
 
 TagEditor::TagEditor(QWidget* parent) : QDockWidget(parent) {
   setWindowTitle("Tag Editor");
@@ -7,7 +10,7 @@ TagEditor::TagEditor(QWidget* parent) : QDockWidget(parent) {
   setWidget(centralWidget);
   QVBoxLayout* mainLayout = new QVBoxLayout(centralWidget);
   mainLayout->setContentsMargins(0,0,0,0);
-  subTagTree = new QTreeWidget(centralWidget);
+  subTagTree = new RichTreeWidget(centralWidget);
   /*subTagTree->setStyleSheet("QTreeView::item {\
       border: 1px solid #d9d9d9;\
      border-top-color: transparent;\
@@ -28,8 +31,22 @@ TagEditor::TagEditor(QWidget* parent) : QDockWidget(parent) {
   mainLayout->addWidget(btnExecute);
   connect(btnExecute, SIGNAL(clicked()), this, SLOT(setAttrTest()));
   
+  QtTreePropertyBrowser* aPropBrowser = new QtTreePropertyBrowser(this);
+  aPropBrowser->setAlternatingRowColors(true);
+  mainLayout->addWidget(aPropBrowser);
+  
+  QtBoolPropertyManager* testProp = new QtBoolPropertyManager();
+  
+  QtProperty *item2 = testProp->addProperty("enabled");
+  aPropBrowser->addProperty(item2);
+  
   QTreeWidgetItem* tviStandard = new QTreeWidgetItem();
   tviStandard->setText(0,"Standard");
+  tviStandard->setFirstColumnSpanned(true);
+  QFont fntTree = tviStandard->font(0);
+  fntTree.setBold(true);
+  tviStandard->setFont(0,fntTree);
+  subTagTree->setFirstItemColumnSpanned(tviStandard,true);
   
   subTagTree->addTopLevelItem(tviStandard);
   normalAttr << "id" << "name" << "class";
@@ -72,27 +89,29 @@ AttrComboBox* TagEditor::createAttribute(QString name, QTreeWidgetItem* parent) 
 }
 
 void TagEditor::displayAttribute(QString tag) {
-  if (tag.trimmed().left(2) == "</") {
-    subTagTree->setDisabled(true);
-  }
-  else {
-    subTagTree->setDisabled(false);
-    loadTagAttr(HtmlParser::getTag(tag.trimmed()));
-  }
-  //aLineEdit->setText(tag);
-  foreach (QString attr, normalAttr)
-    if (HtmlParser::getAttribute(tag,attr) != NULL) {
-      if (hshAttribute.find(attr) == hshAttribute.end())
-	createAttribute(attr);
-      ((AttrComboBox*)subTagTree->itemWidget(hshAttribute[attr],1))->lineEdit()->setText(HtmlParser::getAttribute(tag,attr));
+  if (this->isVisible()) {
+    if (tag.trimmed().left(2) == "</") {
+      subTagTree->setDisabled(true);
+    }
+    else {
+      subTagTree->setDisabled(false);
+      loadTagAttr(HtmlParser::getTag(tag.trimmed()));
     }
     
-  foreach (QString attr, specificAttr)
-    if (HtmlParser::getAttribute(tag,attr) != NULL) {
-      if (hshAttribute.find(attr) == hshAttribute.end())
-	createAttribute(attr);
-      ((AttrComboBox*)subTagTree->itemWidget(hshAttribute[attr],1))->lineEdit()->setText(HtmlParser::getAttribute(tag,attr));
-    }
+    foreach (QString attr, normalAttr)
+      if (HtmlParser::getAttribute(tag,attr) != NULL) {
+	if (hshAttribute.find(attr) == hshAttribute.end())
+	  createAttribute(attr);
+	((AttrComboBox*)subTagTree->itemWidget(hshAttribute[attr],1))->lineEdit()->setText(HtmlParser::getAttribute(tag,attr));
+      }
+      
+    foreach (QString attr, specificAttr)
+      if (HtmlParser::getAttribute(tag,attr) != NULL) {
+	if (hshAttribute.find(attr) == hshAttribute.end())
+	  createAttribute(attr);
+	((AttrComboBox*)subTagTree->itemWidget(hshAttribute[attr],1))->lineEdit()->setText(HtmlParser::getAttribute(tag,attr));
+      }
+  }
 }
 
 void TagEditor::setAttrTest() {
