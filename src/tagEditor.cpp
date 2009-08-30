@@ -1,8 +1,10 @@
 #include "tagEditor.h"
-#include "qtpropertybrowser-2.5-opensource/src/QtTreePropertyBrowser"
 #include <QtSql>
-#include "qtpropertybrowser-2.5-opensource/src/QtProperty"
 #include "qtpropertybrowser-2.5-opensource/src/QtBoolPropertyManager"
+#include "qtpropertybrowser-2.5-opensource/src/QtLineEditFactory"
+#include "qtpropertybrowser-2.5-opensource/src/QtEnumEditorFactory"
+#include "qtpropertybrowser-2.5-opensource/src/QtGroupPropertyManager"
+#include "qtpropertybrowser-2.5-opensource/src/QtBrowserItem"
 
 TagEditor::TagEditor(QWidget* parent) : QDockWidget(parent) {
   setWindowTitle("Tag Editor");
@@ -10,53 +12,40 @@ TagEditor::TagEditor(QWidget* parent) : QDockWidget(parent) {
   setWidget(centralWidget);
   QVBoxLayout* mainLayout = new QVBoxLayout(centralWidget);
   mainLayout->setContentsMargins(0,0,0,0);
-  subTagTree = new RichTreeWidget(centralWidget);
-  /*subTagTree->setStyleSheet("QTreeView::item {\
-      border: 1px solid #d9d9d9;\
-     border-top-color: transparent;\
-     margin:0px;\
- }\
-");*/
-  mainLayout->addWidget(subTagTree);
-  subTagTree->setColumnCount(2);
   resize(250,250);
   
-  QTreeWidgetItem* tviHeader1 = new QTreeWidgetItem();
-  tviHeader1->setText(0,"Attribute");
-  tviHeader1->setText(1,"Value");
-  subTagTree->setHeaderItem(tviHeader1);
+  htmlPropertyBrowser = new QtTreePropertyBrowser(this);
+  htmlPropertyBrowser->setAlternatingRowColors(true);
+  mainLayout->addWidget(htmlPropertyBrowser);
   
-  btnExecute = new KPushButton(this);
-  btnExecute->setText("Exec");
-  mainLayout->addWidget(btnExecute);
-  connect(btnExecute, SIGNAL(clicked()), this, SLOT(setAttrTest()));
+  QtGroupPropertyManager *groupManager = new QtGroupPropertyManager(this);
   
-  QtTreePropertyBrowser* aPropBrowser = new QtTreePropertyBrowser(this);
-  aPropBrowser->setAlternatingRowColors(true);
-  mainLayout->addWidget(aPropBrowser);
+  metaPropStd = groupManager->addProperty("Standard Properties");
+  htmlPropertyBrowser->addProperty(metaPropStd);
   
-  QtBoolPropertyManager* testProp = new QtBoolPropertyManager();
+  metaPropSpecific = groupManager->addProperty("Specific Properties");
+  htmlPropertyBrowser->addProperty(metaPropSpecific);
   
-  QtProperty *item2 = testProp->addProperty("enabled");
-  aPropBrowser->addProperty(item2);
+  metaPropStyle = groupManager->addProperty("Embeded Style");
+  htmlPropertyBrowser->addProperty(metaPropStyle);
   
-  QTreeWidgetItem* tviStandard = new QTreeWidgetItem();
-  tviStandard->setText(0,"Standard");
-  tviStandard->setFirstColumnSpanned(true);
-  QFont fntTree = tviStandard->font(0);
-  fntTree.setBold(true);
-  tviStandard->setFont(0,fntTree);
-  subTagTree->setFirstItemColumnSpanned(tviStandard,true);
+  stringPropManager = new QtStringPropertyManager(this);
+  cbbPropManager = new QtEnumPropertyManager(this);
   
-  subTagTree->addTopLevelItem(tviStandard);
+  connect(stringPropManager, SIGNAL(valueChanged(QtProperty*,QString)), this, SLOT(setStringAttr(QtProperty*,QString)));
+  connect(cbbPropManager, SIGNAL(valueChanged(QtProperty*,int)), this, SLOT(setCbbAttr(QtProperty*,int)));
+  QtLineEditFactory* lineEditFactory = new QtLineEditFactory(this);
+  QtEnumEditorFactory* comboBoxFactory = new QtEnumEditorFactory(this);
+  
+  htmlPropertyBrowser->setFactoryForManager(stringPropManager, lineEditFactory);
+  htmlPropertyBrowser->setFactoryForManager(cbbPropManager, comboBoxFactory);
+
   normalAttr << "id" << "name" << "class";
-  foreach (QString attr, normalAttr)
-    createAttribute(attr,tviStandard);
-  tviStandard->setExpanded(true);
   
-  tviSpecific = new QTreeWidgetItem();
-  tviSpecific->setText(0,"Specific");
-  subTagTree->addTopLevelItem(tviSpecific);
+  foreach (QString attr, normalAttr) {
+    hshStd[attr] = stringPropManager->addProperty(attr);
+    metaPropStd->addSubProperty(hshStd[attr]);
+  }
   
   QSqlQuery query22;
   query22.exec("SELECT TITLE FROM TCSS_TAG");
@@ -66,69 +55,140 @@ TagEditor::TagEditor(QWidget* parent) : QDockWidget(parent) {
   
   styleAttr.sort();
   
-  QTreeWidgetItem* tviStyle = new QTreeWidgetItem();
-  tviStyle->setText(0,"StyleSheet");
-  subTagTree->addTopLevelItem(tviStyle);
+  QStringList lstCssGroup;
+  lstCssGroup << "background" << "margin" << "padding" << "border" << "font" << "text" << "outline" << "list";
   
-  foreach (QString attr, styleAttr)
-    createAttribute(attr,tviStyle);
-  
-}
+  QHash<QString, QtProperty*> hshTagGroup;
 
-AttrComboBox* TagEditor::createAttribute(QString name, QTreeWidgetItem* parent) {
-  QTreeWidgetItem* anItem = new QTreeWidgetItem(parent);
-  anItem->setText(0,name);
-  AttrComboBox* aLineEdit = new AttrComboBox(subTagTree);
-  aLineEdit->attribute = name;
-  if (!parent)
-    subTagTree->addTopLevelItem(anItem);
-  subTagTree->setItemWidget(anItem,1,aLineEdit);
-  hshAttribute[name] = anItem;
-  connect(aLineEdit,SIGNAL(textChanged(QString,QString)),this,SLOT(setTagAttribute(QString,QString)));
-  return aLineEdit;
+  foreach (QString group, lstCssGroup) {
+    hshTagGroup[group] = stringPropManager->addProperty(group);
+    metaPropStyle->addSubProperty(hshTagGroup[group]);
+  }
+  
+  QtProperty *grpPropBorderLeft = groupManager->addProperty("left");
+  hshTagGroup["border"]->addSubProperty(grpPropBorderLeft);
+  
+  QtProperty *grpPropBorderRight = groupManager->addProperty("right");
+  hshTagGroup["border"]->addSubProperty(grpPropBorderRight);
+  
+  QtProperty *grpPropBorderTop = groupManager->addProperty("top");
+  hshTagGroup["border"]->addSubProperty(grpPropBorderTop);
+  
+  QtProperty *grpPropBorderBottom = groupManager->addProperty("bottom");
+  hshTagGroup["border"]->addSubProperty(grpPropBorderBottom);
+  
+  foreach (QString attr, styleAttr) {
+    QtProperty *item3;
+    bool found = false;
+    foreach (QString group, lstCssGroup) {
+      if (attr.indexOf(group+"-") == 0) {
+	if (group == "border") {
+	  if (attr.indexOf(group+"-left-") == 0) {
+	    item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-6));
+	    grpPropBorderLeft->addSubProperty(item3);
+	  }
+	  else if (attr.indexOf(group+"-right-") == 0) {
+	    item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-7));
+	    grpPropBorderRight->addSubProperty(item3);
+	  }
+	  else if (attr.indexOf(group+"-top-") == 0) {
+	    item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-5));
+	    grpPropBorderTop->addSubProperty(item3);
+	  }
+	  else if (attr.indexOf(group+"-bottom-") == 0) {
+	    item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-8));
+	    grpPropBorderBottom->addSubProperty(item3);
+	  }
+	  else {
+	    item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-1));
+	    hshTagGroup[group]->addSubProperty(item3);
+	  }
+	}
+	else {
+	  item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-1));
+	  hshTagGroup[group]->addSubProperty(item3);
+	}
+	found = true;
+	break;
+      }
+    }
+    
+    if (!found) {
+      item3 = stringPropManager->addProperty(attr);
+      metaPropStyle->addSubProperty(item3);
+    }
+    hshStyle[attr] = item3;
+  }
+  
+  QList<QtBrowserItem*> itemList =  htmlPropertyBrowser->topLevelItems();
+  foreach (QtBrowserItem* item, itemList) {
+    if (item->property() == metaPropStyle) {
+      htmlPropertyBrowser->setExpanded(item,false);
+      break;
+    }
+  }  
 }
 
 void TagEditor::displayAttribute(QString tag) {
   if (this->isVisible()) {
-    if (tag.trimmed().left(2) == "</") {
-      subTagTree->setDisabled(true);
+    if ((tag.trimmed().left(2) == "</") || ((tag.trimmed()[0] != '<'))) {
+      htmlPropertyBrowser->setDisabled(true);
     }
     else {
-      subTagTree->setDisabled(false);
+      htmlPropertyBrowser->setDisabled(false);
       loadTagAttr(HtmlParser::getTag(tag.trimmed()));
     }
     
     foreach (QString attr, normalAttr)
-      if (HtmlParser::getAttribute(tag,attr) != NULL) {
-	if (hshAttribute.find(attr) == hshAttribute.end())
-	  createAttribute(attr);
-	((AttrComboBox*)subTagTree->itemWidget(hshAttribute[attr],1))->lineEdit()->setText(HtmlParser::getAttribute(tag,attr));
-      }
+      if (HtmlParser::getAttribute(tag,attr) != NULL)
+	((QtStringPropertyManager*)hshStd[attr]->propertyManager())->setValue(hshStd[attr],HtmlParser::getAttribute(tag,attr));
+      else
+	((QtStringPropertyManager*)hshStd[attr]->propertyManager())->setValue(hshStd[attr],"");
+	
       
     foreach (QString attr, specificAttr)
       if (HtmlParser::getAttribute(tag,attr) != NULL) {
-	if (hshAttribute.find(attr) == hshAttribute.end())
-	  createAttribute(attr);
-	((AttrComboBox*)subTagTree->itemWidget(hshAttribute[attr],1))->lineEdit()->setText(HtmlParser::getAttribute(tag,attr));
+	qDebug() << "Setting arg " << attr;
+	if (hshSpecific[attr]->type == STRING) {
+	  qDebug() << "Its a string";
+	  ((QtStringPropertyManager*)hshSpecific[attr]->propPtr->propertyManager())->setValue(hshSpecific[attr]->propPtr,HtmlParser::getAttribute(tag,attr));
+	}
+	else if (hshSpecific[attr]->type == COMBOBOX) {
+	  qDebug() << "Its a cbb";
+	  int index;
+	  if (((CbbProperty*)hshSpecific[attr])->valueList.indexOf(HtmlParser::getAttribute(tag,attr)) != -1)
+	    index = ((CbbProperty*)hshSpecific[attr])->valueList.indexOf(HtmlParser::getAttribute(tag,attr))+1;
+	  else {
+	    qDebug() << "Value not found";
+	    if (((CbbProperty*)hshSpecific[attr])->edited == false)
+	      ((CbbProperty*)hshSpecific[attr])->valueList << HtmlParser::getAttribute(tag,attr);
+	    else
+	      ((CbbProperty*)hshSpecific[attr])->valueList[((CbbProperty*)hshSpecific[attr])->valueList.size()-1] = HtmlParser::getAttribute(tag,attr);
+	    ((CbbProperty*)hshSpecific[attr])->edited = true;
+	    QStringList value = ((CbbProperty*)hshSpecific[attr])->valueList;
+	    value.insert(0,"-none-");
+	    disconnect(cbbPropManager, SIGNAL(valueChanged(QtProperty*,int)), this, SLOT(setCbbAttr(QtProperty*,int)));
+
+	    cbbPropManager->setEnumNames(hshSpecific[attr]->propPtr,value);
+	    connect(cbbPropManager, SIGNAL(valueChanged(QtProperty*,int)), this, SLOT(setCbbAttr(QtProperty*,int)));
+	    index = value.size()-1;
+	  }
+	  qDebug() <<"settins combo "<<index;
+	  ((QtEnumPropertyManager*)hshSpecific[attr]->propPtr->propertyManager())->setValue(hshSpecific[attr]->propPtr,index);
+	}
       }
+      else
+	((QtStringPropertyManager*)hshSpecific[attr]->propPtr->propertyManager())->setValue(hshSpecific[attr]->propPtr,"");
   }
 }
 
-void TagEditor::setAttrTest() {
-  emit setAttribute("id",((AttrComboBox*)subTagTree->itemWidget(hshAttribute["id"],1))->lineEdit()->text());
-}
-
-void TagEditor::setTagAttribute(QString attribute, QString text) {
-  emit setAttribute(attribute,text);
-}
-
-void TagEditor::loadTagAttr(QString tagName) {
-  if (tagName != currentTag) {
-    foreach (QString attr, specificAttr)
-      hshAttribute.remove(attr);
+void TagEditor::loadTagAttr(QString tagName) { 
+  if (tagName != currentTag) { //BUG WILL not always work
     
-    for (int i=0; i<tviSpecific->childCount();i++)
-      tviSpecific->removeChild(tviSpecific->child(0));
+    foreach (Property* aProp, hshSpecific) {
+      metaPropSpecific->removeSubProperty(aProp->propPtr);
+    }
+
     
     specificAttr.clear();
     
@@ -141,11 +201,58 @@ void TagEditor::loadTagAttr(QString tagName) {
     
     specificAttr = attrList.split(';');
     
-    foreach (QString attr, specificAttr)
-      if (!attr.isEmpty())
-	createAttribute(attr,tviSpecific);
+    foreach (QString attr, specificAttr) {
+      QtProperty *item3;
+      
+      if (attr.indexOf("(") != -1) {
+	hshSpecific[attr.left(attr.indexOf("("))] = new CbbProperty;
+	((CbbProperty*)hshSpecific[attr.left(attr.indexOf("("))])->valueList = attr.mid(attr.indexOf("(")+1, attr.size() - attr.indexOf("(") -2).split(',');
+	specificAttr[specificAttr.indexOf(attr)]=attr.left(attr.indexOf("("));
+	attr = attr.left(attr.indexOf("("));
+	hshSpecific[attr]->type = COMBOBOX;
+	QStringList value = ((CbbProperty*)hshSpecific[attr])->valueList;
+	((CbbProperty*)hshSpecific[attr])->edited = false;
+	value.insert(0,"-none-");
+	
+	item3 = cbbPropManager->addProperty(attr);
+	cbbPropManager->setEnumNames(item3,value);
+	
+      }
+      else {
+	hshSpecific[attr] = new Property;
+	item3 = stringPropManager->addProperty(attr);
+	hshSpecific[attr]->type = STRING;
+      }
+      hshSpecific[attr]->propPtr = item3;
+      metaPropSpecific->addSubProperty(item3);
+    }
       
     currentTag = tagName;
-    tviSpecific->setExpanded(true);
+  }
+}
+
+void TagEditor::setStringAttr(QtProperty* property, const QString& value) {
+      hshStyle;//TODO
+  foreach (Property* aProp, hshSpecific) {
+    if ((property == aProp->propPtr) && (!value.isEmpty())) {
+      emit setAttribute(hshSpecific.key(aProp),value);
+    }
+  }
+  
+  foreach (QtProperty* aProp, hshStd) {
+    if ((property == aProp) && (!value.isEmpty())) {
+      emit setAttribute(hshStd.key(aProp),value);
+    }
+  }
+}
+
+void TagEditor::setCbbAttr(QtProperty* property, const int value) {
+  foreach (Property* aProp, hshSpecific) {
+    if (property == aProp->propPtr) {
+      if (!value)
+	emit setAttribute(hshSpecific.key(aProp),"");
+      else
+	emit setAttribute(hshSpecific.key(aProp),((CbbProperty*)aProp)->valueList[value-1]);
+    }
   }
 }

@@ -13,46 +13,26 @@
 #include <QPainter>
 #include <QItemDelegate>
 #include "htmlParser.h"
+#include "qtpropertybrowser-2.5-opensource/src/QtProperty"
+#include "qtpropertybrowser-2.5-opensource/src/QtStringPropertyManager"
+#include "qtpropertybrowser-2.5-opensource/src/QtEnumPropertyManager"
+#include "qtpropertybrowser-2.5-opensource/src/QtTreePropertyBrowser"
 
-class AttrComboBox : public QComboBox {
-  Q_OBJECT
-  public:
-    AttrComboBox(QWidget* parent = 0) : QComboBox(parent) {
-      setEditable(true);
-      connect(lineEdit(),SIGNAL(textChanged(QString)),this,SLOT(getNewText(QString)));
-    }
-    QString attribute;
-  private slots:
-    void getNewText(QString text) {
-      emit textChanged(attribute,text);
-    }
-  signals:
-    void textChanged(QString, QString);
+enum PropertyType {
+  STRING,
+  BOOL,
+  COMBOBOX,
+  NUMBER
 };
 
-class RichTreeWidget : public QTreeWidget {
-  Q_OBJECT
-  public:
-    RichTreeWidget(QWidget* parent) : QTreeWidget(parent) {}
-  public:
-    void drawRow(QPainter* p, const QStyleOptionViewItem &opt, const QModelIndex &idx) const {
-      QTreeWidget::drawRow(p, opt, idx);
-      for (int col = 0; col < columnCount(); ++col) {
-	QModelIndex s = idx.sibling(idx.row(), col);
-	if (s.isValid()) {
-	  QRect rect = visualRect(s);
-	  p->setPen(Qt::DotLine);
-	  p->drawRect(rect);
-	}
-      }
-    }
-    /*void paint(QPainter* p, const QStyleOptionViewItem &opt, const QModelIndex &idx) const {
-	QItemDelegate::paint(p, opt, idx);
-	if (idx.isValid()) {
-	    p->setPen(Qt::DotLine);
-	    p->drawRect(opt.rect);
-	}
-    }*/
+struct Property {
+  QtProperty* propPtr;
+  PropertyType type;
+};
+
+struct CbbProperty : public Property {
+  QStringList valueList;
+  bool edited;
 };
 
 class TagEditor : public QDockWidget {
@@ -60,19 +40,23 @@ class TagEditor : public QDockWidget {
   public:
     TagEditor(QWidget* parent);
   private:
-    AttrComboBox* createAttribute(QString name, QTreeWidgetItem* parent = NULL);
     void loadTagAttr(QString tagName);
-    RichTreeWidget* subTagTree;
-    QHash<QString, QTreeWidgetItem*> hshAttribute;
-    KPushButton* btnExecute;
+    QHash<QString, QtProperty*> hshStyle;
+    QHash<QString, QtProperty*> hshStd;
+    QHash<QString, Property*> hshSpecific;
+    QtStringPropertyManager* stringPropManager;
+    QtEnumPropertyManager* cbbPropManager;
+    QtProperty* metaPropStd;
+    QtProperty* metaPropSpecific;
+    QtProperty* metaPropStyle;
     QStringList normalAttr;
     QStringList styleAttr;
     QStringList specificAttr;
-    QTreeWidgetItem* tviSpecific;
     QString currentTag;
+    QtTreePropertyBrowser* htmlPropertyBrowser;
   private slots:
-    void setTagAttribute(QString attribute, QString text);
-    void setAttrTest();
+    void setStringAttr(QtProperty* property, const QString& value);
+    void setCbbAttr(QtProperty* property, const int value);
   public slots:
     void displayAttribute(QString tag);
   signals:

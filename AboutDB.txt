@@ -215,6 +215,7 @@ sqlite3 kimberlite.db  "create table THTML_TAG (THTML_TAG_KEY  INTEGER PRIMARY K
   #sqlite3 kimberlite.db  "insert into THTML_TAG (NAME,PROPRIETIES,IFNEEDCLOSE,IFNEEDNEWLINE) values ('STYLE','','1','1');"  
   sqlite3 kimberlite.db  "insert into THTML_TAG (NAME,PROPRIETIES,IFNEEDCLOSE,IFNEEDNEWLINE) values ('!--','','0','1');" 
   sqlite3 kimberlite.db  "insert into THTML_TAG (NAME,PROPRIETIES,IFNEEDCLOSE,IFNEEDNEWLINE) values ('!DOCTYPE','','0','1');" 
+  sqlite3 kimberlite.db  "insert into THTML_TAG (NAME,PROPRIETIES,IFNEEDCLOSE,IFNEEDNEWLINE) values ('?PHP','','0','1');"  
 
   sqlite3 kimberlite.db  "create table TCOLOR (TCOLOR_KEY  INTEGER PRIMARY KEY, NAME TEXT,HEX TEXT);" 
   sqlite3 kimberlite.db  "insert into TCOLOR (NAME,HEX) values ('AliceBlue','#F0F8FF');" 

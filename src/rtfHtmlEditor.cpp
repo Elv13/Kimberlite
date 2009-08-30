@@ -461,12 +461,15 @@ void RtfHtmlEditor::findText() {
 }
 
 void RtfHtmlEditor::inspectLine() {
+  
   QTextCursor tc = textCursor();
+  QString selectedText = tc.selectedText();
   int currentPos = tc.position();
   tc.select(QTextCursor::LineUnderCursor);
   QString tag = HtmlParser::getTag(tc.selectedText()).toUpper();
   
   emit currentTagChanged(tc.selectedText());
+  tc.setPosition(currentPos);
 }
 
 void RtfHtmlEditor::setAttribute(QString name, QString value) {

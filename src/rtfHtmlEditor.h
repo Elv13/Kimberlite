@@ -65,20 +65,20 @@ public:
     //keywordFormat.setFontWeight(QFont::Bold);
     QStringList keywordPatterns;
     
-    rule.pattern = QRegExp(" [a-zA-Z]*\\=");
+    rule.pattern = QRegExp(" [a-zA-Z-]*\\=");
     rule.format = keywordFormat;
     highlightingRules.append(rule);
 
     classFormat.setFontWeight(QFont::Bold);
     classFormat.setForeground(Qt::darkMagenta);
-    rule.pattern = QRegExp("<\\/?[a-zA-Z!]?[a-zA-Z0-9]+ ?>?");
+    rule.pattern = QRegExp("<\\/?[a-zA-Z!?]?[a-zA-Z0-9]+ ?>?");
     rule.format = classFormat;
     highlightingRules.append(rule);
 
     singleLineCommentFormat.setForeground(Qt::darkMagenta);
     singleLineCommentFormat.setFontWeight(QFont::Bold);
     //rule.pattern = QRegExp("//[^\n]*");
-    rule.pattern = QRegExp(">");
+    rule.pattern = QRegExp("[?]?>");
     rule.format = singleLineCommentFormat;
     highlightingRules.append(rule);
 

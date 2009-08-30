@@ -37,6 +37,12 @@ void ParserThread::timerDone() {
 }
 
 void ParserThread::updateHtmlTree(HtmlData &pageData) {
+  for (int i=0;i<pageData.tagList.size();i++)
+    if (pageData.tagList[i].left(5).toUpper() =="<?PHP")
+      pageData.tagList[i] = "<?php CODE ?>";
+    else if ((pageData.tagList[i].left(7).toUpper() =="<SCRIPT") && (pageData.tagList.size() > i+2))
+      if (pageData.tagList[i+2].toUpper() == "</SCRIPT>")
+	pageData.tagList[i+1] = "JavaScript code";
   IndexedTreeWidgetItem* previousNode(NULL);
   IndexedTreeWidgetItem* aNode(NULL);
   int index(0), size(pageData.tagList.size());

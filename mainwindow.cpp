@@ -835,7 +835,8 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   connect(rtfHTMLEditor, SIGNAL(currentTagChanged(QString)),aTagEditor,SLOT(displayAttribute(QString)));
   connect(aTagEditor, SIGNAL(setAttribute(QString,QString)),rtfHTMLEditor,SLOT(setAttribute(QString, QString)));
   connect(ashActions["Attributes"], SIGNAL(triggered(bool)), aTagEditor, SLOT(setVisible(bool)));
-
+  connect(aTagEditor, SIGNAL(visibilityChanged(bool)), ashActions["Attributes"] , SLOT(setChecked(bool)));
+  
   /***************************************************************
   
 			HTML Debugger
@@ -1544,6 +1545,8 @@ void MainWindow::modeChanged(int index) {
   
   if (previousKimberliteMode == MODE_CSS)
     updateCssFile(MODE_CSS);
+  else if (previousKimberliteMode == MODE_HTML)
+    loadPage(currentHTMLPage,rtfHTMLEditor->toPlainText(),true);
   
   switch (index) {
     case MODE_WYSIWYG: { 
@@ -1558,8 +1561,8 @@ void MainWindow::modeChanged(int index) {
       break;
     }
     case MODE_HTML:
-      //if (webPreview->isModified()) //Too dangerous
-      rtfHTMLEditor->setPlainText(aParser->getParsedHtml(webPreview->page()->mainFrame()->toHtml()));
+      if (previousKimberliteMode == MODE_WYSIWYG)
+	rtfHTMLEditor->setPlainText(aParser->getParsedHtml(webPreview->page()->mainFrame()->toHtml()));
       disableWysiwyg(false);
       ashActions["Zoom 1:1"]->setEnabled(true);
       dockHtmlTree->setVisible(true);
