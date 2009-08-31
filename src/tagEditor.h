@@ -41,9 +41,11 @@ class TagEditor : public QDockWidget {
     TagEditor(QWidget* parent);
   private:
     void loadTagAttr(QString tagName);
+    Property* createProperty(QString &attr);
     QHash<QString, QtProperty*> hshStyle;
-    QHash<QString, QtProperty*> hshStd;
+    QHash<QString, Property*> hshStd;
     QHash<QString, Property*> hshSpecific;
+    QHash<QString, Property*> hshEvent;
     QtStringPropertyManager* stringPropManager;
     QtEnumPropertyManager* cbbPropManager;
     QtProperty* metaPropStd;

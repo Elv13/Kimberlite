@@ -23,6 +23,8 @@ TagEditor::TagEditor(QWidget* parent) : QDockWidget(parent) {
   metaPropStd = groupManager->addProperty("Standard Properties");
   htmlPropertyBrowser->addProperty(metaPropStd);
   
+  QtProperty* metaPropEvent = groupManager->addProperty("Events");
+  
   metaPropSpecific = groupManager->addProperty("Specific Properties");
   htmlPropertyBrowser->addProperty(metaPropSpecific);
   
@@ -40,12 +42,22 @@ TagEditor::TagEditor(QWidget* parent) : QDockWidget(parent) {
   htmlPropertyBrowser->setFactoryForManager(stringPropManager, lineEditFactory);
   htmlPropertyBrowser->setFactoryForManager(cbbPropManager, comboBoxFactory);
 
-  normalAttr << "id" << "name" << "class";
+  normalAttr << "id" << "name" << "class" << "title" << "lang" << "dir(ltr,rtl)";
+  QStringList evenList;
+  evenList << "onclick" << "ondblclick" << "onmousedown" << "onmouseup" << "onmouseover" << "onmousemove" << "onmouseout" << "onkeypress" << "onkeyup" << "onkeydown";
+  
+  foreach (QString attr, evenList) {
+    Property* aProp = createProperty(attr);
+    hshEvent[attr] = aProp;
+    metaPropEvent->addSubProperty(hshEvent[attr]->propPtr);
+  }
   
   foreach (QString attr, normalAttr) {
-    hshStd[attr] = stringPropManager->addProperty(attr);
-    metaPropStd->addSubProperty(hshStd[attr]);
+    Property* aProp = createProperty(attr);
+    hshStd[attr] = aProp;
+    metaPropStd->addSubProperty(hshStd[attr]->propPtr);
   }
+  metaPropStd->addSubProperty(metaPropEvent);
   
   QSqlQuery query22;
   query22.exec("SELECT TITLE FROM TCSS_TAG");
@@ -61,6 +73,8 @@ TagEditor::TagEditor(QWidget* parent) : QDockWidget(parent) {
   QHash<QString, QtProperty*> hshTagGroup;
 
   foreach (QString group, lstCssGroup) {
+    QtProperty *item3;
+
     hshTagGroup[group] = stringPropManager->addProperty(group);
     metaPropStyle->addSubProperty(hshTagGroup[group]);
   }
@@ -141,9 +155,12 @@ void TagEditor::displayAttribute(QString tag) {
     
     foreach (QString attr, normalAttr)
       if (HtmlParser::getAttribute(tag,attr) != NULL)
-	((QtStringPropertyManager*)hshStd[attr]->propertyManager())->setValue(hshStd[attr],HtmlParser::getAttribute(tag,attr));
+	if (hshStd[attr]->type == STRING)
+	  ((QtStringPropertyManager*)hshStd[attr]->propPtr->propertyManager())->setValue(hshStd[attr]->propPtr,HtmlParser::getAttribute(tag,attr));
+	//else if (hshStd[attr]->type == COMBOBOX)
+	  //((QtEnumPropertyManager*)hshStd[attr]->propPtr->propertyManager())->setValue(hshStd[attr]->propPtr,HtmlParser::getAttribute(tag,attr));
       else
-	((QtStringPropertyManager*)hshStd[attr]->propertyManager())->setValue(hshStd[attr],"");
+	((QtStringPropertyManager*)hshStd[attr]->propPtr->propertyManager())->setValue(hshStd[attr]->propPtr,"");
 	
       
     foreach (QString attr, specificAttr)
@@ -202,7 +219,7 @@ void TagEditor::loadTagAttr(QString tagName) {
     specificAttr = attrList.split(';');
     
     foreach (QString attr, specificAttr) {
-      QtProperty *item3;
+      /*QtProperty *item3;
       
       if (attr.indexOf("(") != -1) {
 	hshSpecific[attr.left(attr.indexOf("("))] = new CbbProperty;
@@ -223,8 +240,12 @@ void TagEditor::loadTagAttr(QString tagName) {
 	item3 = stringPropManager->addProperty(attr);
 	hshSpecific[attr]->type = STRING;
       }
-      hshSpecific[attr]->propPtr = item3;
-      metaPropSpecific->addSubProperty(item3);
+      hshSpecific[attr]->propPtr = item3;*/
+      int oldIdx = specificAttr.indexOf(attr);
+      Property* aProp = createProperty(attr);
+      hshSpecific[attr] = aProp;
+      specificAttr[oldIdx] = attr;
+      metaPropSpecific->addSubProperty(aProp->propPtr);
     }
       
     currentTag = tagName;
@@ -239,8 +260,8 @@ void TagEditor::setStringAttr(QtProperty* property, const QString& value) {
     }
   }
   
-  foreach (QtProperty* aProp, hshStd) {
-    if ((property == aProp) && (!value.isEmpty())) {
+  foreach (Property* aProp, hshStd) {
+    if ((property == aProp->propPtr) && (!value.isEmpty())) {
       emit setAttribute(hshStd.key(aProp),value);
     }
   }
@@ -255,4 +276,30 @@ void TagEditor::setCbbAttr(QtProperty* property, const int value) {
 	emit setAttribute(hshSpecific.key(aProp),((CbbProperty*)aProp)->valueList[value-1]);
     }
   }
+}
+
+Property* TagEditor::createProperty(QString &attr) {
+  QtProperty *item3;
+  Property* aProp;
+  if (attr.indexOf("(") != -1) {
+    aProp = new CbbProperty;
+    ((CbbProperty*)aProp)->valueList = attr.mid(attr.indexOf("(")+1, attr.size() - attr.indexOf("(") -2).split(',');
+    //aProp=attr.left(attr.indexOf("("));
+    attr = attr.left(attr.indexOf("("));
+    aProp->type = COMBOBOX;
+    QStringList value = ((CbbProperty*)aProp)->valueList;
+    ((CbbProperty*)aProp)->edited = false;
+    value.insert(0,"-none-");
+    
+    item3 = cbbPropManager->addProperty(attr);
+    cbbPropManager->setEnumNames(item3,value);
+    
+  }
+  else {
+    aProp = new Property;
+    item3 = stringPropManager->addProperty(attr);
+    aProp->type = STRING;
+  }
+  aProp->propPtr = item3;
+  return aProp;
 }
