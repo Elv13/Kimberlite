@@ -10,6 +10,7 @@ class CssParser{
     static QString getUnit(QString line);
     static QString getValue(QString line);
     static QStringList getClass(QString className);
+    static QStringList getContent(QString content);
     static QString getPropriety(QString line);
     static QString parseCSS();
     static QString cssFile;

@@ -61,9 +61,10 @@ class HtmlParser{
     static W3Cinfo htmlInfo;
     static QString setAttribute(QString tag, QString attribute, QString value);
     static void setAttribute(HtmlData &pageData, QString tag, uint index, QString attribute, QString value);
-    static QString getAttribute(QString tag, QString attribute, int &start, int &length);
+    static QString getAttribute(QString tag, QString attribute, int &start, int &length, int &isSet);
     static QString getAttribute(QString tag, QString attribute);
     static QString removeAttribute(QString tag, QString attribute);
+    static void split(QVector<QString> &tagList, QString &inputFile, uint index);
   private:
     static QVector<uint> levelParser(QVector<QString> tagList);
     static QVector<QString> listTag(QString inputFile);

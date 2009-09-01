@@ -23,7 +23,7 @@ QString HtmlParser::getTag(QString aTag) {
   return tag.toUpper();
 }
 
-void split(QVector<QString> &tagList, QString &inputFile, uint index) {
+void HtmlParser::split(QVector<QString> &tagList, QString &inputFile, uint index) {
   tagList.push_back(inputFile.left(index).trimmed());
   inputFile = inputFile.remove(0,index);
 }
@@ -129,30 +129,27 @@ void HtmlParser::setAttribute(HtmlData &pageData, QString tag, uint index, QStri
 }
 
 QString HtmlParser::setAttribute(QString tag, QString attribute, QString value) {
-  if (getAttribute(tag,attribute) == NULL)
-    tag.insert(tag.count() - 1, " " + attribute + "=\"" + value + "\"");
-  else {
-    int start,length;
-    getAttribute(tag,attribute,start,length);
-    tag.replace(start,length,value);
-    if (value.isEmpty())
-      tag.remove(tag.toUpper().indexOf(attribute.toUpper()) -1,attribute.size()+4);
-  }
+  int start,length,isSet;
+  getAttribute(tag,attribute,start,length,isSet);
+  (!isSet)?tag.insert(tag.count() - 1, " " + attribute + "=\"" + value + "\""):tag.replace(start,length,value);
+  if (value.isEmpty())
+    tag.remove(tag.toUpper().indexOf(attribute.toUpper()) -1,attribute.size()+4);
   return tag;
 }
 
-QString HtmlParser::getAttribute(QString tag, QString attribute, int &start, int &length) {
+QString HtmlParser::getAttribute(QString tag, QString attribute, int &start, int &length, int &isSet) {
   int position = tag.toLower().indexOf(attribute.toLower());
+  isSet = false;
   if (tag[position+attribute.count()] == '=') {
-    start = tag.indexOf("=",position)+2;
+    isSet = start = tag.indexOf("=",position)+2;
     length = tag.indexOf((tag.indexOf(" ",position) != -1)?" ":">",position)-2 - (position+1+attribute.count());
     return (position == -1)?NULL:tag.mid(start,length);
   }
   else
-    return NULL; //It is just safer than checking position == -1 in if
+    return NULL; //Use isSet to check if it exist, don't rely on NULL
 }
 
 QString HtmlParser::getAttribute(QString tag, QString attribute) {
-  int start,length;
-  return HtmlParser::getAttribute(tag, attribute, start, length);
+  int start,length,isSet;
+  return HtmlParser::getAttribute(tag, attribute, start, length,isSet);
 }

@@ -45,10 +45,12 @@ class TagEditor : public QDockWidget {
   private:
     void loadTagAttr(QString tagName);
     Property* createProperty(QString &attr);
+    void clear();
     PropertiesHash hshStyle;
     PropertiesHash hshStd;
     PropertiesHash hshSpecific;
     PropertiesHash hshEvent;
+    QList<Property*> lstModified;
     QtStringPropertyManager* stringPropManager;
     QtEnumPropertyManager* cbbPropManager;
     QtProperty* metaPropStd;

@@ -1430,7 +1430,8 @@ void MainWindow::changeCssMode(int mode) {
   }
   else */if (previousCssMode == CSS_MODE_EXPERT) {
     clearCssBeg();
-    fillCSSBegMode(getClassName(treeWidget->currentItem()));
+    if (treeWidget->currentItem() != NULL)
+      fillCSSBegMode(getClassName(treeWidget->currentItem()));
   }
   
   qDebug() << CssParser::cssFile;

@@ -58,23 +58,27 @@ QString CssParser::getValue(QString line) {
   return line2.trimmed().toLower();
 }
 
-QStringList CssParser::getClass(QString className) {
-  QString parsedCSS = parseCSS();
-  QStringList aClass;
-  parsedCSS.remove(0,parsedCSS.indexOf(className + " {")+ className.count() +2 );
-  parsedCSS.truncate(parsedCSS.indexOf("\n}"));
-  while ((parsedCSS.count() != 0) && (parsedCSS.indexOf(";") != -1)) {
-    if ((parsedCSS.indexOf("/*") != -1) && ((parsedCSS.indexOf("/*") < (parsedCSS.indexOf(";"))))) {
-      aClass << parsedCSS.left(parsedCSS.indexOf("*/")+2).trimmed();
-      parsedCSS.remove(0,parsedCSS.indexOf("*/")+2);
+QStringList CssParser::getContent(QString content) {
+  QStringList propList;
+  while ((content.count() != 0) && (content.indexOf(";") != -1)) {
+    if ((content.indexOf("/*") != -1) && ((content.indexOf("/*") < (content.indexOf(";"))))) {
+      propList << content.left(content.indexOf("*/")+2).trimmed();
+      content.remove(0,content.indexOf("*/")+2);
     }
     else {
-      aClass << parsedCSS.left(parsedCSS.indexOf(";")+1).trimmed();
-      parsedCSS.remove(0,parsedCSS.indexOf(";")+1);
+      propList << content.left(content.indexOf(";")+1).trimmed();
+      content.remove(0,content.indexOf(";")+1);
     }
-    parsedCSS = parsedCSS.trimmed();
+    content = content.trimmed();
   }
-  return aClass;
+  return propList;
+}
+
+QStringList CssParser::getClass(QString className) {
+  QString parsedCSS = parseCSS();
+  parsedCSS.remove(0,parsedCSS.indexOf(className + " {")+ className.count() +2 );
+  parsedCSS.truncate(parsedCSS.indexOf("\n}"));
+  return getContent(parsedCSS);
 }
 
 QString CssParser::getPropriety(QString line) {

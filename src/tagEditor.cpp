@@ -53,7 +53,10 @@ TagEditor::TagEditor(QWidget* parent) : QDockWidget(parent) {
   }
   
   foreach (QString attr, normalAttr) {
+    int idx = normalAttr.indexOf(attr);
     Property* aProp = createProperty(attr);
+    if (idx != -1)
+      normalAttr[idx] = attr;
     hshStd[attr] = aProp;
     metaPropStd->addSubProperty(hshStd[attr]->propPtr);
   }
@@ -173,29 +176,30 @@ void TagEditor::displayAttribute(QString tag) {
     }
     
     foreach (QString attr, normalAttr)
-      if (HtmlParser::getAttribute(tag,attr) != NULL)
+      if (HtmlParser::getAttribute(tag,attr) != NULL) {
 	if (hshStd[attr]->type == STRING)
 	  ((QtStringPropertyManager*)hshStd[attr]->propPtr->propertyManager())->setValue(hshStd[attr]->propPtr,HtmlParser::getAttribute(tag,attr));
 	//else if (hshStd[attr]->type == COMBOBOX)
 	  //((QtEnumPropertyManager*)hshStd[attr]->propPtr->propertyManager())->setValue(hshStd[attr]->propPtr,HtmlParser::getAttribute(tag,attr));
-      else
-	((QtStringPropertyManager*)hshStd[attr]->propPtr->propertyManager())->setValue(hshStd[attr]->propPtr,"");
+      }
+      else {
+	if (hshStd[attr]->type == STRING)
+	  ((QtStringPropertyManager*)hshStd[attr]->propPtr->propertyManager())->setValue(hshStd[attr]->propPtr,"");
+	else if (hshStd[attr]->type == COMBOBOX)
+	  ((QtEnumPropertyManager*)hshStd[attr]->propPtr->propertyManager())->setValue(hshStd[attr]->propPtr,0);
+      }
 	
       
     foreach (QString attr, specificAttr)
       if (HtmlParser::getAttribute(tag,attr) != NULL) {
-	qDebug() << "Setting arg " << attr;
 	if (hshSpecific[attr]->type == STRING) {
-	  qDebug() << "Its a string";
 	  ((QtStringPropertyManager*)hshSpecific[attr]->propPtr->propertyManager())->setValue(hshSpecific[attr]->propPtr,HtmlParser::getAttribute(tag,attr));
 	}
 	else if (hshSpecific[attr]->type == COMBOBOX) {
-	  qDebug() << "Its a cbb";
 	  int index;
 	  if (((CbbProperty*)hshSpecific[attr])->valueList.indexOf(HtmlParser::getAttribute(tag,attr)) != -1)
 	    index = ((CbbProperty*)hshSpecific[attr])->valueList.indexOf(HtmlParser::getAttribute(tag,attr))+1;
 	  else {
-	    qDebug() << "Value not found";
 	    if (((CbbProperty*)hshSpecific[attr])->edited == false)
 	      ((CbbProperty*)hshSpecific[attr])->valueList << HtmlParser::getAttribute(tag,attr);
 	    else
@@ -218,56 +222,75 @@ void TagEditor::displayAttribute(QString tag) {
  
       
     if (HtmlParser::getAttribute(tag,"style") != NULL) {
-      qDebug() << "Style is set: " << HtmlParser::getAttribute(tag,"style");
-      qDebug() << "content = " << CssParser::getClass("Class {"+HtmlParser::getAttribute(tag,"style")+" }");
+      QString content = HtmlParser::getAttribute(tag,"style");
+      if (content.trimmed().right(1) != ";")
+	content += ";";
+      QStringList tagList = CssParser::getContent(content);
+      foreach (QString property, tagList) {
+	if (hshStyle.find(CssParser::getPropriety(property)) != hshStyle.end())
+	  ((QtStringPropertyManager*)hshStyle[CssParser::getPropriety(property)]->propPtr->propertyManager())->setValue(hshStyle[CssParser::getPropriety(property)]->propPtr,CssParser::getValue(property));
+      }
     }
   }
 }
 
 void TagEditor::loadTagAttr(QString tagName) { 
+  //clear();
   if (tagName != currentTag) { //BUG WILL not always work
     
-    foreach (Property* aProp, hshSpecific) {
-      metaPropSpecific->removeSubProperty(aProp->propPtr);
-    }
+  foreach (Property* aProp, hshSpecific) {
+    metaPropSpecific->removeSubProperty(aProp->propPtr);
+  }
 
+  
+  specificAttr.clear();
+  
+  QSqlQuery query23;
+  query23.exec("SELECT PROPRIETIES FROM THTML_TAG WHERE NAME ='" + tagName.toUpper() +"'" );
     
-    specificAttr.clear();
-    
-    QSqlQuery query23;
-    query23.exec("SELECT PROPRIETIES FROM THTML_TAG WHERE NAME ='" + tagName.toUpper() +"'" );
+  QString attrList;
+  query23.next();
+  attrList = query23.value(0).toString().toLower();
+  
+  specificAttr = attrList.split(';');
+  
+  foreach (QString attr, specificAttr) {
+    int oldIdx = specificAttr.indexOf(attr);
+    Property* aProp = createProperty(attr);
+    hshSpecific[attr] = aProp;
+    specificAttr[oldIdx] = attr;
+    metaPropSpecific->addSubProperty(aProp->propPtr);
+  }
       
-    QString attrList;
-    query23.next();
-    attrList = query23.value(0).toString().toLower();
-    
-    specificAttr = attrList.split(';');
-    
-    foreach (QString attr, specificAttr) {
-      int oldIdx = specificAttr.indexOf(attr);
-      Property* aProp = createProperty(attr);
-      hshSpecific[attr] = aProp;
-      specificAttr[oldIdx] = attr;
-      metaPropSpecific->addSubProperty(aProp->propPtr);
-    }
-      
-    currentTag = tagName;
+  currentTag = tagName;
+  
   }
 }
 
-void TagEditor::setStringAttr(QtProperty* property, const QString& value) {
-      hshStyle;//TODO
-      
+void TagEditor::setStringAttr(QtProperty* property, const QString& value) {  
   QList< PropertiesHash* >  hshList;
   hshList << &hshStd << &hshSpecific << &hshEvent;
   foreach (PropertiesHash* anHsh, hshList) {
     foreach (Property* aProp, *anHsh) {
       if (property == aProp->propPtr) {
 	emit setAttribute(anHsh->key(aProp),value);
+	lstModified.push_back(aProp);
 	return;
       }
     }
   }
+  /*If it get here, it is a style prop*/
+  QString accumulation;
+  bool found = false;
+  foreach (Property* aProp, hshStyle) {
+    if (property == aProp->propPtr)
+      found = true;
+    if (aProp->propPtr->valueText() != "")
+      accumulation += hshStyle.key(aProp)+":"+aProp->propPtr->valueText()+";";
+    lstModified.push_back(aProp);
+  }
+  if (found)
+    emit setAttribute("style",accumulation);
 }
 
 void TagEditor::setCbbAttr(QtProperty* property, const int value) {
@@ -280,10 +303,12 @@ void TagEditor::setCbbAttr(QtProperty* property, const int value) {
 	  emit setAttribute(anHsh->key(aProp),"");
 	else
 	  emit setAttribute(anHsh->key(aProp),((CbbProperty*)aProp)->valueList[value-1]);
+	lstModified.push_back(aProp);
 	return;
       }
     }
   }
+  
 }
 
 Property* TagEditor::createProperty(QString &attr) {
@@ -310,4 +335,19 @@ Property* TagEditor::createProperty(QString &attr) {
   }
   aProp->propPtr = item3;
   return aProp;
+}
+
+void TagEditor::clear() {
+  qDebug() << "Starting clearing";
+  disconnect(cbbPropManager, SIGNAL(valueChanged(QtProperty*,int)), this, SLOT(setCbbAttr(QtProperty*,int)));
+  disconnect(stringPropManager, SIGNAL(valueChanged(QtProperty*,QString)), this, SLOT(setStringAttr(QtProperty*,QString)));
+  foreach (Property* aProp, lstModified) {
+    qDebug() << "Clearing tag";
+    if (aProp->type == STRING)
+      ((QtStringPropertyManager*)aProp->propPtr->propertyManager())->setValue(aProp->propPtr,"");
+    else if (aProp->type == COMBOBOX)
+      ((QtEnumPropertyManager*)aProp->propPtr->propertyManager())->setValue(aProp->propPtr,0);
+  }
+  connect(stringPropManager, SIGNAL(valueChanged(QtProperty*,QString)), this, SLOT(setStringAttr(QtProperty*,QString)));
+  connect(cbbPropManager, SIGNAL(valueChanged(QtProperty*,int)), this, SLOT(setCbbAttr(QtProperty*,int)));
 }
