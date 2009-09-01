@@ -63,6 +63,7 @@ class HtmlParser{
     static void setAttribute(HtmlData &pageData, QString tag, uint index, QString attribute, QString value);
     static QString getAttribute(QString tag, QString attribute, int &start, int &length);
     static QString getAttribute(QString tag, QString attribute);
+    static QString removeAttribute(QString tag, QString attribute);
   private:
     static QVector<uint> levelParser(QVector<QString> tagList);
     static QVector<QString> listTag(QString inputFile);

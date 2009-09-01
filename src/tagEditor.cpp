@@ -42,7 +42,7 @@ TagEditor::TagEditor(QWidget* parent) : QDockWidget(parent) {
   htmlPropertyBrowser->setFactoryForManager(stringPropManager, lineEditFactory);
   htmlPropertyBrowser->setFactoryForManager(cbbPropManager, comboBoxFactory);
 
-  normalAttr << "id" << "name" << "class" << "title" << "lang" << "dir(ltr,rtl)";
+  normalAttr << "id" << "name" << "class" << "title" << "lang(american,ar,ar_aa,ar_sa,arabic,bg,bg_bg,bulgarian,c-french,c,c_c,cextend,chinese-s,chinese-t,croatian,cs,cs_cs,cs_cz,cz,cz_cz,czech,da,da_dk,danish,de,de_at,de_ch,de_de,dutch,ee,el,el_gr,en,en_au,en_ca,en_gb,en_ie,en_nz,en_uk,en_us,eng_gb,english,english_uk,english_united-states,english_us,es,es_ar,es_bo,es_cl,es_co,es_cr,es_ec,es_es,es_gt,es_mx,es_ni,es_pa,es_pe,es_py,es_sv,es_uy,es_ve,et,et_ee,fi,fi_fi,finnish,fr,fr_be,fr_ca,fr_ch,fr_fr,fre_fr,french,french_france,ger_de,german,german_germany,greek,hebrew,hr,hr_hr,hu,hu_hu,hungarian,icelandic,id,id_id,is,is_is,iso-8859-1,iso-8859-15,iso8859-1,iso8859-15,iso_8859_1,iso_8859_15,it,it_ch,it_it,italian,iw,iw_il,ja,ja.jis,ja.sjis,ja_jp,ja_jp.ajec,ja_jp.euc,ja_jp.eucjp,ja_jp.iso-2022-jp,ja_jp.jis,ja_jp.jis7,ja_jp.mscode,ja_jp.sjis,ja_jp.ujis,japan,japanese,japanese-euc,japanese.euc,jp_jp,ko,ko_kr,ko_kr.euc,korean,lt,lv,mk,mk_mk,nl,nl_be,nl_nl,no,no_no,norwegian,pl,pl_pl,polish,portuguese,portuguese_brazil,posix,posix-utf2,pt,pt_br,pt_pt,ro,ro_ro,ru,ru_ru,rumanian,russian,serbocroatian,sh,sh_hr,sh_sp,sh_yu,sk,sk_sk,sl,sl_cs,sl_si,slovak,slovene,sp,sp_yu,spanish,spanish_spain,sr_sp,sv,sv_se,swedish,th_th,tr,tr_tr,turkish,univ,universal,zh,zh_cn,zh_cn.big5,zh_cn.euc,zh_tw,zh_tw.euc)" << "dir(ltr,rtl)";
   QStringList evenList;
   evenList << "onclick" << "ondblclick" << "onmousedown" << "onmouseup" << "onmouseover" << "onmousemove" << "onmouseout" << "onkeypress" << "onkeyup" << "onkeydown";
   
@@ -131,16 +131,35 @@ TagEditor::TagEditor(QWidget* parent) : QDockWidget(parent) {
       item3 = stringPropManager->addProperty(attr);
       metaPropStyle->addSubProperty(item3);
     }
-    hshStyle[attr] = item3;
+    Property* aProp;
+    aProp = new Property;
+    hshStyle[attr] = aProp;
+    hshStyle[attr]->propPtr = item3;
   }
   
   QList<QtBrowserItem*> itemList =  htmlPropertyBrowser->topLevelItems();
   foreach (QtBrowserItem* item, itemList) {
     if (item->property() == metaPropStyle) {
       htmlPropertyBrowser->setExpanded(item,false);
+      //break;
+    }
+    else if (item->property() == metaPropStd) {
+      foreach (QtBrowserItem* item2, item->children()) {
+	if (item2->property() == metaPropEvent) {
+	  htmlPropertyBrowser->setExpanded(item2,false);
+	  break;
+	}
+      }
+    }
+  }
+  
+ /* itemList =  metaPropStd->children();
+  foreach (QtBrowserItem* item, itemList) {
+    if (item->property() == metaPropEvent) {
+      htmlPropertyBrowser->setExpanded(item,false);
       break;
     }
-  }  
+  }*/
 }
 
 void TagEditor::displayAttribute(QString tag) {
@@ -196,6 +215,12 @@ void TagEditor::displayAttribute(QString tag) {
       }
       else
 	((QtStringPropertyManager*)hshSpecific[attr]->propPtr->propertyManager())->setValue(hshSpecific[attr]->propPtr,"");
+ 
+      
+    if (HtmlParser::getAttribute(tag,"style") != NULL) {
+      qDebug() << "Style is set: " << HtmlParser::getAttribute(tag,"style");
+      qDebug() << "content = " << CssParser::getClass("Class {"+HtmlParser::getAttribute(tag,"style")+" }");
+    }
   }
 }
 
@@ -219,28 +244,6 @@ void TagEditor::loadTagAttr(QString tagName) {
     specificAttr = attrList.split(';');
     
     foreach (QString attr, specificAttr) {
-      /*QtProperty *item3;
-      
-      if (attr.indexOf("(") != -1) {
-	hshSpecific[attr.left(attr.indexOf("("))] = new CbbProperty;
-	((CbbProperty*)hshSpecific[attr.left(attr.indexOf("("))])->valueList = attr.mid(attr.indexOf("(")+1, attr.size() - attr.indexOf("(") -2).split(',');
-	specificAttr[specificAttr.indexOf(attr)]=attr.left(attr.indexOf("("));
-	attr = attr.left(attr.indexOf("("));
-	hshSpecific[attr]->type = COMBOBOX;
-	QStringList value = ((CbbProperty*)hshSpecific[attr])->valueList;
-	((CbbProperty*)hshSpecific[attr])->edited = false;
-	value.insert(0,"-none-");
-	
-	item3 = cbbPropManager->addProperty(attr);
-	cbbPropManager->setEnumNames(item3,value);
-	
-      }
-      else {
-	hshSpecific[attr] = new Property;
-	item3 = stringPropManager->addProperty(attr);
-	hshSpecific[attr]->type = STRING;
-      }
-      hshSpecific[attr]->propPtr = item3;*/
       int oldIdx = specificAttr.indexOf(attr);
       Property* aProp = createProperty(attr);
       hshSpecific[attr] = aProp;
@@ -254,26 +257,31 @@ void TagEditor::loadTagAttr(QString tagName) {
 
 void TagEditor::setStringAttr(QtProperty* property, const QString& value) {
       hshStyle;//TODO
-  foreach (Property* aProp, hshSpecific) {
-    if ((property == aProp->propPtr) && (!value.isEmpty())) {
-      emit setAttribute(hshSpecific.key(aProp),value);
-    }
-  }
-  
-  foreach (Property* aProp, hshStd) {
-    if ((property == aProp->propPtr) && (!value.isEmpty())) {
-      emit setAttribute(hshStd.key(aProp),value);
+      
+  QList< PropertiesHash* >  hshList;
+  hshList << &hshStd << &hshSpecific << &hshEvent;
+  foreach (PropertiesHash* anHsh, hshList) {
+    foreach (Property* aProp, *anHsh) {
+      if (property == aProp->propPtr) {
+	emit setAttribute(anHsh->key(aProp),value);
+	return;
+      }
     }
   }
 }
 
 void TagEditor::setCbbAttr(QtProperty* property, const int value) {
-  foreach (Property* aProp, hshSpecific) {
-    if (property == aProp->propPtr) {
-      if (!value)
-	emit setAttribute(hshSpecific.key(aProp),"");
-      else
-	emit setAttribute(hshSpecific.key(aProp),((CbbProperty*)aProp)->valueList[value-1]);
+  QList< PropertiesHash* >  hshList;
+  hshList << &hshStd << &hshSpecific << &hshEvent;
+  foreach (PropertiesHash* anHsh, hshList) {
+    foreach (Property* aProp, *anHsh) {
+      if (property == aProp->propPtr) {
+	if (!value)
+	  emit setAttribute(anHsh->key(aProp),"");
+	else
+	  emit setAttribute(anHsh->key(aProp),((CbbProperty*)aProp)->valueList[value-1]);
+	return;
+      }
     }
   }
 }

@@ -13,6 +13,7 @@
 #include <QPainter>
 #include <QItemDelegate>
 #include "htmlParser.h"
+#include "cssParser.h"
 #include "qtpropertybrowser-2.5-opensource/src/QtProperty"
 #include "qtpropertybrowser-2.5-opensource/src/QtStringPropertyManager"
 #include "qtpropertybrowser-2.5-opensource/src/QtEnumPropertyManager"
@@ -35,6 +36,8 @@ struct CbbProperty : public Property {
   bool edited;
 };
 
+typedef QHash<QString, Property*> PropertiesHash;
+
 class TagEditor : public QDockWidget {
   Q_OBJECT
   public:
@@ -42,10 +45,10 @@ class TagEditor : public QDockWidget {
   private:
     void loadTagAttr(QString tagName);
     Property* createProperty(QString &attr);
-    QHash<QString, QtProperty*> hshStyle;
-    QHash<QString, Property*> hshStd;
-    QHash<QString, Property*> hshSpecific;
-    QHash<QString, Property*> hshEvent;
+    PropertiesHash hshStyle;
+    PropertiesHash hshStd;
+    PropertiesHash hshSpecific;
+    PropertiesHash hshEvent;
     QtStringPropertyManager* stringPropManager;
     QtEnumPropertyManager* cbbPropManager;
     QtProperty* metaPropStd;

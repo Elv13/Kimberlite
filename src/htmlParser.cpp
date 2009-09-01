@@ -135,6 +135,8 @@ QString HtmlParser::setAttribute(QString tag, QString attribute, QString value) 
     int start,length;
     getAttribute(tag,attribute,start,length);
     tag.replace(start,length,value);
+    if (value.isEmpty())
+      tag.remove(tag.toUpper().indexOf(attribute.toUpper()) -1,attribute.size()+4);
   }
   return tag;
 }
