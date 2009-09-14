@@ -108,6 +108,7 @@
 #include "src/colorComboBox.h"
 #include "src/headerComboBox.h"
 #include "src/configSkeleton.h"
+#include "src/tagEditor.h"
 
 #define KIMBERLITE_MODE tabWEditor->currentIndex()
 #define CSS_MODE tabWCSSLevel->currentIndex()
@@ -208,6 +209,7 @@ public:
     QVBoxLayout *verticalLayout_3;
     RtfHtmlEditor* rtfHTMLEditor;
     QPushButton *btnParse;
+    TagEditor* aTagEditor;
     QDockWidget *dockDebug;
     QListWidget* lstDebug;
     QGridLayout *verticalLayout_99;

@@ -35,7 +35,6 @@
 #include "src/newScript.h"
 #include "src/newProject.h"
 #include "src/debugger.h"
-#include "src/tagEditor.h"
 
 MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NULL),currentScript(NULL),aProjectManager(NULL),isModified(false),previousCssMode(999),previousKimberliteMode(MODE_WYSIWYG) {
   actionCollection = new KActionCollection(this);
@@ -829,7 +828,7 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   
   ***************************************************************/
   
-  TagEditor* aTagEditor = new TagEditor(this);
+  aTagEditor = new TagEditor(this);
   aTagEditor->setVisible(false);
   addDockWidget(Qt::RightDockWidgetArea, aTagEditor);
   connect(rtfHTMLEditor, SIGNAL(currentTagChanged(QString)),aTagEditor,SLOT(displayAttribute(QString)));
@@ -1559,6 +1558,8 @@ void MainWindow::modeChanged(int index) {
       treeDock->setVisible(false);
       dockHtmlTree->setVisible(false);
       pbStatusBar->setEnabled(true);
+      aTagEditor->setVisible(false);
+      ashActions["Attributes"]->setEnabled(false);
       break;
     }
     case MODE_HTML:
@@ -1569,6 +1570,7 @@ void MainWindow::modeChanged(int index) {
       dockHtmlTree->setVisible(true);
       treeDock->setVisible(false);
       pbStatusBar->setEnabled(false);
+      ashActions["Attributes"]->setEnabled(true);
       break;
     case MODE_SCRIPT:
       ashActions["Zoom 1:1"]->setEnabled(true);
@@ -1576,6 +1578,8 @@ void MainWindow::modeChanged(int index) {
       dockHtmlTree->setVisible(false);
       treeDock->setVisible(false);
       pbStatusBar->setEnabled(false);
+      aTagEditor->setVisible(false);
+      ashActions["Attributes"]->setEnabled(false);
       break;
     case MODE_CSS:
       disableWysiwyg(true);
@@ -1586,6 +1590,8 @@ void MainWindow::modeChanged(int index) {
       pbStatusBar->setEnabled(false);
       if (!currentClassName.isEmpty())
 	fillCSSBegMode(getClassName(getClassWidget(currentClassName)));
+      aTagEditor->setVisible(false);
+      ashActions["Attributes"]->setEnabled(false);
   }
   previousKimberliteMode = index;
 } //modeChanged

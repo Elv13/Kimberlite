@@ -17,6 +17,7 @@
 #include "qtpropertybrowser-2.5-opensource/src/QtProperty"
 #include "qtpropertybrowser-2.5-opensource/src/QtStringPropertyManager"
 #include "qtpropertybrowser-2.5-opensource/src/QtEnumPropertyManager"
+#include "qtpropertybrowser-2.5-opensource/src/QtGroupPropertyManager"
 #include "qtpropertybrowser-2.5-opensource/src/QtTreePropertyBrowser"
 
 enum PropertyType {
@@ -46,21 +47,31 @@ class TagEditor : public QDockWidget {
     void loadTagAttr(QString tagName);
     Property* createProperty(QString &attr);
     void clear();
+    void createStyleMetaProp(QtProperty* parentProperty, PropertiesHash &parentHsh);
+    void expandTopProperty(QtProperty* aProp, bool expand);
+    void setStyleContent(PropertiesHash* toFill, QStringList content);
     PropertiesHash hshStyle;
+    PropertiesHash hshStyleId;
+    PropertiesHash hshStyleClass;
     PropertiesHash hshStd;
     PropertiesHash hshSpecific;
     PropertiesHash hshEvent;
     QList<Property*> lstModified;
     QtStringPropertyManager* stringPropManager;
     QtEnumPropertyManager* cbbPropManager;
+    QtGroupPropertyManager* groupManager;
     QtProperty* metaPropStd;
     QtProperty* metaPropSpecific;
     QtProperty* metaPropStyle;
+    QtProperty* metaPropIdStyle;
+    QtProperty* metaPropClassStyle;
     QStringList normalAttr;
     QStringList styleAttr;
     QStringList specificAttr;
     QString currentTag;
     QtTreePropertyBrowser* htmlPropertyBrowser;
+    bool idStyleActive;
+    bool classStyleActive;
   private slots:
     void setStringAttr(QtProperty* property, const QString& value);
     void setCbbAttr(QtProperty* property, const int value);

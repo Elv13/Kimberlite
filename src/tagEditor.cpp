@@ -6,7 +6,7 @@
 #include "qtpropertybrowser-2.5-opensource/src/QtGroupPropertyManager"
 #include "qtpropertybrowser-2.5-opensource/src/QtBrowserItem"
 
-TagEditor::TagEditor(QWidget* parent) : QDockWidget(parent) {
+TagEditor::TagEditor(QWidget* parent) : QDockWidget(parent),metaPropIdStyle(false),metaPropClassStyle(false),idStyleActive(NULL),classStyleActive(NULL) {
   setWindowTitle("Tag Editor");
   QWidget* centralWidget = new QWidget(this);
   setWidget(centralWidget);
@@ -18,7 +18,7 @@ TagEditor::TagEditor(QWidget* parent) : QDockWidget(parent) {
   htmlPropertyBrowser->setAlternatingRowColors(true);
   mainLayout->addWidget(htmlPropertyBrowser);
   
-  QtGroupPropertyManager *groupManager = new QtGroupPropertyManager(this);
+  groupManager = new QtGroupPropertyManager(this);
   
   metaPropStd = groupManager->addProperty("Standard Properties");
   htmlPropertyBrowser->addProperty(metaPropStd);
@@ -62,89 +62,17 @@ TagEditor::TagEditor(QWidget* parent) : QDockWidget(parent) {
   }
   metaPropStd->addSubProperty(metaPropEvent);
   
-  QSqlQuery query22;
-  query22.exec("SELECT TITLE FROM TCSS_TAG");
-  
-  while (query22.next())
-    styleAttr <<  query22.value(0).toString();
-  
-  styleAttr.sort();
-  
-  QStringList lstCssGroup;
-  lstCssGroup << "background" << "margin" << "padding" << "border" << "font" << "text" << "outline" << "list";
-  
-  QHash<QString, QtProperty*> hshTagGroup;
-
-  foreach (QString group, lstCssGroup) {
-    QtProperty *item3;
-
-    hshTagGroup[group] = stringPropManager->addProperty(group);
-    metaPropStyle->addSubProperty(hshTagGroup[group]);
-  }
-  
-  QtProperty *grpPropBorderLeft = groupManager->addProperty("left");
-  hshTagGroup["border"]->addSubProperty(grpPropBorderLeft);
-  
-  QtProperty *grpPropBorderRight = groupManager->addProperty("right");
-  hshTagGroup["border"]->addSubProperty(grpPropBorderRight);
-  
-  QtProperty *grpPropBorderTop = groupManager->addProperty("top");
-  hshTagGroup["border"]->addSubProperty(grpPropBorderTop);
-  
-  QtProperty *grpPropBorderBottom = groupManager->addProperty("bottom");
-  hshTagGroup["border"]->addSubProperty(grpPropBorderBottom);
-  
-  foreach (QString attr, styleAttr) {
-    QtProperty *item3;
-    bool found = false;
-    foreach (QString group, lstCssGroup) {
-      if (attr.indexOf(group+"-") == 0) {
-	if (group == "border") {
-	  if (attr.indexOf(group+"-left-") == 0) {
-	    item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-6));
-	    grpPropBorderLeft->addSubProperty(item3);
-	  }
-	  else if (attr.indexOf(group+"-right-") == 0) {
-	    item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-7));
-	    grpPropBorderRight->addSubProperty(item3);
-	  }
-	  else if (attr.indexOf(group+"-top-") == 0) {
-	    item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-5));
-	    grpPropBorderTop->addSubProperty(item3);
-	  }
-	  else if (attr.indexOf(group+"-bottom-") == 0) {
-	    item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-8));
-	    grpPropBorderBottom->addSubProperty(item3);
-	  }
-	  else {
-	    item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-1));
-	    hshTagGroup[group]->addSubProperty(item3);
-	  }
-	}
-	else {
-	  item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-1));
-	  hshTagGroup[group]->addSubProperty(item3);
-	}
-	found = true;
-	break;
-      }
-    }
-    
-    if (!found) {
-      item3 = stringPropManager->addProperty(attr);
-      metaPropStyle->addSubProperty(item3);
-    }
-    Property* aProp;
-    aProp = new Property;
-    hshStyle[attr] = aProp;
-    hshStyle[attr]->propPtr = item3;
-  }
+  createStyleMetaProp(metaPropStyle,hshStyle);
   
   QList<QtBrowserItem*> itemList =  htmlPropertyBrowser->topLevelItems();
   foreach (QtBrowserItem* item, itemList) {
     if (item->property() == metaPropStyle) {
       htmlPropertyBrowser->setExpanded(item,false);
-      //break;
+      /*foreach (QtBrowserItem* item2, item->children()) {
+	if (item2->children().count() != 0) {
+	  htmlPropertyBrowser->setExpanded(item2,false);
+	}
+      }*/
     }
     else if (item->property() == metaPropStd) {
       foreach (QtBrowserItem* item2, item->children()) {
@@ -187,6 +115,14 @@ void TagEditor::displayAttribute(QString tag) {
 	  ((QtStringPropertyManager*)hshStd[attr]->propPtr->propertyManager())->setValue(hshStd[attr]->propPtr,"");
 	else if (hshStd[attr]->type == COMBOBOX)
 	  ((QtEnumPropertyManager*)hshStd[attr]->propPtr->propertyManager())->setValue(hshStd[attr]->propPtr,0);
+	if ((attr == "id") && (idStyleActive)) {
+	  metaPropIdStyle->setEnabled(false);
+	  expandTopProperty(metaPropIdStyle,false);
+	}
+	else if ((attr == "class") && (classStyleActive)) {
+	  metaPropClassStyle->setEnabled(false);
+	  expandTopProperty(metaPropClassStyle,false);
+	}
       }
 	
       
@@ -226,16 +162,13 @@ void TagEditor::displayAttribute(QString tag) {
       if (content.trimmed().right(1) != ";")
 	content += ";";
       QStringList tagList = CssParser::getContent(content);
-      foreach (QString property, tagList) {
-	if (hshStyle.find(CssParser::getPropriety(property)) != hshStyle.end())
-	  ((QtStringPropertyManager*)hshStyle[CssParser::getPropriety(property)]->propPtr->propertyManager())->setValue(hshStyle[CssParser::getPropriety(property)]->propPtr,CssParser::getValue(property));
-      }
+      setStyleContent(&hshStyle,tagList);
     }
   }
 }
 
 void TagEditor::loadTagAttr(QString tagName) { 
-  //clear();
+  clear();
   if (tagName != currentTag) { //BUG WILL not always work
     
   foreach (Property* aProp, hshSpecific) {
@@ -255,13 +188,32 @@ void TagEditor::loadTagAttr(QString tagName) {
   specificAttr = attrList.split(';');
   
   foreach (QString attr, specificAttr) {
-    int oldIdx = specificAttr.indexOf(attr);
-    Property* aProp = createProperty(attr);
-    hshSpecific[attr] = aProp;
-    specificAttr[oldIdx] = attr;
-    metaPropSpecific->addSubProperty(aProp->propPtr);
+    if (!attr.isEmpty()) {
+      int oldIdx = specificAttr.indexOf(attr);
+      Property* aProp = createProperty(attr);
+      hshSpecific[attr] = aProp;
+      specificAttr[oldIdx] = attr;
+      metaPropSpecific->addSubProperty(aProp->propPtr);
+    }
+    else
+      specificAttr.erase(specificAttr.begin() + specificAttr.indexOf(attr));
   }
-      
+  
+  if (specificAttr.count() == 0)
+    metaPropSpecific->setEnabled(false);
+  else
+    metaPropSpecific->setEnabled(true);
+  
+  if (idStyleActive) {
+    metaPropIdStyle->setEnabled(false);
+    idStyleActive=false;
+  }
+  
+  if (classStyleActive) {
+    metaPropClassStyle->setEnabled(false);
+    classStyleActive=false;
+  }
+  
   currentTag = tagName;
   
   }
@@ -273,8 +225,36 @@ void TagEditor::setStringAttr(QtProperty* property, const QString& value) {
   foreach (PropertiesHash* anHsh, hshList) {
     foreach (Property* aProp, *anHsh) {
       if (property == aProp->propPtr) {
-	emit setAttribute(anHsh->key(aProp),value);
-	lstModified.push_back(aProp);
+	QString propName = anHsh->key(aProp);
+	emit setAttribute(propName,value);
+	if (propName == "id") {
+	  if (!idStyleActive) {
+	    if (!metaPropIdStyle) {
+	      metaPropIdStyle = groupManager->addProperty("Id Style");
+	      htmlPropertyBrowser->addProperty(metaPropIdStyle);
+	      createStyleMetaProp(metaPropIdStyle,hshStyleId);
+	      expandTopProperty(metaPropIdStyle,false);
+	    }
+	    metaPropIdStyle->setEnabled(true);
+	  }
+	  idStyleActive = true;
+	}
+	else if (propName == "class") {
+	  if (!classStyleActive) {
+	    if (!metaPropClassStyle) {
+	      metaPropClassStyle = groupManager->addProperty("Class Style");
+	      htmlPropertyBrowser->addProperty(metaPropClassStyle);
+	      createStyleMetaProp(metaPropClassStyle,hshStyleClass);
+	      expandTopProperty(metaPropClassStyle,false);
+	    }
+	    metaPropClassStyle->setEnabled(true);
+	    qDebug() << "enabling class style with class: " << value;
+	    qDebug() << "class content : " << CssParser::getClass("."+value);
+	    setStyleContent(&hshStyleClass,CssParser::getClass("."+value));
+	  }
+	  classStyleActive = true;
+	}
+	//lstModified.push_back(aProp);
 	return;
       }
     }
@@ -282,15 +262,20 @@ void TagEditor::setStringAttr(QtProperty* property, const QString& value) {
   /*If it get here, it is a style prop*/
   QString accumulation;
   bool found = false;
+  qDebug() << "Original prop text: " << property->valueText();
   foreach (Property* aProp, hshStyle) {
     if (property == aProp->propPtr)
       found = true;
-    if (aProp->propPtr->valueText() != "")
+    if (aProp->propPtr->valueText() != "") {
       accumulation += hshStyle.key(aProp)+":"+aProp->propPtr->valueText()+";";
-    lstModified.push_back(aProp);
+      //if (lstModified.indexOf(aProp) == -1)
+	lstModified.push_back(aProp);
+    }
   }
-  if (found)
+  if (found) {
+    qDebug() << "Final string: " << accumulation;
     emit setAttribute("style",accumulation);
+  }
 }
 
 void TagEditor::setCbbAttr(QtProperty* property, const int value) {
@@ -343,10 +328,135 @@ void TagEditor::clear() {
   disconnect(stringPropManager, SIGNAL(valueChanged(QtProperty*,QString)), this, SLOT(setStringAttr(QtProperty*,QString)));
   foreach (Property* aProp, lstModified) {
     qDebug() << "Clearing tag";
-    if (aProp->type == STRING)
+    if (aProp->type == STRING) {
+      qDebug() << "It is a string";
       ((QtStringPropertyManager*)aProp->propPtr->propertyManager())->setValue(aProp->propPtr,"");
+    }
     else if (aProp->type == COMBOBOX)
       ((QtEnumPropertyManager*)aProp->propPtr->propertyManager())->setValue(aProp->propPtr,0);
+  }
+  lstModified.clear();
+  connect(stringPropManager, SIGNAL(valueChanged(QtProperty*,QString)), this, SLOT(setStringAttr(QtProperty*,QString)));
+  connect(cbbPropManager, SIGNAL(valueChanged(QtProperty*,int)), this, SLOT(setCbbAttr(QtProperty*,int)));
+}
+
+void TagEditor::createStyleMetaProp(QtProperty* parentProperty, PropertiesHash &parentHsh) {
+  if (styleAttr.count() == 0) {
+    QSqlQuery query22;
+    query22.exec("SELECT TITLE FROM TCSS_TAG");
+    
+    while (query22.next())
+      styleAttr <<  query22.value(0).toString();
+    
+    styleAttr.sort();
+  }
+  
+  QStringList lstCssGroup;
+  lstCssGroup << "background" << "margin" << "padding" << "border" << "font" << "text" << "outline" << "list";
+  
+  QHash<QString, QtProperty*> hshTagGroup;
+
+  foreach (QString group, lstCssGroup) {
+    QtProperty *item3;
+
+    hshTagGroup[group] = stringPropManager->addProperty(group);
+    parentProperty->addSubProperty(hshTagGroup[group]);
+  }
+  
+  QtProperty *grpPropBorderLeft = groupManager->addProperty("left");
+  hshTagGroup["border"]->addSubProperty(grpPropBorderLeft);
+  
+  QtProperty *grpPropBorderRight = groupManager->addProperty("right");
+  hshTagGroup["border"]->addSubProperty(grpPropBorderRight);
+  
+  QtProperty *grpPropBorderTop = groupManager->addProperty("top");
+  hshTagGroup["border"]->addSubProperty(grpPropBorderTop);
+  
+  QtProperty *grpPropBorderBottom = groupManager->addProperty("bottom");
+  hshTagGroup["border"]->addSubProperty(grpPropBorderBottom);
+  
+  foreach (QString attr, styleAttr) {
+    QtProperty *item3;
+    bool found = false;
+    foreach (QString group, lstCssGroup) {
+      if (attr.indexOf(group+"-") == 0) {
+	if (group == "border") {
+	  if (attr.indexOf(group+"-left-") == 0) {
+	    item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-6));
+	    grpPropBorderLeft->addSubProperty(item3);
+	  }
+	  else if (attr.indexOf(group+"-right-") == 0) {
+	    item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-7));
+	    grpPropBorderRight->addSubProperty(item3);
+	  }
+	  else if (attr.indexOf(group+"-top-") == 0) {
+	    item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-5));
+	    grpPropBorderTop->addSubProperty(item3);
+	  }
+	  else if (attr.indexOf(group+"-bottom-") == 0) {
+	    item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-8));
+	    grpPropBorderBottom->addSubProperty(item3);
+	  }
+	  else {
+	    item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-1));
+	    hshTagGroup[group]->addSubProperty(item3);
+	  }
+	}
+	else {
+	  item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-1));
+	  hshTagGroup[group]->addSubProperty(item3);
+	}
+	found = true;
+	break;
+      }
+    }
+    
+    if (!found) {
+      item3 = stringPropManager->addProperty(attr);
+      parentProperty->addSubProperty(item3);
+    }
+    Property* aProp;
+    aProp = new Property;
+    parentHsh[attr] = aProp;
+    parentHsh[attr]->propPtr = item3;
+    parentHsh[attr]->type = STRING; //TODO change
+  }
+  
+  QList<QtBrowserItem*> itemList =  htmlPropertyBrowser->topLevelItems();
+  foreach (QtBrowserItem* item, itemList) {
+    if (item->property() == parentProperty) {
+      htmlPropertyBrowser->setExpanded(item,false);
+      foreach (QtBrowserItem* item2, item->children()) {
+	if (item2->children().count() != 0) {
+	  htmlPropertyBrowser->setExpanded(item2,false);
+	}
+      }
+    }
+  }
+}
+
+void TagEditor::expandTopProperty(QtProperty* aProp, bool expand) {
+  QList<QtBrowserItem*> itemList =  htmlPropertyBrowser->topLevelItems();
+  foreach (QtBrowserItem* item, itemList) {
+    if (item->property() == aProp) {
+      htmlPropertyBrowser->setExpanded(item,expand);
+      break;
+    }
+  }
+}
+
+void TagEditor::setStyleContent(PropertiesHash* toFill, QStringList content) {
+  disconnect(cbbPropManager, SIGNAL(valueChanged(QtProperty*,int)), this, SLOT(setCbbAttr(QtProperty*,int)));
+  disconnect(stringPropManager, SIGNAL(valueChanged(QtProperty*,QString)), this, SLOT(setStringAttr(QtProperty*,QString)));
+  foreach (QString property, content) {
+    if (hshStyle.find(CssParser::getPropriety(property)) != hshStyle.end()) {
+      QString unit = CssParser::getUnit(property);
+      if (unit == "-1")
+	unit = "";
+      Property* theProp = (*toFill)[CssParser::getPropriety(property)];
+      ((QtStringPropertyManager*)theProp->propPtr->propertyManager())->setValue(theProp->propPtr,CssParser::getValue(property)+unit);
+      lstModified.push_back(theProp);
+    }
   }
   connect(stringPropManager, SIGNAL(valueChanged(QtProperty*,QString)), this, SLOT(setStringAttr(QtProperty*,QString)));
   connect(cbbPropManager, SIGNAL(valueChanged(QtProperty*,int)), this, SLOT(setCbbAttr(QtProperty*,int)));
