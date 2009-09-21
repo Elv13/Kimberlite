@@ -2584,6 +2584,126 @@ void QtFontEditorFactory::disconnectPropertyManager(QtFontPropertyManager *manag
     disconnect(manager, SIGNAL(valueChanged(QtProperty*,QFont)), this, SLOT(slotPropertyChanged(QtProperty*,QFont)));
 }
 
+
+
+/**/
+// QtCssEditFactory
+//#include "CssPropertyEditor.h"
+
+class QtCssEditFactoryPrivate : public EditorFactoryPrivate<CSSBeginnerWidget>
+{
+    QtCssEditFactory *q_ptr;
+    Q_DECLARE_PUBLIC(QtCssEditFactory)
+public:
+
+    void slotPropertyChanged(QtProperty *property, const QString &value);
+    void slotRegExpChanged(QtProperty *property, const QRegExp &regExp) {}
+    void slotSetValue(const QString &value);
+};
+
+#include <QDebug>
+void QtCssEditFactoryPrivate::slotPropertyChanged(QtProperty *property, const QString &value)
+{
+    if (!m_createdEditors.contains(property))
+        return;
+
+    QListIterator<CSSBeginnerWidget *> itEditor( m_createdEditors[property]);
+    while (itEditor.hasNext()) {
+        CSSBeginnerWidget *editor = itEditor.next();
+	qDebug() << "\n\nQtCssEditFactoryPrivate In editor: " << value << "Editor value: " << editor->getValue() << "\n\n";
+	if (editor->getValue() != value)
+            editor->setValue(value);
+    }
+}
+
+void QtCssEditFactoryPrivate::slotSetValue(const QString &value)
+{
+    QObject *object = q_ptr->sender();
+    const QMap<CSSBeginnerWidget *, QtProperty *>::ConstIterator ecend = m_editorToProperty.constEnd();
+    for (QMap<CSSBeginnerWidget *, QtProperty *>::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend; ++itEditor)
+        if (itEditor.key() == object) {
+            QtProperty *property = itEditor.value();
+            QtStringPropertyManager *manager = q_ptr->propertyManager(property);
+            if (!manager)
+                return;
+	    manager->setValue(property, value);
+            return;
+        }
+}
+
+/*!
+    \class QtCssEditFactory
+
+    \brief The QtCssEditFactory class provides CSSBeginnerWidget widgets for
+    properties created by QtStringPropertyManager objects.
+
+    \sa QtAbstractEditorFactory, QtStringPropertyManager
+*/
+
+/*!
+    Creates a factory with the given \a parent.
+*/
+QtCssEditFactory::QtCssEditFactory(QObject *parent) : QtAbstractEditorFactory<QtStringPropertyManager>(parent)
+{
+    d_ptr = new QtCssEditFactoryPrivate();
+    d_ptr->q_ptr = this;
+
+}
+
+/*!
+    Destroys this factory, and all the widgets it has created.
+*/
+/*QtCssEditFactory::~QtCssEditFactory()
+{
+    //qDeleteAll(d_ptr->m_editorToProperty.keys());
+    //delete d_ptr;
+}*/
+
+/*!
+    \internal
+
+    Reimplemented from the QtAbstractEditorFactory class.
+*/
+void QtCssEditFactory::connectPropertyManager(QtStringPropertyManager *manager)
+{
+    connect(manager, SIGNAL(valueChanged(QtProperty *, const QString &)), this, SLOT(slotPropertyChanged(QtProperty *, const QString &)));
+    //connect(manager, SIGNAL(regExpChanged(QtProperty *, const QRegExp &)), this, SLOT(slotRegExpChanged(QtProperty *, const QRegExp &)));
+}
+
+/*!
+    \internal
+
+    Reimplemented from the QtAbstractEditorFactory class.
+*/
+QWidget *QtCssEditFactory::createEditor(QtStringPropertyManager *manager, QtProperty *property, QWidget *parent)
+{
+
+    editor = d_ptr->createEditor(property, parent);
+    QRegExp regExp = manager->regExp(property);
+    //if (regExp.isValid()) {
+    //    QValidator *validator = new QRegExpValidator(regExp, editor);
+    //    editor->setValidator(validator);
+    //}
+    editor->setValue(manager->value(property));
+    editor->setProperty(property->cssName);
+
+    connect(editor, SIGNAL(textEdited(const QString &)), this, SLOT(slotSetValue(const QString &)));
+    connect(editor, SIGNAL(destroyed(QObject *)), this, SLOT(slotEditorDestroyed(QObject *)));
+    return editor;
+}
+
+/*!
+    \internal
+
+    Reimplemented from the QtAbstractEditorFactory class.
+*/
+void QtCssEditFactory::disconnectPropertyManager(QtStringPropertyManager *manager)
+{
+    disconnect(manager, SIGNAL(valueChanged(QtProperty *, const QString &)), this, SLOT(slotPropertyChanged(QtProperty *, const QString &)));
+    //disconnect(manager, SIGNAL(regExpChanged(QtProperty *, const QRegExp &)), this, SLOT(slotRegExpChanged(QtProperty *, const QRegExp &)));
+}
+/**/
+
 #if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
 #endif

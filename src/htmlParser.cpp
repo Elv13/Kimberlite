@@ -95,7 +95,7 @@ QString HtmlParser::getParsedHtml(HtmlData &pageData) {
   for (int j=0; j < pageData.tagList.size();j++) {
     tag2 = getTag(pageData.tagList[j]);
     tab.clear();
-    for (int k =0; k < pageData.levelList[j]; k++) 
+    for (uint k =0; k < pageData.levelList[j]; k++) 
       tab += "   ";
     if ((htmlInfo.noNewLineTags.indexOf(tag2) != -1) || (pageData.tagList[j][0] != '<')) {
       if ((pageData.tagList[j][0] == '<') && (htmlInfo.needNewLineOnOpen.indexOf(tag2) != -1) && (parsedHTML[(parsedHTML.size() !=0)?parsedHTML.size()-1:0] != '\n') && (pageData.tagList[j].left(2) != "</") && (parsedHTML.size() !=0))
@@ -117,8 +117,8 @@ QString HtmlParser::getParsedHtml(HtmlData &pageData) {
 }
 
 void HtmlParser::setAttribute(HtmlData &pageData, QString tag, uint index, QString attribute, QString value) {
-  int i=0;
-  for (int j =0; j < pageData.tagList.size(); j++)
+  uint i=0;
+  for (uint j =0; j < pageData.tagList.size(); j++)
     if ((HtmlParser::getTag(pageData.tagList[j]).toUpper() == tag.toUpper()) && (pageData.tagList[j][1] != '/'))
       if (i == index) {
 	pageData.tagList[j] = setAttribute(pageData.tagList[j],attribute,value);

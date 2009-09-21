@@ -1106,7 +1106,7 @@ void MainWindow::retranslateUi() {
 
 void MainWindow::fillCSSBegMode(QString className) {
   QStringList aClass = CssParser::getClass(className);
-  foreach (QString propriety, aClass) {
+  foreach (QString propriety, aClass) { //TODO can be optimised
     if (cssBegTagList.indexOf(CssParser::getPropriety(propriety.toLower())) != -1)
       ashCssBeg[CssParser::getPropriety(propriety.toLower())]->fillMe(propriety);
     else {
@@ -1400,9 +1400,7 @@ QString MainWindow::clearCssBeg() {
   QString currentClass;
   foreach (QString tag, cssBegTagList) {
     if (ashCssBeg[tag]->cbbValue->isEnabled()) {
-      currentClass += "  " + tag +": "+ ashCssBeg[tag]->cbbValue->currentText();
-      if (ashCssBeg[tag]->isEnabled())
-        currentClass += ashCssBeg[tag]->cbbUnit->currentText();
+      currentClass += "  " + ashCssBeg[tag]->getValue(); //BUG Modified this recently
       currentClass += ";\n";
     }
     ashCssBeg[tag]->clear();

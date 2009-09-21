@@ -440,6 +440,41 @@ private:
     Q_PRIVATE_SLOT(d_func(), void slotSetValue(const QFont &))
 };
 
+
+
+
+
+
+
+
+/**/
+#include "../../CSSbeginnerWidget.h"
+class QtCssEditFactoryPrivate;
+
+class QT_QTPROPERTYBROWSER_EXPORT QtCssEditFactory : public QtAbstractEditorFactory<QtStringPropertyManager>
+{
+    Q_OBJECT
+public:
+    QtCssEditFactory(QObject *parent = 0);
+    ~QtCssEditFactory() {}
+protected:
+    void connectPropertyManager(QtStringPropertyManager *manager);
+    QWidget *createEditor(QtStringPropertyManager *manager, QtProperty *property, QWidget *parent);
+    void disconnectPropertyManager(QtStringPropertyManager *manager);
+    CSSBeginnerWidget *editor;
+private:
+    QtCssEditFactoryPrivate *d_ptr;
+    Q_DECLARE_PRIVATE(QtCssEditFactory)
+    Q_DISABLE_COPY(QtCssEditFactory)
+    Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, const QString &))
+    Q_PRIVATE_SLOT(d_func(), void slotRegExpChanged(QtProperty *, const QRegExp &))
+    Q_PRIVATE_SLOT(d_func(), void slotSetValue(const QString &))
+    Q_PRIVATE_SLOT(d_func(), void slotEditorDestroyed(QObject *))
+};
+/**/
+
+
+
 #if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
 #endif

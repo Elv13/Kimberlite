@@ -19,12 +19,23 @@
 #include "qtpropertybrowser-2.5-opensource/src/QtEnumPropertyManager"
 #include "qtpropertybrowser-2.5-opensource/src/QtGroupPropertyManager"
 #include "qtpropertybrowser-2.5-opensource/src/QtTreePropertyBrowser"
+#include "qtpropertybrowser-2.5-opensource/src/QtBoolPropertyManager"
+#include "qtpropertybrowser-2.5-opensource/src/QtLineEditFactory"
+#include "qtpropertybrowser-2.5-opensource/src/QtEnumEditorFactory"
+#include "qtpropertybrowser-2.5-opensource/src/QtGroupPropertyManager"
+#include "qtpropertybrowser-2.5-opensource/src/QtBrowserItem"
+#include "qtpropertybrowser-2.5-opensource/src/QtBoolPropertyManager"
+#include "qtpropertybrowser-2.5-opensource/src/QtLineEditFactory"
+#include "qtpropertybrowser-2.5-opensource/src/QtEnumEditorFactory"
+#include "qtpropertybrowser-2.5-opensource/src/QtGroupPropertyManager"
+#include "qtpropertybrowser-2.5-opensource/src/QtBrowserItem"
 
 enum PropertyType {
   STRING,
   BOOL,
   COMBOBOX,
-  NUMBER
+  NUMBER,
+  CSS
 };
 
 struct Property {
@@ -58,8 +69,10 @@ class TagEditor : public QDockWidget {
     PropertiesHash hshEvent;
     QList<Property*> lstModified;
     QtStringPropertyManager* stringPropManager;
+    QtStringPropertyManager* cssPropManager;
     QtEnumPropertyManager* cbbPropManager;
     QtGroupPropertyManager* groupManager;
+    QtCssEditFactory* cssFactory;
     QtProperty* metaPropStd;
     QtProperty* metaPropSpecific;
     QtProperty* metaPropStyle;
@@ -75,6 +88,7 @@ class TagEditor : public QDockWidget {
   private slots:
     void setStringAttr(QtProperty* property, const QString& value);
     void setCbbAttr(QtProperty* property, const int value);
+    void setStyleAttr(QtProperty* property, const QString& value);
   public slots:
     void displayAttribute(QString tag);
   signals:

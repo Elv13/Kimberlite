@@ -134,6 +134,9 @@ public:
     bool hasValue() const;
     QIcon valueIcon() const;
     QString valueText() const;
+    
+    //Quite cheap, but after 6 attempt to implement this feature, it is time to do that
+    QString cssName;
 
     void setToolTip(const QString &text);
     void setStatusTip(const QString &text);

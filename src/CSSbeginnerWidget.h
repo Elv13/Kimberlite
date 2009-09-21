@@ -39,8 +39,12 @@ QT_BEGIN_NAMESPACE
 class CSSBeginnerWidget : public QWidget {
 Q_OBJECT
 public:
+  CSSBeginnerWidget(QWidget* parent);
   CSSBeginnerWidget(QWidget* parent, QString tagName);
   ~CSSBeginnerWidget(){};
+  void setProperty(QString tagName);
+  QString getValue();
+  void setValue(QString value);
   void fillMe(QString line);
   void clear();
   QHBoxLayout *hlCbbTag;
@@ -51,10 +55,16 @@ public:
 private:
   QList<bool> isEditable;
   void fetchColorName();
+  void createWidget();
+  bool minimal;
+  QString tagName;
 
 private slots:
   void ckbName_checked(int state);
   void cbbValue_changed(int index);
   void selectColor();
+  void valueChanged();
+signals:
+  void textEdited(QString);
 };
 #endif

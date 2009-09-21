@@ -30,16 +30,28 @@
 #include <QLineEdit>
 #include <KColorDialog>
 
-CSSBeginnerWidget::CSSBeginnerWidget(QWidget* parent, QString tagName) : QWidget (parent),btnColor(NULL) {
-  hlCbbTag = new QHBoxLayout(this);
+CSSBeginnerWidget::CSSBeginnerWidget(QWidget* parent) : QWidget (parent),btnColor(NULL),minimal(true) {
+  createWidget();
+}
+
+CSSBeginnerWidget::CSSBeginnerWidget(QWidget* parent, QString tagName) : QWidget (parent),btnColor(NULL),minimal(false) {
+  createWidget();
+  setProperty(tagName);
+}
+
+void CSSBeginnerWidget::createWidget() {
+    hlCbbTag = new QHBoxLayout(this);
   hlCbbTag->setObjectName(QString::fromUtf8("hlCbbTag"));
   hlCbbTag->setContentsMargins(0,0,0,0);
-  ckbName = new QCheckBox(this);
-  ckbName->setObjectName(QString::fromUtf8("ckbName"));
-  ckbName->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed));
-  ckbName->setMinimumSize(QSize(160, 0));
-  ckbName->setMaximumSize(QSize(160, 999999));
-  hlCbbTag->addWidget(ckbName);
+  
+  if (minimal == false) {
+    ckbName = new QCheckBox(this);
+    ckbName->setObjectName(QString::fromUtf8("ckbName"));
+    ckbName->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed));
+    ckbName->setMinimumSize(QSize(160, 0));
+    ckbName->setMaximumSize(QSize(160, 999999));
+    hlCbbTag->addWidget(ckbName);
+  }
 
   cbbValue = new QComboBox(this);
   cbbValue->setObjectName(QString::fromUtf8("cbbValue"));
@@ -47,12 +59,22 @@ CSSBeginnerWidget::CSSBeginnerWidget(QWidget* parent, QString tagName) : QWidget
   hlCbbTag->addWidget(cbbValue);
 
   cbbUnit = new QComboBox(this);
-  cbbUnit->setMinimumSize(QSize(75, 0));
-  cbbUnit->setMaximumSize(QSize(75, 99));
+  if (!minimal) {
+    cbbUnit->setMinimumSize(QSize(75, 0));
+    cbbUnit->setMaximumSize(QSize(75, 99));
+  }
+  else {
+    cbbUnit->setMinimumSize(QSize(40, 0));
+    cbbUnit->setMaximumSize(QSize(40, 99));
+  }
   cbbUnit->setObjectName(QString::fromUtf8("cbbUnit"));
   cbbUnit->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
   hlCbbTag->addWidget(cbbUnit);
 
+}
+
+void CSSBeginnerWidget::setProperty(QString tagName) {
+  this->tagName = tagName;
   QSqlQuery query;
   query.exec("SELECT VALUE,UNIT FROM TCSS_TAG WHERE TITLE = '"+ tagName +"'");
   
@@ -100,13 +122,21 @@ CSSBeginnerWidget::CSSBeginnerWidget(QWidget* parent, QString tagName) : QWidget
       if (possibleUnit[i].isEmpty() == false)
 	cbbUnit->addItem(possibleUnit[i]);
   }
-  
-  cbbValue_changed(0);
-  ckbName->setText(tagName);
-  cbbUnit->setEnabled(false);
-  cbbValue->setEnabled(false);
-  connect( ckbName, SIGNAL( stateChanged(int) ), this, SLOT( ckbName_checked(int) ) );
+  if (cbbValue->count())
+    cbbValue_changed(0);
+  if (!minimal) {
+    ckbName->setText(tagName);
+    cbbUnit->setEnabled(false);
+    cbbValue->setEnabled(false);
+
+    connect( ckbName, SIGNAL( stateChanged(int) ), this, SLOT( ckbName_checked(int) ) );
+  }
   connect( cbbValue, SIGNAL( currentIndexChanged(int) ), this, SLOT( cbbValue_changed(int) ) );
+  connect( cbbUnit, SIGNAL( currentIndexChanged(int) ), this, SLOT( valueChanged() ) );
+  connect( cbbValue, SIGNAL( editTextChanged(QString) ), this, SLOT( valueChanged() ) );
+
+  if ((cbbUnit->count() == 0) && (minimal))
+    cbbUnit->setVisible(false);
 }
 
 void CSSBeginnerWidget::ckbName_checked(int state) {
@@ -133,11 +163,15 @@ void CSSBeginnerWidget::cbbValue_changed(int index) {
   if (btnColor) {
     if (btnColor->isVisible() == true) {
       btnColor->setVisible(false);
-      cbbUnit->setVisible(true);
+      if ((cbbUnit->count() > 0) && minimal)
+	cbbUnit->setVisible(true);
     }
   }
   
-  if (isEditable[index] == true) {
+  if (index >= isEditable.size()) {
+    qDebug() << "Indice out ou bound (CssbegWidget)";
+  }
+  else if (isEditable[index] == true) {
     cbbValue->setEditable(true);
     if (cbbUnit->count() != 0)
       cbbUnit->setEnabled(true);
@@ -151,14 +185,18 @@ void CSSBeginnerWidget::cbbValue_changed(int index) {
     if (cbbValue->itemText(index) == "color") {
       if (!btnColor) {
 	btnColor = new QPushButton(this);
-	btnColor->setText("Color");
+	if (!minimal)
+	  btnColor->setText("Color");
 	btnColor->setIcon(KIcon("fill-color"));
 	hlCbbTag->addWidget(btnColor);
-	btnColor->setMinimumSize(QSize(75, 0));
-	btnColor->setMaximumSize(QSize(75, 99));
+	if (!minimal) {
+	  btnColor->setMinimumSize(QSize(75, 0));
+	  btnColor->setMaximumSize(QSize(75, 99));
+	}
 	connect( btnColor, SIGNAL( clicked() ), this, SLOT( selectColor() ) );
-	if (ckbName->isChecked() == false)
-	  btnColor->setDisabled(true);
+	if (!minimal)
+	  if (ckbName->isChecked() == false)
+	    btnColor->setDisabled(true);
       }
       else {
 	btnColor->setVisible(true);
@@ -168,16 +206,18 @@ void CSSBeginnerWidget::cbbValue_changed(int index) {
     }
     cbbValue->setFocus();
   }
-  else {
+  else if (minimal) {
     cbbValue->setEditable(false);
     cbbUnit->setEnabled(false);
     if (btnColor)
       btnColor->setEnabled(false);
   }
+  valueChanged();
 }
 
 void CSSBeginnerWidget::fillMe(QString line) {
-  ckbName->setChecked(true);
+  if (!minimal)
+    ckbName->setChecked(true);
   QString anUnit = CssParser::getUnit(line);
   if (anUnit.count()) {
     bool found = false;
@@ -216,7 +256,8 @@ void CSSBeginnerWidget::fillMe(QString line) {
 }
 
 void CSSBeginnerWidget::clear() {
-  ckbName->setChecked(false);
+  if (!minimal)
+    ckbName->setChecked(false);
   cbbValue->setCurrentIndex(0);
   cbbValue->setStyleSheet(QString::fromUtf8(""));
   cbbUnit->setCurrentIndex(0);
@@ -239,4 +280,25 @@ void CSSBeginnerWidget::selectColor() {
   if ( result == KColorDialog::Accepted ) {
     cbbValue->lineEdit()->setText(aColor.name());
   }
+}
+
+void CSSBeginnerWidget::setValue(QString value) { //TODO deprecate fillMe
+  //setProperty(CssParser::getPropriety(value));
+  qDebug() << "Fill line: " << value;
+  //fillMe(tagName + ": " + value+";");
+}
+
+QString CSSBeginnerWidget::getValue() {
+  QString value;
+  value = tagName + ":" +cbbValue->currentText();
+  if (cbbUnit->isEnabled())
+    value += cbbUnit->currentText();
+  return value;
+}
+
+
+void CSSBeginnerWidget::valueChanged() {
+  QString value = getValue();
+  //qDebug() << "Emmiting: " << value;
+  emit textEdited(value);
 }

@@ -1,10 +1,5 @@
 #include "tagEditor.h"
 #include <QtSql>
-#include "qtpropertybrowser-2.5-opensource/src/QtBoolPropertyManager"
-#include "qtpropertybrowser-2.5-opensource/src/QtLineEditFactory"
-#include "qtpropertybrowser-2.5-opensource/src/QtEnumEditorFactory"
-#include "qtpropertybrowser-2.5-opensource/src/QtGroupPropertyManager"
-#include "qtpropertybrowser-2.5-opensource/src/QtBrowserItem"
 
 TagEditor::TagEditor(QWidget* parent) : QDockWidget(parent),metaPropIdStyle(false),metaPropClassStyle(false),idStyleActive(NULL),classStyleActive(NULL) {
   setWindowTitle("Tag Editor");
@@ -33,13 +28,18 @@ TagEditor::TagEditor(QWidget* parent) : QDockWidget(parent),metaPropIdStyle(fals
   
   stringPropManager = new QtStringPropertyManager(this);
   cbbPropManager = new QtEnumPropertyManager(this);
+  cssPropManager = new QtStringPropertyManager(this);
   
   connect(stringPropManager, SIGNAL(valueChanged(QtProperty*,QString)), this, SLOT(setStringAttr(QtProperty*,QString)));
   connect(cbbPropManager, SIGNAL(valueChanged(QtProperty*,int)), this, SLOT(setCbbAttr(QtProperty*,int)));
+  connect(cssPropManager, SIGNAL(valueChanged(QtProperty*,QString)), this, SLOT(setStyleAttr(QtProperty*,QString)));
+  
   QtLineEditFactory* lineEditFactory = new QtLineEditFactory(this);
   QtEnumEditorFactory* comboBoxFactory = new QtEnumEditorFactory(this);
+  cssFactory = new QtCssEditFactory(this);
   
   htmlPropertyBrowser->setFactoryForManager(stringPropManager, lineEditFactory);
+  htmlPropertyBrowser->setFactoryForManager(cssPropManager, cssFactory);
   htmlPropertyBrowser->setFactoryForManager(cbbPropManager, comboBoxFactory);
 
   normalAttr << "id" << "name" << "class" << "title" << "lang(american,ar,ar_aa,ar_sa,arabic,bg,bg_bg,bulgarian,c-french,c,c_c,cextend,chinese-s,chinese-t,croatian,cs,cs_cs,cs_cz,cz,cz_cz,czech,da,da_dk,danish,de,de_at,de_ch,de_de,dutch,ee,el,el_gr,en,en_au,en_ca,en_gb,en_ie,en_nz,en_uk,en_us,eng_gb,english,english_uk,english_united-states,english_us,es,es_ar,es_bo,es_cl,es_co,es_cr,es_ec,es_es,es_gt,es_mx,es_ni,es_pa,es_pe,es_py,es_sv,es_uy,es_ve,et,et_ee,fi,fi_fi,finnish,fr,fr_be,fr_ca,fr_ch,fr_fr,fre_fr,french,french_france,ger_de,german,german_germany,greek,hebrew,hr,hr_hr,hu,hu_hu,hungarian,icelandic,id,id_id,is,is_is,iso-8859-1,iso-8859-15,iso8859-1,iso8859-15,iso_8859_1,iso_8859_15,it,it_ch,it_it,italian,iw,iw_il,ja,ja.jis,ja.sjis,ja_jp,ja_jp.ajec,ja_jp.euc,ja_jp.eucjp,ja_jp.iso-2022-jp,ja_jp.jis,ja_jp.jis7,ja_jp.mscode,ja_jp.sjis,ja_jp.ujis,japan,japanese,japanese-euc,japanese.euc,jp_jp,ko,ko_kr,ko_kr.euc,korean,lt,lv,mk,mk_mk,nl,nl_be,nl_nl,no,no_no,norwegian,pl,pl_pl,polish,portuguese,portuguese_brazil,posix,posix-utf2,pt,pt_br,pt_pt,ro,ro_ro,ru,ru_ru,rumanian,russian,serbocroatian,sh,sh_hr,sh_sp,sh_yu,sk,sk_sk,sl,sl_cs,sl_si,slovak,slovene,sp,sp_yu,spanish,spanish_spain,sr_sp,sv,sv_se,swedish,th_th,tr,tr_tr,turkish,univ,universal,zh,zh_cn,zh_cn.big5,zh_cn.euc,zh_tw,zh_tw.euc)" << "dir(ltr,rtl)";
@@ -105,13 +105,13 @@ void TagEditor::displayAttribute(QString tag) {
     
     foreach (QString attr, normalAttr)
       if (HtmlParser::getAttribute(tag,attr) != NULL) {
-	if (hshStd[attr]->type == STRING)
+	if (hshStd[attr]->type == STRING || hshStd[attr]->type == CSS)
 	  ((QtStringPropertyManager*)hshStd[attr]->propPtr->propertyManager())->setValue(hshStd[attr]->propPtr,HtmlParser::getAttribute(tag,attr));
 	//else if (hshStd[attr]->type == COMBOBOX)
 	  //((QtEnumPropertyManager*)hshStd[attr]->propPtr->propertyManager())->setValue(hshStd[attr]->propPtr,HtmlParser::getAttribute(tag,attr));
       }
       else {
-	if (hshStd[attr]->type == STRING)
+	if (hshStd[attr]->type == STRING || hshStd[attr]->type == CSS)
 	  ((QtStringPropertyManager*)hshStd[attr]->propPtr->propertyManager())->setValue(hshStd[attr]->propPtr,"");
 	else if (hshStd[attr]->type == COMBOBOX)
 	  ((QtEnumPropertyManager*)hshStd[attr]->propPtr->propertyManager())->setValue(hshStd[attr]->propPtr,0);
@@ -128,7 +128,7 @@ void TagEditor::displayAttribute(QString tag) {
       
     foreach (QString attr, specificAttr)
       if (HtmlParser::getAttribute(tag,attr) != NULL) {
-	if (hshSpecific[attr]->type == STRING) {
+	if (hshSpecific[attr]->type == STRING || hshSpecific[attr]->type == CSS) {
 	  ((QtStringPropertyManager*)hshSpecific[attr]->propPtr->propertyManager())->setValue(hshSpecific[attr]->propPtr,HtmlParser::getAttribute(tag,attr));
 	}
 	else if (hshSpecific[attr]->type == COMBOBOX) {
@@ -259,6 +259,9 @@ void TagEditor::setStringAttr(QtProperty* property, const QString& value) {
       }
     }
   }
+}
+
+void TagEditor::setStyleAttr(QtProperty* property, const QString& value) {
   /*If it get here, it is a style prop*/
   QString accumulation;
   bool found = false;
@@ -267,7 +270,8 @@ void TagEditor::setStringAttr(QtProperty* property, const QString& value) {
     if (property == aProp->propPtr)
       found = true;
     if (aProp->propPtr->valueText() != "") {
-      accumulation += hshStyle.key(aProp)+":"+aProp->propPtr->valueText()+";";
+      qDebug() << "This is what is being accumulated: " << aProp->propPtr->valueText();
+      accumulation += aProp->propPtr->valueText().trimmed()+";";
       //if (lstModified.indexOf(aProp) == -1)
 	lstModified.push_back(aProp);
     }
@@ -326,18 +330,18 @@ void TagEditor::clear() {
   qDebug() << "Starting clearing";
   disconnect(cbbPropManager, SIGNAL(valueChanged(QtProperty*,int)), this, SLOT(setCbbAttr(QtProperty*,int)));
   disconnect(stringPropManager, SIGNAL(valueChanged(QtProperty*,QString)), this, SLOT(setStringAttr(QtProperty*,QString)));
+  disconnect(cssPropManager, SIGNAL(valueChanged(QtProperty*,QString)), this, SLOT(setStyleAttr(QtProperty*,QString)));
   foreach (Property* aProp, lstModified) {
     qDebug() << "Clearing tag";
-    if (aProp->type == STRING) {
-      qDebug() << "It is a string";
+    if (aProp->type == STRING || aProp->type == CSS)
       ((QtStringPropertyManager*)aProp->propPtr->propertyManager())->setValue(aProp->propPtr,"");
-    }
     else if (aProp->type == COMBOBOX)
       ((QtEnumPropertyManager*)aProp->propPtr->propertyManager())->setValue(aProp->propPtr,0);
   }
   lstModified.clear();
   connect(stringPropManager, SIGNAL(valueChanged(QtProperty*,QString)), this, SLOT(setStringAttr(QtProperty*,QString)));
   connect(cbbPropManager, SIGNAL(valueChanged(QtProperty*,int)), this, SLOT(setCbbAttr(QtProperty*,int)));
+  connect(cssPropManager, SIGNAL(valueChanged(QtProperty*,QString)), this, SLOT(setStyleAttr(QtProperty*,QString)));
 }
 
 void TagEditor::createStyleMetaProp(QtProperty* parentProperty, PropertiesHash &parentHsh) {
@@ -359,7 +363,7 @@ void TagEditor::createStyleMetaProp(QtProperty* parentProperty, PropertiesHash &
   foreach (QString group, lstCssGroup) {
     QtProperty *item3;
 
-    hshTagGroup[group] = stringPropManager->addProperty(group);
+    hshTagGroup[group] = groupManager->addProperty(group);
     parentProperty->addSubProperty(hshTagGroup[group]);
   }
   
@@ -382,28 +386,28 @@ void TagEditor::createStyleMetaProp(QtProperty* parentProperty, PropertiesHash &
       if (attr.indexOf(group+"-") == 0) {
 	if (group == "border") {
 	  if (attr.indexOf(group+"-left-") == 0) {
-	    item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-6));
+	    item3 = cssPropManager->addProperty(attr.right(attr.size()-group.size()-6));
 	    grpPropBorderLeft->addSubProperty(item3);
 	  }
 	  else if (attr.indexOf(group+"-right-") == 0) {
-	    item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-7));
+	    item3 = cssPropManager->addProperty(attr.right(attr.size()-group.size()-7));
 	    grpPropBorderRight->addSubProperty(item3);
 	  }
 	  else if (attr.indexOf(group+"-top-") == 0) {
-	    item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-5));
+	    item3 = cssPropManager->addProperty(attr.right(attr.size()-group.size()-5));
 	    grpPropBorderTop->addSubProperty(item3);
 	  }
 	  else if (attr.indexOf(group+"-bottom-") == 0) {
-	    item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-8));
+	    item3 = cssPropManager->addProperty(attr.right(attr.size()-group.size()-8));
 	    grpPropBorderBottom->addSubProperty(item3);
 	  }
 	  else {
-	    item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-1));
+	    item3 = cssPropManager->addProperty(attr.right(attr.size()-group.size()-1));
 	    hshTagGroup[group]->addSubProperty(item3);
 	  }
 	}
 	else {
-	  item3 = stringPropManager->addProperty(attr.right(attr.size()-group.size()-1));
+	  item3 = cssPropManager->addProperty(attr.right(attr.size()-group.size()-1));
 	  hshTagGroup[group]->addSubProperty(item3);
 	}
 	found = true;
@@ -412,14 +416,18 @@ void TagEditor::createStyleMetaProp(QtProperty* parentProperty, PropertiesHash &
     }
     
     if (!found) {
-      item3 = stringPropManager->addProperty(attr);
+      item3 = cssPropManager->addProperty(attr);
       parentProperty->addSubProperty(item3);
     }
+    
+    item3->cssName = attr;
+    
     Property* aProp;
     aProp = new Property;
     parentHsh[attr] = aProp;
     parentHsh[attr]->propPtr = item3;
-    parentHsh[attr]->type = STRING; //TODO change
+    parentHsh[attr]->type = CSS; //TODO change
+    //((QtStringPropertyManager*)item3->propertyManager())->setValue(item3,"@@KIMBERLITE:"+attr);
   }
   
   QList<QtBrowserItem*> itemList =  htmlPropertyBrowser->topLevelItems();
@@ -448,16 +456,19 @@ void TagEditor::expandTopProperty(QtProperty* aProp, bool expand) {
 void TagEditor::setStyleContent(PropertiesHash* toFill, QStringList content) {
   disconnect(cbbPropManager, SIGNAL(valueChanged(QtProperty*,int)), this, SLOT(setCbbAttr(QtProperty*,int)));
   disconnect(stringPropManager, SIGNAL(valueChanged(QtProperty*,QString)), this, SLOT(setStringAttr(QtProperty*,QString)));
+  disconnect(cssPropManager, SIGNAL(valueChanged(QtProperty*,QString)), this, SLOT(setStyleAttr(QtProperty*,QString)));
   foreach (QString property, content) {
     if (hshStyle.find(CssParser::getPropriety(property)) != hshStyle.end()) {
       QString unit = CssParser::getUnit(property);
       if (unit == "-1")
 	unit = "";
       Property* theProp = (*toFill)[CssParser::getPropriety(property)];
+      qDebug() << "Set style = " << CssParser::getValue(property)+unit;
       ((QtStringPropertyManager*)theProp->propPtr->propertyManager())->setValue(theProp->propPtr,CssParser::getValue(property)+unit);
       lstModified.push_back(theProp);
     }
   }
   connect(stringPropManager, SIGNAL(valueChanged(QtProperty*,QString)), this, SLOT(setStringAttr(QtProperty*,QString)));
   connect(cbbPropManager, SIGNAL(valueChanged(QtProperty*,int)), this, SLOT(setCbbAttr(QtProperty*,int)));
+  connect(cssPropManager, SIGNAL(valueChanged(QtProperty*,QString)), this, SLOT(setStyleAttr(QtProperty*,QString)));
 }
