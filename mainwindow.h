@@ -109,6 +109,7 @@
 #include "src/headerComboBox.h"
 #include "src/configSkeleton.h"
 #include "src/tagEditor.h"
+#include "src/cssPreviewWidget.h"
 
 #define KIMBERLITE_MODE tabWEditor->currentIndex()
 #define CSS_MODE tabWCSSLevel->currentIndex()
@@ -208,6 +209,7 @@ public:
     QWidget *tabHTML;
     QVBoxLayout *verticalLayout_3;
     RtfHtmlEditor* rtfHTMLEditor;
+    int intRtfHtmlPos;
     QPushButton *btnParse;
     TagEditor* aTagEditor;
     QDockWidget *dockDebug;
@@ -248,6 +250,7 @@ public:
     QTextEdit* txtOtherTags;
     QDockWidget* dockHtmlTree;
     QTreeWidget* treeHtml;
+    CssPreviewWidget* cssPreview;
     KToolBar* fileTB;
     KToolBar* editTB;
     KToolBar* viewTB;

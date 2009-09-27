@@ -41,6 +41,7 @@ include(KDE4Defaults)
       src/qtpropertybrowser-2.5-opensource/src/qtpropertymanager.cpp
       src/qtpropertybrowser-2.5-opensource/src/qtgroupboxpropertybrowser.cpp
       src/cssPropertyEditor.cpp
+      src/cssPreviewWidget.cpp
       )
 
       kde4_add_executable(kimberlite ${kimberlite_SRCS})

@@ -36,7 +36,7 @@
 #include "src/newProject.h"
 #include "src/debugger.h"
 
-MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NULL),currentScript(NULL),aProjectManager(NULL),isModified(false),previousCssMode(999),previousKimberliteMode(MODE_WYSIWYG) {
+MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NULL),currentScript(NULL),aProjectManager(NULL),isModified(false),previousCssMode(999),previousKimberliteMode(MODE_WYSIWYG),intRtfHtmlPos(0) {
   actionCollection = new KActionCollection(this);
   setWindowTitle("Kimberlite");
   db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE"));
@@ -670,7 +670,7 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   helpTB->setStyleSheet("margin:0px;spacing:0px;padding:0px;background-color:transparent;");
 
   createAction("Manual", "help-contents", NULL);
-  connect(ashActions["Manual"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+  //connect(ashActions["Manual"], SIGNAL(triggered(bool)), this, SLOT(quit()));
   helpTB->addAction(ashActions["Manual"]);
   ashActions["Manual"]->setDisabled(true);
 
@@ -685,6 +685,41 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   helpTB->addAction(ashActions["Report A Bug"]);
   
   setMenuWidget(tabWMenu);
+  
+  /***************************************************************
+  
+			Corner widgets
+  
+  ***************************************************************/
+  
+  QWidget* wdgCornerContainer = new QWidget(this);
+  wdgCornerContainer->setStyleSheet("margin:0px;spacing:0px;padding:0px;");
+  QHBoxLayout* cornerLayout = new QHBoxLayout(wdgCornerContainer);
+  cornerLayout->setContentsMargins(0,0,0,0);
+  
+  KPushButton* manualButton = createToolButton(wdgCornerContainer,"help-contents","Launch the manual");
+  manualButton->setStyleSheet("background-color:transparent;margin:0px;padding:0px;border:0px");
+  manualButton->setIconSize(QSize(16,16));
+  manualButton->setMaximumSize(22,22);
+  cornerLayout->addWidget(manualButton);
+  
+  KPushButton* bugButton = createToolButton(wdgCornerContainer,"tools-report-bug","Report a bug");
+  bugButton->setStyleSheet("background-color:transparent;margin:0px;padding:0px;border:0px");
+  bugButton->setIconSize(QSize(22,22));
+  bugButton->setMaximumSize(22,22);
+  cornerLayout->addWidget(bugButton);
+  
+  KPushButton* aboutButton = createToolButton(wdgCornerContainer,"help-about","About Kimberlite");
+  aboutButton->setStyleSheet("background-color:transparent;margin:0px;padding:0px;border:0px");
+  aboutButton->setIconSize(QSize(16,16));
+  aboutButton->setMaximumSize(22,22);
+  cornerLayout->addWidget(aboutButton);
+  
+  tabWMenu->setCornerWidget(wdgCornerContainer);
+  
+  //connect(ashActions["Manual"], SIGNAL(triggered(bool)), this, SLOT(quit()));
+  connect(bugButton, SIGNAL(clicked()), this, SLOT(reportBug()));
+  connect(aboutButton, SIGNAL(clicked()), this, SLOT(aboutKimberlite()));
   
   /***************************************************************
   
@@ -769,6 +804,21 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   connect(ashActions["CSS Class"], SIGNAL(triggered(bool)), treeDock, SLOT(setVisible(bool)));
   connect(treeDock, SIGNAL(visibilityChanged(bool)), ashActions["CSS Class"] , SLOT(setChecked(bool)));
 
+  /***************************************************************
+  
+			  CSS Preview
+  
+  ***************************************************************/
+  
+  QDockWidget* cssPreviewDock = new QDockWidget(this);
+  addDockWidget(Qt::LeftDockWidgetArea,cssPreviewDock);
+  cssPreviewDock->setWindowTitle("Style preview");
+  
+  cssPreview = new CssPreviewWidget(this);
+  cssPreviewDock->setWidget(cssPreview);
+  
+  cssPreviewDock->setVisible(false);
+  
   /***************************************************************
   
 			Editing MODE
@@ -1313,6 +1363,7 @@ void MainWindow::cssClassClicked(QTreeWidgetItem* anItem) {
     QString className = getClassName(anItem);
     setCssCursor(className);
   }
+  cssPreview->diaplayObject(getClassName(anItem));
 } //cssClassClicked
 
 void MainWindow::loadCSSClass(QTreeWidgetItem* anItem) {
@@ -1543,8 +1594,10 @@ void MainWindow::modeChanged(int index) {
   
   if (previousKimberliteMode == MODE_CSS)
     updateCssFile(MODE_CSS);
-  else if (previousKimberliteMode == MODE_HTML)
+  else if (previousKimberliteMode == MODE_HTML) {
     loadPage(currentHTMLPage,rtfHTMLEditor->toPlainText(),true);
+    intRtfHtmlPos = rtfHTMLEditor->verticalScrollBar()->value();
+  }
   
   switch (index) {
     case MODE_WYSIWYG: { 
@@ -1569,6 +1622,7 @@ void MainWindow::modeChanged(int index) {
       treeDock->setVisible(false);
       pbStatusBar->setEnabled(false);
       ashActions["Attributes"]->setEnabled(true);
+      rtfHTMLEditor->verticalScrollBar()->setValue(intRtfHtmlPos);
       break;
     case MODE_SCRIPT:
       ashActions["Zoom 1:1"]->setEnabled(true);
@@ -2059,7 +2113,9 @@ void MainWindow::cursorChanged() {
       currentText = tc.selectedText();
     }
     if (currentText.indexOf('{') != -1) {
-      QTreeWidgetItem* anItem = getClassWidget(currentText.left(currentText.indexOf('{')).trimmed());
+      QString calssName = currentText.left(currentText.indexOf('{')).trimmed();
+      QTreeWidgetItem* anItem = getClassWidget(calssName);
+      cssPreview->diaplayObject(calssName);
       if ((anItem) && (CSS_MODE != CSS_MODE_BEG)) {
 	currentClassName = currentText.left(currentText.indexOf('{')).trimmed();
 	treeWidget->setCurrentItem(anItem);
