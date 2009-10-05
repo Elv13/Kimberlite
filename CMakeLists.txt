@@ -33,6 +33,7 @@ include(KDE4Defaults)
       src/headerComboBox.cpp
       src/configSkeleton.h
       src/tagEditor.cpp
+      src/config.cpp
       src/qtpropertybrowser-2.5-opensource/src/qtbuttonpropertybrowser.cpp
       src/qtpropertybrowser-2.5-opensource/src/qteditorfactory.cpp
       src/qtpropertybrowser-2.5-opensource/src/qtpropertybrowser.cpp
@@ -41,7 +42,6 @@ include(KDE4Defaults)
       src/qtpropertybrowser-2.5-opensource/src/qttreepropertybrowser.cpp
       src/qtpropertybrowser-2.5-opensource/src/qtpropertymanager.cpp
       src/qtpropertybrowser-2.5-opensource/src/qtgroupboxpropertybrowser.cpp
-      src/cssPropertyEditor.cpp
       src/cssPreviewWidget.cpp
       )
 

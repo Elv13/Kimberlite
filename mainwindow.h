@@ -111,6 +111,7 @@
 #include "src/configSkeleton.h"
 #include "src/tagEditor.h"
 #include "src/cssPreviewWidget.h"
+#include "src/config.h"
 
 #define KIMBERLITE_MODE tabWEditor->currentIndex()
 #define CSS_MODE tabWCSSLevel->currentIndex()
@@ -385,6 +386,7 @@ public:
     
     void editToolbar();
     void editShortcut();
+    void editPref();
     void aboutKimberlite();
     void reportBug();
     void cursorChanged();

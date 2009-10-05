@@ -1,5 +1,5 @@
-//#ifndef CONFIG_SKELETON
-//#define CONFIG_SKELETON
+#ifndef CONFIG_SKELETON
+#define CONFIG_SKELETON
 
 #include <kconfigskeleton.h>
 #include <QStringList>
@@ -20,3 +20,5 @@ class KimberliteConfigSkeleton : public KConfigSkeleton {
   QStringList recentP4;
   QStringList recentP5;
 };
+
+#endif

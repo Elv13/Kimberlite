@@ -541,6 +541,10 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   connect(ashActions["Shortcuts"], SIGNAL(triggered(bool)), this, SLOT(editShortcut()));
   optionsTB->addAction(ashActions["Shortcuts"]);
   
+  createAction("Preferences", "configure", NULL);
+  connect(ashActions["Preferences"], SIGNAL(triggered(bool)), this, SLOT(editPref()));
+  optionsTB->addAction(ashActions["Preferences"]);
+  
   optToolBarLayout->addWidget(createSpacer(),0,1,2,1);
   
   QLabel* lblStandard = new QLabel(menuEdit);
@@ -1918,6 +1922,11 @@ void MainWindow::editShortcut() {
   aDialog->setMainWidget(new KShortcutsEditor(actionCollection,aDialog));
   aDialog->show();
 } //editShortcut
+
+void MainWindow::editPref() {
+  Config* aConfig = new Config(this, &configSkeleton);
+  aConfig->show();
+} //editPref
 
 void MainWindow::editToolbar() {
   KEditToolBar* aToolbarEditor = new KEditToolBar(actionCollection);
