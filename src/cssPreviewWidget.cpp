@@ -9,7 +9,7 @@ CssPreviewWidget::CssPreviewWidget(QWidget* parent) : QWidget(parent) {
       <head>\
 	  <link rel=\"stylesheet\" href=\"./StyleSheet.css\" type=\"text/css\">\
       </head>\
-      <body style=\"word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-line-break: after-white-space; \">\
+      <body style=\"background-color:#777777\">\
 	  Welcome to your new website!\
       </body>\
     </html>\
@@ -30,7 +30,7 @@ void CssPreviewWidget::diaplayObject(QString name) {
       <head>\
 	  <link rel=\"stylesheet\" href=\"./StyleSheet.css\" type=\"text/css\">\
       </head>\
-      <body style=\"word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-line-break: after-white-space; \">\
+      <body style=\"background-color:#777777\">\
 	  "+type+"\
 	  <br>\
 	  "+name+"\

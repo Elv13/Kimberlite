@@ -16,6 +16,7 @@ include(KDE4Defaults)
       src/addProprietyWidget.cpp
       src/htmlParser.cpp
       src/cssParser.cpp
+      src/phpParser.cpp
       src/ProjectManager_v2.cpp
       src/rtfCssEditor.cpp
       src/rtfHtmlEditor.cpp

@@ -817,7 +817,7 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   cssPreview = new CssPreviewWidget(this);
   cssPreviewDock->setWidget(cssPreview);
   
-  cssPreviewDock->setVisible(false);
+  //cssPreviewDock->setVisible(false);
   
   /***************************************************************
   
@@ -1589,6 +1589,8 @@ QString MainWindow::setupTmpDir(bool initial) {
   return path2;
 }
 
+QHash<int, QString> tmpTest;
+
 void MainWindow::modeChanged(int index) {
   tableDock->setVisible(true);
   
@@ -1602,8 +1604,13 @@ void MainWindow::modeChanged(int index) {
   switch (index) {
     case MODE_WYSIWYG: { 
       qDebug() << "i am suppose to work";
-      if (previousKimberliteMode == MODE_HTML)
-	webPreview->setHtml(rtfHTMLEditor->toPlainText(),setupTmpDir());
+      //TODO This is for testing purpose, remove php Code after tests complete
+      if (previousKimberliteMode == MODE_HTML) {
+	HtmlData page = HtmlParser::getHtmlData(rtfHTMLEditor->toPlainText());
+	tmpTest = PhpParser::extractPhp(page);
+	PhpParser::testReplacePhp(page);
+	webPreview->setHtml(HtmlParser::getParsedHtml(page),setupTmpDir());
+      }
       disableWysiwyg(false);
       ashActions["Zoom 1:1"]->setEnabled(true);
       treeDock->setVisible(false);
@@ -1614,8 +1621,13 @@ void MainWindow::modeChanged(int index) {
       break;
     }
     case MODE_HTML:
-      if (previousKimberliteMode == MODE_WYSIWYG)
-	rtfHTMLEditor->setPlainText(aParser->getParsedHtml(webPreview->page()->mainFrame()->toHtml()));
+      //TODO This is for testing purpose, remove php Code after tests complete
+      if (previousKimberliteMode == MODE_WYSIWYG) {
+	HtmlData page = HtmlParser::getHtmlData(webPreview->page()->mainFrame()->toHtml());
+	PhpParser::restorePhp(page,tmpTest);
+	rtfHTMLEditor->setPlainText(HtmlParser::getParsedHtml(page));
+	//rtfHTMLEditor->setPlainText(aParser->getParsedHtml(webPreview->page()->mainFrame()->toHtml()));
+      }
       disableWysiwyg(false);
       ashActions["Zoom 1:1"]->setEnabled(true);
       dockHtmlTree->setVisible(true);

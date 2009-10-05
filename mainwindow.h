@@ -29,6 +29,7 @@
 
 #include "src/htmlParser.h"
 #include "src/cssParser.h"
+#include "src/phpParser.h"
 
 #include <QtCore/QVariant>
 #include <KXmlGuiWindow>
