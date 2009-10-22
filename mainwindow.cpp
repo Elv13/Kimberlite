@@ -49,6 +49,9 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   aTipDialog->showTip(this, QString(), true);
   
   configSkeleton.readConfig();
+  
+  //TODO remove this
+  isPHP = true;
 
   aParser = new HtmlParser();
   tabWMenu = new KTabWidget(this);
@@ -1410,18 +1413,36 @@ void MainWindow::loadPage(QTreeWidgetItem* item, QString text, bool force) {
       }
     }
     currentHTMLPage = item;
-    HtmlData data = HtmlParser::getHtmlData(text);
+    
     switch (KIMBERLITE_MODE) {
       case MODE_WYSIWYG:
-	webPreview->setHtml(HtmlParser::getParsedHtml(data),setupTmpDir());
+	if (isPHP) {
+	  QString path2 = setupTmpDir();
+	  QFile aFile(path2+"page.php");
+	  if (!aFile.open(QIODevice::WriteOnly))
+	    QMessageBox::warning(this, "Exporting",tr("Cannot write file %1 in %2\n%3").arg("page.php").arg(path2).arg(aFile.errorString()));
+	  else {
+	    aFile.write(text.toAscii());
+	    aFile.close();
+	  }
+          aProjectManager->exportProject(configSkeleton.serverUrl + "kimberlite/project" + aProjectManager->getProjectName() + "/");
+	  webPreview->load(path2 + "kimberlite/project/" + aProjectManager->getProjectName() + "/" + "page.php");
+	}
+	else {
+	  webPreview->setHtml(text,setupTmpDir());
+	}
 	break;
-      case MODE_HTML:
+      case MODE_HTML: {
+	HtmlData data = HtmlParser::getHtmlData(text);
 	rtfHTMLEditor->setPlainText(HtmlParser::getParsedHtml(data));
+      }
 	break;
-      default:
+      default: {
+	HtmlData data = HtmlParser::getHtmlData(text);
 	if (!force)
 	  tabWEditor->setCurrentIndex(1);
 	rtfHTMLEditor->setPlainText(HtmlParser::getParsedHtml(data));
+      }
     }    
     QString completeName;
     QTreeWidgetItem* parent = item->parent();
@@ -1442,7 +1463,7 @@ void MainWindow::addHtmlPage() {
   NewWebPage* aDialog = new NewWebPage(this,aProjectManager->htmlPage);
   aDialog->show();
   connect(aDialog, SIGNAL(addFolder(QString,QTreeWidgetItem*)), aProjectManager, SLOT(addFolder(QString,QTreeWidgetItem*)));
-  connect(aDialog, SIGNAL(addHtmlPage(QString,QString,QString,QString)), aProjectManager, SLOT(addHtmlPage(QString,QString,QString,QString)));
+  connect(aDialog, SIGNAL(addHtmlPage(QString,QString,QString,QString,int)), aProjectManager, SLOT(addHtmlPage(QString,QString,QString,QString,int)));
 } //addHtmlPage
 
 void MainWindow::addScript() {
@@ -1579,16 +1600,24 @@ void MainWindow::loadCss(QString text) {
 
 QString MainWindow::setupTmpDir(bool initial) {
   QDir aDir;
-  if (initial) {
-    if (aDir.exists(QDir::tempPath() + "/kimberlite/project/" + aProjectManager->getProjectName() + "/"))
-      aDir.remove(QDir::tempPath() + "/kimberlite/project/" + aProjectManager->getProjectName() + "/");
-  }
   QString path2;
-  path2 = QDir::tempPath() + "/kimberlite/project/" + aProjectManager->getProjectName() + "/";
+  
+  if (isPHP) {
+    path2 = configSkeleton.serverLocation + "/kimberlite/project/" + aProjectManager->getProjectName() + "/";
+  }
+  else {
+    path2 = QDir::tempPath() + "/kimberlite/project/" + aProjectManager->getProjectName() + "/";
+  }
+  
+  if (initial) {
+    if (aDir.exists(path2))
+      aDir.remove(path2);
+  }
+  
   aDir.mkpath(path2);
   QFile aFile(path2+"StyleSheet.css");
   aFile.open(QIODevice::WriteOnly);
-  aFile.write(CssParser::parseCSS().toStdString().c_str());
+  aFile.write(CssParser::parseCSS().toAscii());
   aFile.close();
   return path2;
 }
@@ -1610,10 +1639,31 @@ void MainWindow::modeChanged(int index) {
       qDebug() << "i am suppose to work";
       //TODO This is for testing purpose, remove php Code after tests complete
       if (previousKimberliteMode == MODE_HTML) {
-	HtmlData page = HtmlParser::getHtmlData(rtfHTMLEditor->toPlainText());
-	tmpTest = PhpParser::extractPhp(page);
-	PhpParser::testReplacePhp(page);
-	webPreview->setHtml(HtmlParser::getParsedHtml(page),setupTmpDir());
+	if (isPHP) {
+	  HtmlData page = HtmlParser::getHtmlData(rtfHTMLEditor->toPlainText());
+	  tmpTest = PhpParser::extractPhp(page);
+	  PhpParser::testReplacePhp(page);
+
+          QString path2 = setupTmpDir();
+          QFile aFile(path2+"page.php");
+          if (!aFile.open(QIODevice::WriteOnly))
+            QMessageBox::warning(this, "Exporting",tr("Cannot write file %1 in %2\n%3").arg("page.php").arg(path2).arg(aFile.errorString()));
+          else {
+            aFile.write(HtmlParser::getParsedHtml(page).toAscii());
+            aFile.close();
+          }
+          aProjectManager->exportProject(path2 + aProjectManager->getProjectName() + "/");
+	  QString folderName = aProjectManager->getDomElement(currentHTMLPage).attribute("folder");
+	  if (!folderName.isEmpty())
+	    folderName += "/";
+	  QString pageName = aProjectManager->getDomElement(currentHTMLPage).attribute("name");
+	  QString projectName = aProjectManager->getProjectName();
+	  qDebug() << "Loading: " << configSkeleton.serverUrl+"kimberlite/project/" + aProjectManager->getProjectName() + "/" + aProjectManager->getProjectName() + "/"+ folderName + pageName;
+	  webPreview->load(configSkeleton.serverUrl+"kimberlite/project/" + projectName + "/" + aProjectManager->getProjectName() + "/"+ folderName + pageName);
+	}
+	else {
+	  webPreview->setHtml(rtfHTMLEditor->toPlainText());
+	}
       }
       disableWysiwyg(false);
       ashActions["Zoom 1:1"]->setEnabled(true);
@@ -2204,7 +2254,7 @@ QFrame* MainWindow::createSpacer() {
 
 KAction* MainWindow::createAction(QString name, QString icon, QKeySequence shortcut, bool checkable) {
   KAction* newAction = new KAction(this);
-  newAction->setText(i18n(name.toStdString().c_str()));
+  newAction->setText(name);
   newAction->setIcon(KIcon(icon));
   newAction->setShortcut(shortcut);
   newAction->setCheckable(checkable);

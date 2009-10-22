@@ -13,6 +13,19 @@ QHash<int, QString> PhpParser::extractPhp(HtmlData &page) {
       id++;
       i++;
     }
+    
+  for (int i=0;i < page.levelList.size();i++) {
+    if (page.tagList[i].left(4) == "<div") {
+      page.tagList.insert(i, "<kimberliteBlocMarker style=\"border-color:#FFDD00;border-style:dotted;border-width:1px;display:block;margin:1px;\">" );
+      page.levelList.insert(i, 0 );
+      i++;
+    }
+    else if (page.tagList[i].left(6) == "</div>") {
+      page.tagList.insert(i+1, "</kimberliteBlocMarker>" );
+      page.levelList.insert(i+1, 0 );
+      i++;
+    }
+  }
   return toReturn;
 }
 
@@ -34,6 +47,23 @@ void PhpParser::restorePhp(HtmlData &page, QHash<int, QString> snipet) {
 	page.levelList.erase(page.levelList.begin()+i+1,page.levelList.begin()+i+(found -i)+1);
 	i++;
       }
+    }
+    
+  for (int i=0;i < page.tagList.size();i++) 
+    if (HtmlParser::getTag(page.tagList[i]) == "KIMBERLITEBLOCMARKER") {
+      page.tagList.remove(i);
+      page.levelList.remove(i);
+      i--;
+    }
+    else if (HtmlParser::getTag(page.tagList[i]) == "KIMBERLITELABELMARKER") {
+      for (int j=0;j < 7;j++) {
+	page.tagList.remove(i);
+	page.levelList.remove(i);
+      }
+      /*while (page.tagList[i] != "</kimberliteLabelMarker>") {
+	page.tagList.remove(i);
+	page.levelList.remove(i);
+      }*/
     }
 }
 

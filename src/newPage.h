@@ -555,7 +555,7 @@ class NewWebPage : public KPageDialog {
     void addHtmlPage();
   signals:
     void addFolder(QString,QTreeWidgetItem*);
-    void addHtmlPage(QString title, QString name, QString body, QString folderName);
+    void addHtmlPage(QString title, QString name, QString body, QString folderName, int pageType);
 };
 
 #endif

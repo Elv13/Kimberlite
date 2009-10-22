@@ -299,10 +299,13 @@ QDomDocument* ProjectManager2::getDomDocument() {
   return &domDocument;
 }
 
-void ProjectManager2::addHtmlPage(QString title, QString name, QString body, QString foldeName) {
+void ProjectManager2::addHtmlPage(QString title, QString name, QString body, QString foldeName, int type) {
   QDomElement anElement = domDocument.createElement("page");
   anElement.setAttribute("title", title);
   anElement.setAttribute("name", name);
+  anElement.setAttribute("folder",foldeName);
+  if (!type)
+    type =1;
   QDomElement newContentElement = domDocument.createElement("content");
   QDomText newContentText;
   if (body.isEmpty())

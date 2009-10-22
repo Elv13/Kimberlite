@@ -297,6 +297,9 @@ public:
     QTextEdit* getCurrentEditor();
     KimberliteConfigSkeleton configSkeleton;
     
+    //TODO TEMP/QUICKFIX
+    bool isPHP;
+    
   private slots:
     void defaultPageLinkClicked(const QUrl& url);
     void quit();

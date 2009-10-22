@@ -85,12 +85,15 @@ void NewWebPage::addHtmlPage() {
       return;
     }
     QString fileName = newPage->txtFileName->text();
-    if ((fileName.right(4).toLower() != ".htm") || (fileName.right(5).toLower() != ".html"))
+    if (((fileName.right(4).toLower() != ".htm") || (fileName.right(5).toLower() != ".html")) && (newPage->cbbLanguage->currentIndex() < 4))
       fileName += ".htm";
+    else if ((fileName.right(4).toLower() != ".php") && (newPage->cbbLanguage->currentIndex() > 3))
+      fileName += ".php";
+
     if (newPage->tvFolder->currentItem() != newPage->tvFolder->topLevelItem(0))
-      emit addHtmlPage(newPage->txtPageTitle->text(), fileName, "", newPage->tvFolder->currentItem()->text(0));
+      emit addHtmlPage(newPage->txtPageTitle->text(), fileName, "", newPage->tvFolder->currentItem()->text(0), newPage->cbbLanguage->currentIndex());
     else
-      emit addHtmlPage("", fileName, "", "@@@ROOT");
+      emit addHtmlPage("", fileName, "", "@@@ROOT", newPage->cbbLanguage->currentIndex());
   }
   else if (currentPage() == pageTemplate) {
     //TODO Incoming feature
@@ -116,8 +119,8 @@ void NewWebPage::addHtmlPage() {
     if ((fileName.right(4).toLower() != ".htm") || (fileName.right(5).toLower() != ".html"))
       fileName += ".htm";
     if (newImport->tvFolder->currentItem() != newImport->tvFolder->topLevelItem(0))
-      emit addHtmlPage("", fileName, content, newImport->tvFolder->currentItem()->text(0));
+      emit addHtmlPage("", fileName, content, newImport->tvFolder->currentItem()->text(0), newImport->cbbLanguage->currentIndex());
     else
-      emit addHtmlPage("", fileName, content, "@@@ROOT");
+      emit addHtmlPage("", fileName, content, "@@@ROOT", newImport->cbbLanguage->currentIndex());
   }
 }
