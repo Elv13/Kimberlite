@@ -1425,8 +1425,10 @@ void MainWindow::loadPage(QTreeWidgetItem* item, QString text, bool force) {
 	    aFile.write(text.toAscii());
 	    aFile.close();
 	  }
-          aProjectManager->exportProject(configSkeleton.serverUrl + "kimberlite/project" + aProjectManager->getProjectName() + "/");
-	  webPreview->load(path2 + "kimberlite/project/" + aProjectManager->getProjectName() + "/" + "page.php");
+	  qDebug() << "Export: " << configSkeleton.serverLocation + "kimberlite/project/" + aProjectManager->getProjectName() + "/";
+          aProjectManager->exportProject(configSkeleton.serverLocation + "kimberlite/project/" + aProjectManager->getProjectName() + "/");
+	  qDebug() << "try to load:" << configSkeleton.serverUrl  + "kimberlite/project/" + aProjectManager->getProjectName() + "/page.php";
+	  webPreview->load(configSkeleton.serverUrl + "kimberlite/project/" + aProjectManager->getProjectName() + "/page.php");
 	}
 	else {
 	  webPreview->setHtml(text,setupTmpDir());
@@ -1603,7 +1605,7 @@ QString MainWindow::setupTmpDir(bool initial) {
   QString path2;
   
   if (isPHP) {
-    path2 = configSkeleton.serverLocation + "/kimberlite/project/" + aProjectManager->getProjectName() + "/";
+    path2 = configSkeleton.serverLocation + ((configSkeleton.serverLocation.right(1) == "/")?"":"/") +"kimberlite/project/" + aProjectManager->getProjectName() + "/";
   }
   else {
     path2 = QDir::tempPath() + "/kimberlite/project/" + aProjectManager->getProjectName() + "/";
