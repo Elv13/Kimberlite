@@ -51,7 +51,7 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   configSkeleton.readConfig();
   
   //TODO remove this
-  isPHP = true;
+  isPHP = false;
 
   aParser = new HtmlParser();
   tabWMenu = new KTabWidget(this);
