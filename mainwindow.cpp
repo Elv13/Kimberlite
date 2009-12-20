@@ -49,9 +49,7 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   aTipDialog->showTip(this, QString(), true);
   
   configSkeleton.readConfig();
-  
-  //TODO remove this
-  isPHP = false;
+
 
   aParser = new HtmlParser();
   tabWMenu = new KTabWidget(this);
@@ -1416,9 +1414,10 @@ void MainWindow::loadPage(QTreeWidgetItem* item, QString text, bool force) {
     
     switch (KIMBERLITE_MODE) {
       case MODE_WYSIWYG:
-	if (isPHP) {
+	if (aProjectManager->getDomElement(currentHTMLPage).attribute("type").toInt() >= PHP4) {
 	  QString path2 = setupTmpDir();
 	  QFile aFile(path2+"page.php");
+	  qDebug() << "I am here1122212 : " << path2;
 	  if (!aFile.open(QIODevice::WriteOnly))
 	    QMessageBox::warning(this, "Exporting",tr("Cannot write file %1 in %2\n%3").arg("page.php").arg(path2).arg(aFile.errorString()));
 	  else {
@@ -1604,7 +1603,7 @@ QString MainWindow::setupTmpDir(bool initial) {
   QDir aDir;
   QString path2;
   
-  if (isPHP) {
+  if (aProjectManager->getDomElement(currentHTMLPage).attribute("type").toInt() >= PHP4) {
     path2 = configSkeleton.serverLocation + ((configSkeleton.serverLocation.right(1) == "/")?"":"/") +"kimberlite/project/" + aProjectManager->getProjectName() + "/";
   }
   else {
@@ -1641,12 +1640,14 @@ void MainWindow::modeChanged(int index) {
       qDebug() << "i am suppose to work";
       //TODO This is for testing purpose, remove php Code after tests complete
       if (previousKimberliteMode == MODE_HTML) {
-	if (isPHP) {
+	qDebug() << "I get here" << aProjectManager->getDomElement(currentHTMLPage).attribute("type").toInt();
+	if (aProjectManager->getDomElement(currentHTMLPage).attribute("type").toInt() >= PHP4) {
 	  HtmlData page = HtmlParser::getHtmlData(rtfHTMLEditor->toPlainText());
 	  tmpTest = PhpParser::extractPhp(page);
 	  PhpParser::testReplacePhp(page);
 
           QString path2 = setupTmpDir();
+	  qDebug() << "This is the tmpDirPath: " << path2;
           QFile aFile(path2+"page.php");
           if (!aFile.open(QIODevice::WriteOnly))
             QMessageBox::warning(this, "Exporting",tr("Cannot write file %1 in %2\n%3").arg("page.php").arg(path2).arg(aFile.errorString()));
@@ -1654,19 +1655,27 @@ void MainWindow::modeChanged(int index) {
             aFile.write(HtmlParser::getParsedHtml(page).toAscii());
             aFile.close();
           }
+          
+          qDebug() << "This is the page: " << HtmlParser::getParsedHtml(page).toAscii();
+          
           aProjectManager->exportProject(path2 + aProjectManager->getProjectName() + "/");
 	  QString folderName = aProjectManager->getDomElement(currentHTMLPage).attribute("folder");
 	  if (!folderName.isEmpty())
 	    folderName += "/";
+	  
+	  if (folderName == "@@@ROOT") //Should -never- get in there
+	    folderName = "";
+	  
 	  QString pageName = aProjectManager->getDomElement(currentHTMLPage).attribute("name");
 	  QString projectName = aProjectManager->getProjectName();
-	  qDebug() << "Loading: " << configSkeleton.serverUrl+"kimberlite/project/" + aProjectManager->getProjectName() + "/" + aProjectManager->getProjectName() + "/"+ folderName + pageName;
-	  webPreview->load(configSkeleton.serverUrl+"kimberlite/project/" + projectName + "/" + aProjectManager->getProjectName() + "/"+ folderName + pageName);
+	  qDebug() << "Loading: " << configSkeleton.serverUrl+"kimberlite/project/" + projectName + "/"+ folderName + "page.php";
+	  webPreview->load(configSkeleton.serverUrl+"kimberlite/project/" + projectName + "/" + folderName + "page.php");
 	}
 	else {
 	  webPreview->setHtml(rtfHTMLEditor->toPlainText());
 	}
       }
+      qDebug() << "No, I failed" << previousKimberliteMode;
       disableWysiwyg(false);
       ashActions["Zoom 1:1"]->setEnabled(true);
       treeDock->setVisible(false);
