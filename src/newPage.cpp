@@ -85,7 +85,7 @@ void NewWebPage::addHtmlPage() {
       return;
     }
     QString fileName = newPage->txtFileName->text();
-    if (((fileName.right(4).toLower() != ".htm") || (fileName.right(5).toLower() != ".html")) && (newPage->cbbLanguage->currentIndex() < 4))
+    if (((fileName.right(4).toLower() != ".htm") && (fileName.right(5).toLower() != ".html")) && (newPage->cbbLanguage->currentIndex() < 4))
       fileName += ".htm";
     else if ((fileName.right(4).toLower() != ".php") && (newPage->cbbLanguage->currentIndex() > 3))
       fileName += ".php";
@@ -116,8 +116,10 @@ void NewWebPage::addHtmlPage() {
       return;
     }
     QString fileName = newImport->txtFileName->text();
-    if ((fileName.right(4).toLower() != ".htm") || (fileName.right(5).toLower() != ".html"))
+    if (((fileName.right(4).toLower() != ".htm") && (fileName.right(5).toLower() != ".html")) && (newImport->cbbLanguage->currentIndex() < 4))
       fileName += ".htm";
+    else if ((fileName.right(4).toLower() != ".php") && (newImport->cbbLanguage->currentIndex() > 3))
+      fileName += ".php";
     if (newImport->tvFolder->currentItem() != newImport->tvFolder->topLevelItem(0))
       emit addHtmlPage("", fileName, content, newImport->tvFolder->currentItem()->text(0), newImport->cbbLanguage->currentIndex());
     else

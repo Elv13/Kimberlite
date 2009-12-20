@@ -282,7 +282,14 @@ QString ProjectManager2::fromHTML(QString input) {
 
 void ProjectManager2::loadPage(QTreeWidgetItem* anItem) {
   qDebug() << "I am goinf to show page!!! Name:" << domElementForItem.value(anItem).firstChildElement().attribute("name");
-  if (domElementForItem.value(anItem).attribute("name").indexOf(".htm") != -1) {
+  
+  //TODO Remove this code, it's for legacy document
+  if (domElementForItem.value(anItem).hasAttribute("type") == false) {
+    QDomElement anElement = domElementForItem.value(anItem);
+    anElement.setAttribute("type",1);
+  }
+  
+  if (domElementForItem.value(anItem).attribute("type").toInt() <= PHP5) {
     qDebug() << "tree Pointer:" << anItem << " dom element:" << &domElementForItem.value(anItem);
     emit htmlPageChanged(anItem, toHTML(domElementForItem.value(anItem).text()));
   }
@@ -303,9 +310,11 @@ void ProjectManager2::addHtmlPage(QString title, QString name, QString body, QSt
   QDomElement anElement = domDocument.createElement("page");
   anElement.setAttribute("title", title);
   anElement.setAttribute("name", name);
-  anElement.setAttribute("folder",foldeName);
+  if (foldeName != "@@@ROOT")
+    anElement.setAttribute("folder",foldeName);
   if (!type)
     type =1;
+  anElement.setAttribute("type",QString::number(type));
   QDomElement newContentElement = domDocument.createElement("content");
   QDomText newContentText;
   if (body.isEmpty())

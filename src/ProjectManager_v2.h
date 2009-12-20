@@ -8,14 +8,6 @@
 #include <QByteArray>
 #include "miniClasses.h"
 
-enum PageType {
-  HTMLv4 =1,
-  HTMLv5 =2,
-  xHTMLv1 =3,
-  PHP4 = 4,
-  PHP5 = 5
-};
-
 QT_BEGIN_NAMESPACE
 class ProjectManager2 : public QTreeWidget {
     Q_OBJECT

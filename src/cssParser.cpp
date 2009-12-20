@@ -25,7 +25,7 @@ QStringList CssParser::getClassList() {
   while (cssFile.indexOf("{") != -1) {
     while (cssFile.indexOf("{") > cssFile.indexOf("\n"))
       cssFile.remove(0, cssFile.indexOf("\n")+1);
-    if (cssFile.at(0) == '      ')
+    if (cssFile.at(0) == 0x09)
       classList.push_back(classList[classList.count()-1] + "^?" + cssFile.left(cssFile.indexOf(" {")).trimmed());
     else
       classList.push_back(cssFile.left(cssFile.indexOf(" {")).trimmed());

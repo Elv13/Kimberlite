@@ -8,4 +8,12 @@ class TreeItem : public QTreeWidgetItem {
     TreeItem(QTreeWidgetItem* parent) : QTreeWidgetItem (parent) {}
     int type; //0 = folder, 1 = HTML page
 };
+
+enum PageType {
+  HTMLv4 =1,
+  HTMLv5 =2,
+  xHTMLv1 =3,
+  PHP4 = 4,
+  PHP5 = 5
+};
 #endif
