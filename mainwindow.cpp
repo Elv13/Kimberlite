@@ -36,7 +36,7 @@
 #include "src/newProject.h"
 #include "src/debugger.h"
 
-MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NULL),currentScript(NULL),aProjectManager(NULL),isModified(false),previousCssMode(999),previousKimberliteMode(MODE_WYSIWYG),intRtfHtmlPos(0) {
+MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NULL),currentScript(NULL),isModified(false),previousCssMode(999),previousKimberliteMode(MODE_WYSIWYG),intRtfHtmlPos(0) {
   actionCollection = new KActionCollection(this);
   setWindowTitle("Kimberlite");
   db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE"));
@@ -751,18 +751,18 @@ MainWindow::MainWindow(QWidget* parent) : KMainWindow(parent),currentHTMLPage(NU
   
   ***************************************************************/
 
-  aProjectManager = new ProjectManager2(0);
+  ProjectManager2::setProject(new ProjectManager2(0));
   
   tableDock = new QDockWidget(this);
   tableDock->setWindowTitle("Project");
   tableDock->setObjectName(QString::fromUtf8("tableDock"));
-  tableDock->setWidget(aProjectManager);
+  tableDock->setWidget(ProjectManager2::getProject());
   addDockWidget(Qt::LeftDockWidgetArea, tableDock);
   tableDock->setVisible(false);
   
-  connect(aProjectManager, SIGNAL(htmlPageChanged(QTreeWidgetItem*, QString)), this, SLOT(loadPage(QTreeWidgetItem*, QString)));
-  connect(aProjectManager, SIGNAL(javaScriptChanged(QTreeWidgetItem*, QString)), this, SLOT(loadScript(QTreeWidgetItem*, QString)));
-  connect(aProjectManager, SIGNAL(loadCss(QString)), this, SLOT(loadCss(QString)));
+  connect(ProjectManager2::getProject(), SIGNAL(htmlPageChanged(QTreeWidgetItem*, QString)), this, SLOT(loadPage(QTreeWidgetItem*, QString)));
+  connect(ProjectManager2::getProject(), SIGNAL(javaScriptChanged(QTreeWidgetItem*, QString)), this, SLOT(loadScript(QTreeWidgetItem*, QString)));
+  connect(ProjectManager2::getProject(), SIGNAL(loadCss(QString)), this, SLOT(loadCss(QString)));
   connect(ashActions["Project"], SIGNAL(triggered(bool)), tableDock , SLOT(setVisible(bool)));
   connect(tableDock, SIGNAL(visibilityChanged(bool)), ashActions["Project"] , SLOT(setChecked(bool)));
 
@@ -1208,7 +1208,7 @@ void MainWindow::newProject(){
 void MainWindow::newProject(QString name, QString filePath) {
   openProject(filePath);
   fileName.clear();
-  aProjectManager->setProjectName(name);
+  ProjectManager2::getProject()->setProjectName(name);
 } //newProject
  
 void MainWindow::saveProjectAs(const QString &outputFileName){
@@ -1216,18 +1216,18 @@ void MainWindow::saveProjectAs(const QString &outputFileName){
     changeCssMode(CSS_MODE_BEG);
   else
     CssParser::cssFile = rtfCSSEditor->toPlainText();
-  aProjectManager->saveCss();
+  ProjectManager2::getProject()->saveCss();
   loadPage(currentHTMLPage,rtfHTMLEditor->toPlainText(),true);
   KSaveFile file(outputFileName);
   file.open();
   QByteArray outputByteArray;
-  outputByteArray.append(aProjectManager->createFile());
+  outputByteArray.append(ProjectManager2::getProject()->createFile());
   file.write(outputByteArray);
   file.finalize();
   file.close();
 
   fileName = outputFileName;
-  saveRecentProject(fileName, aProjectManager->getProjectName());
+  saveRecentProject(fileName, ProjectManager2::getProject()->getProjectName());
 } //saveProjectAs
  
 void MainWindow::saveProjectAs(){
@@ -1273,9 +1273,9 @@ void MainWindow::openProject(QString fileName) {
     if (!file.open(QFile::ReadOnly | QFile::Text)) 
       QMessageBox::warning(this, tr("SAX Bookmarks"),tr("Cannot read file %1:\n%2.").arg(fileName).arg(file.errorString()));
     else 
-      aProjectManager->read(&file);
-    aProjectManager->expandAll();
-    setWindowTitle("Kimberlite - "+aProjectManager->projectTitle);
+      ProjectManager2::getProject()->read(&file);
+    ProjectManager2::getProject()->expandAll();
+    setWindowTitle("Kimberlite - "+ProjectManager2::getProject()->projectTitle);
     setupTmpDir(true);
     webPreview->page()->setContentEditable(true);
     tabWEditor->setTabEnabled(1,true);
@@ -1293,7 +1293,7 @@ void MainWindow::openProject(QString fileName) {
     ashActions["Print Preview"]->setDisabled(false);
     ashActions["Export"]->setDisabled(false);
     tableDock->setVisible(true);
-    saveRecentProject(fileName, aProjectManager->getProjectName());
+    saveRecentProject(fileName, ProjectManager2::getProject()->getProjectName());
     this->fileName = fileName;
   }
 } //openProject
@@ -1403,10 +1403,10 @@ void MainWindow::loadPage(QTreeWidgetItem* item, QString text, bool force) {
     if (currentHTMLPage != NULL) {
       switch (KIMBERLITE_MODE) {
 	case MODE_WYSIWYG:
-	  aProjectManager->updateDomElement(currentHTMLPage,webPreview->page()->mainFrame()->toHtml());
+	  ProjectManager2::getProject()->updateDomElement(currentHTMLPage,webPreview->page()->mainFrame()->toHtml());
 	  break;
 	case MODE_HTML:
-	  aProjectManager->updateDomElement(currentHTMLPage,rtfHTMLEditor->toPlainText());
+	  ProjectManager2::getProject()->updateDomElement(currentHTMLPage,rtfHTMLEditor->toPlainText());
 	  break;
       }
     }
@@ -1414,7 +1414,7 @@ void MainWindow::loadPage(QTreeWidgetItem* item, QString text, bool force) {
     
     switch (KIMBERLITE_MODE) {
       case MODE_WYSIWYG:
-	if (aProjectManager->getDomElement(currentHTMLPage).attribute("type").toInt() >= PHP4) {
+	if (ProjectManager2::getProject()->getDomElement(currentHTMLPage).attribute("type").toInt() >= PHP4) {
 	  QString path2 = setupTmpDir();
 	  QFile aFile(path2+"page.php");
 	  qDebug() << "I am here1122212 : " << path2;
@@ -1424,10 +1424,10 @@ void MainWindow::loadPage(QTreeWidgetItem* item, QString text, bool force) {
 	    aFile.write(text.toAscii());
 	    aFile.close();
 	  }
-	  qDebug() << "Export: " << configSkeleton.serverLocation + "kimberlite/project/" + aProjectManager->getProjectName() + "/";
-          aProjectManager->exportProject(configSkeleton.serverLocation + "kimberlite/project/" + aProjectManager->getProjectName() + "/");
-	  qDebug() << "try to load:" << configSkeleton.serverUrl  + "kimberlite/project/" + aProjectManager->getProjectName() + "/page.php";
-	  webPreview->load(configSkeleton.serverUrl + "kimberlite/project/" + aProjectManager->getProjectName() + "/page.php");
+	  qDebug() << "Export: " << configSkeleton.serverLocation + "kimberlite/project/" + ProjectManager2::getProject()->getProjectName() + "/";
+          ProjectManager2::getProject()->exportProject(configSkeleton.serverLocation + "kimberlite/project/" + ProjectManager2::getProject()->getProjectName() + "/");
+	  qDebug() << "try to load:" << configSkeleton.serverUrl  + "kimberlite/project/" + ProjectManager2::getProject()->getProjectName() + "/page.php";
+	  webPreview->load(configSkeleton.serverUrl + "kimberlite/project/" + ProjectManager2::getProject()->getProjectName() + "/page.php");
 	}
 	else {
 	  webPreview->setHtml(text,setupTmpDir());
@@ -1452,7 +1452,7 @@ void MainWindow::loadPage(QTreeWidgetItem* item, QString text, bool force) {
       parent = parent->parent();
       completeName.insert(0,parent->text(0) + "/");
     }
-    setWindowTitle("Kimberlite - "+aProjectManager->projectTitle + "  (" + completeName + item->text(0) + ")");
+    setWindowTitle("Kimberlite - "+ProjectManager2::getProject()->projectTitle + "  (" + completeName + item->text(0) + ")");
   }
 } //loadPage
 
@@ -1461,16 +1461,16 @@ void MainWindow::setModified() {
 } //setModified
 
 void MainWindow::addHtmlPage() {
-  NewWebPage* aDialog = new NewWebPage(this,aProjectManager->htmlPage);
+  NewWebPage* aDialog = new NewWebPage(this,ProjectManager2::getProject()->htmlPage);
   aDialog->show();
-  connect(aDialog, SIGNAL(addFolder(QString,QTreeWidgetItem*)), aProjectManager, SLOT(addFolder(QString,QTreeWidgetItem*)));
-  connect(aDialog, SIGNAL(addHtmlPage(QString,QString,QString,QString,int)), aProjectManager, SLOT(addHtmlPage(QString,QString,QString,QString,int)));
+  connect(aDialog, SIGNAL(addFolder(QString,QTreeWidgetItem*)), ProjectManager2::getProject(), SLOT(addFolder(QString,QTreeWidgetItem*)));
+  connect(aDialog, SIGNAL(addHtmlPage(QString,QString,QString,QString,int)), ProjectManager2::getProject(), SLOT(addHtmlPage(QString,QString,QString,QString,int)));
 } //addHtmlPage
 
 void MainWindow::addScript() {
-  NewScript* aScript = new NewScript(this,aProjectManager->script);
+  NewScript* aScript = new NewScript(this,ProjectManager2::getProject()->script);
   aScript->show();
-  connect(aScript, SIGNAL(addScript(QString,QString,QString)), aProjectManager, SLOT(addScript(QString,QString,QString)));
+  connect(aScript, SIGNAL(addScript(QString,QString,QString)), ProjectManager2::getProject(), SLOT(addScript(QString,QString,QString)));
 } //addScript
 
 QString MainWindow::clearCssBeg() {
@@ -1583,7 +1583,7 @@ KIcon MainWindow::getRightIcon(QString text) {
 void MainWindow::loadScript(QTreeWidgetItem* anItem, QString text) {
   if (anItem != currentScript) {
     if (currentScript != NULL) {
-      aProjectManager->updateDomElement(currentHTMLPage,rtfHTMLEditor->toPlainText());
+      ProjectManager2::getProject()->updateDomElement(currentHTMLPage,rtfHTMLEditor->toPlainText());
       isModified = false;
     }
     rtfScriptEditor->setPlainText(text.trimmed());
@@ -1603,11 +1603,11 @@ QString MainWindow::setupTmpDir(bool initial) {
   QDir aDir;
   QString path2;
   
-  if (aProjectManager->getDomElement(currentHTMLPage).attribute("type").toInt() >= PHP4) {
-    path2 = configSkeleton.serverLocation + ((configSkeleton.serverLocation.right(1) == "/")?"":"/") +"kimberlite/project/" + aProjectManager->getProjectName() + "/";
+  if (ProjectManager2::getProject()->getDomElement(currentHTMLPage).attribute("type").toInt() >= PHP4) {
+    path2 = configSkeleton.serverLocation + ((configSkeleton.serverLocation.right(1) == "/")?"":"/") +"kimberlite/project/" + ProjectManager2::getProject()->getProjectName() + "/";
   }
   else {
-    path2 = QDir::tempPath() + "/kimberlite/project/" + aProjectManager->getProjectName() + "/";
+    path2 = QDir::tempPath() + "/kimberlite/project/" + ProjectManager2::getProject()->getProjectName() + "/";
   }
   
   if (initial) {
@@ -1640,8 +1640,8 @@ void MainWindow::modeChanged(int index) {
       qDebug() << "i am suppose to work";
       //TODO This is for testing purpose, remove php Code after tests complete
       if (previousKimberliteMode == MODE_HTML) {
-	qDebug() << "I get here" << aProjectManager->getDomElement(currentHTMLPage).attribute("type").toInt();
-	if (aProjectManager->getDomElement(currentHTMLPage).attribute("type").toInt() >= PHP4) {
+	qDebug() << "I get here" << ProjectManager2::getProject()->getDomElement(currentHTMLPage).attribute("type").toInt();
+	if (ProjectManager2::getProject()->getDomElement(currentHTMLPage).attribute("type").toInt() >= PHP4) {
 	  HtmlData page = HtmlParser::getHtmlData(rtfHTMLEditor->toPlainText());
 	  tmpTest = PhpParser::extractPhp(page);
 	  PhpParser::testReplacePhp(page);
@@ -1658,16 +1658,16 @@ void MainWindow::modeChanged(int index) {
           
           qDebug() << "This is the page: " << HtmlParser::getParsedHtml(page).toAscii();
           
-          aProjectManager->exportProject(path2 + aProjectManager->getProjectName() + "/");
-	  QString folderName = aProjectManager->getDomElement(currentHTMLPage).attribute("folder");
+          ProjectManager2::getProject()->exportProject(path2 + ProjectManager2::getProject()->getProjectName() + "/");
+	  QString folderName = ProjectManager2::getProject()->getDomElement(currentHTMLPage).attribute("folder");
 	  if (!folderName.isEmpty())
 	    folderName += "/";
 	  
 	  if (folderName == "@@@ROOT") //Should -never- get in there
 	    folderName = "";
 	  
-	  QString pageName = aProjectManager->getDomElement(currentHTMLPage).attribute("name");
-	  QString projectName = aProjectManager->getProjectName();
+	  QString pageName = ProjectManager2::getProject()->getDomElement(currentHTMLPage).attribute("name");
+	  QString projectName = ProjectManager2::getProject()->getProjectName();
 	  qDebug() << "Loading: " << configSkeleton.serverUrl+"kimberlite/project/" + projectName + "/"+ folderName + "page.php";
 	  webPreview->load(configSkeleton.serverUrl+"kimberlite/project/" + projectName + "/" + folderName + "page.php");
 	}
@@ -1955,10 +1955,15 @@ void MainWindow::insertImage(QString path) {
     addTag("<img src=\""+path+"\" \\>","","insertImage", path);
 } //insertImage
 
-void MainWindow::insertTable() {
-  NewTable* aNewTable = new NewTable(this);
-  aNewTable->show();
-  addTag("<a href=\"\">","</a>","inserthtml","<b><table><tr><td>test</td><td>test2</td></tr><tr><td>test3</td><td>test4</td></tr></table></b>");
+void MainWindow::insertTable(QString html) {
+  if (html.isEmpty()) {
+    NewTable* aNewTable = new NewTable(this);
+    aNewTable->show();
+    connect(aNewTable, SIGNAL(addTable(QString)), this, SLOT(insertTable(QString)));
+  }
+  else {
+    addTag(html,"","inserthtml",html);
+  }
 } //insertTable
 
 void MainWindow::insertLink(QString path) {
@@ -2284,7 +2289,7 @@ void MainWindow::updateHtmlTree(IndexedTreeWidgetItem* topItem,bool clear) {
 
 void MainWindow::exportProject() {
   QString path = KFileDialog::getExistingDirectory(QUrl(""),this);
-  aProjectManager->exportProject(path + "/" + aProjectManager->getProjectName() + "/");
+  ProjectManager2::getProject()->exportProject(path + "/" + ProjectManager2::getProject()->getProjectName() + "/");
 } //exportProject
 
 void MainWindow::addAnchor() {

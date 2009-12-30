@@ -264,7 +264,6 @@ public:
     QStringList cssBegTagList;
     QHash<QString, CSSBeginnerWidget*> ashCssBeg;
     QHash<QString, QAction*> ashActions;
-    ProjectManager2* aProjectManager;
     QTreeWidgetItem* currentScript;
 
   private:
@@ -359,7 +358,7 @@ public:
     void setUList();
     void setOList();
     void insertImage(QString path = "");
-    void insertTable();
+    void insertTable(QString html =  "");
     void insertLink(QString path = "");
     void insertChar();
     void addAnchor();
