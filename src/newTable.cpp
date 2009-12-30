@@ -33,6 +33,11 @@ NewTable::NewTable(QWidget* parent) : KDialog(parent) {
   cbbBorder = new QComboBox(grbNewTable);
   cbbBorder->setObjectName(QString::fromUtf8("cbbBorder"));
   gridLayout->addWidget(cbbBorder, 2, 1, 1, 1);
+  
+  cbbBorder->addItem("none");
+  cbbBorder->addItem("solid");
+  cbbBorder->addItem("double");
+  cbbBorder->addItem("dotted");
 
   ckbAddHeader = new QCheckBox(grbNewTable);
   ckbAddHeader->setObjectName(QString::fromUtf8("ckbAddHeader"));
@@ -46,6 +51,30 @@ NewTable::NewTable(QWidget* parent) : KDialog(parent) {
   lblRow->setText(QApplication::translate("NewTable", "Row:", 0, QApplication::UnicodeUTF8));
   lblBorder->setText(QApplication::translate("NewTable", "Border:", 0, QApplication::UnicodeUTF8));
   ckbAddHeader->setText(QApplication::translate("NewTable", "Add header", 0, QApplication::UnicodeUTF8));
+  
+  connect(this,SIGNAL(okClicked()),this,SLOT(okClicked2()));
   Q_UNUSED(this);
   setModal(true);
+}
+
+void NewTable::okClicked2() {
+  QString toReturn = "<table class=\"border-style:"+cbbBorder->currentText()+"\">";
+  QString aRow,header;
+  if (ckbAddHeader->isChecked()) {
+    for (int i = 0; i < spnColumn->value(); i++) {
+      header += "<th></th>";
+    }
+    toReturn += "<tr>"+header+"</tr><tbody>";
+  }
+  
+  for (int i = 0; i < spnColumn->value(); i++) {
+    aRow += "<td></td>";
+  }
+  
+  for (int i = 0; i < spnRow->value(); i++) {
+    toReturn += "<tr>"+aRow+"</tr>";
+  }
+  
+  toReturn += QString((ckbAddHeader->isChecked())?"</tbody>":"")+"</table>";
+  emit addTable(toReturn);
 }

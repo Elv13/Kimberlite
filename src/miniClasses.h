@@ -1,6 +1,7 @@
 #ifndef MINI_CLASSES
 #define MINI_CLASSES
 #include <QTreeWidgetItem>
+#include "ProjectManager_v2.h"
 
 class TreeItem : public QTreeWidgetItem {
   public:

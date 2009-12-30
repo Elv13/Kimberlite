@@ -6,6 +6,7 @@
 #include <QDebug>
 #include "cssParser.h"
 #include "htmlParser.h"
+ProjectManager2* ProjectManager2::aProject = NULL; 
 
 ProjectManager2::ProjectManager2(QWidget *parent) : QTreeWidget(parent),firstPage(true) {
   setHeaderHidden(true);

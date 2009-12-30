@@ -130,26 +130,41 @@ void HtmlParser::setAttribute(HtmlData &pageData, QString tag, uint index, QStri
 
 QString HtmlParser::setAttribute(QString tag, QString attribute, QString value) {
   int start,length,isSet;
-  getAttribute(tag,attribute,start,length,isSet);
+  getAttribute(tag,attribute,&start,&length,&isSet);
   (!isSet)?tag.insert(tag.count() - 1, " " + attribute + "=\"" + value + "\""):tag.replace(start,length,value);
   if (value.isEmpty())
     tag.remove(tag.toUpper().indexOf(attribute.toUpper()) -1,attribute.size()+4);
   return tag;
 }
 
-QString HtmlParser::getAttribute(QString tag, QString attribute, int &start, int &length, int &isSet) {
-  int position = tag.toLower().indexOf(attribute.toLower());
+QString HtmlParser::getAttribute(QString tag, QString attribute, int* start, int* length, int* isSet) {
+  int position(tag.toLower().indexOf(attribute.toLower()));
+  if (start == (int*)UNSET)
+    start = new int(), length = new int(), isSet = new int;
   isSet = false;
   if (tag[position+attribute.count()] == '=') {
-    isSet = start = tag.indexOf("=",position)+2;
-    length = tag.indexOf((tag.indexOf(" ",position) != -1)?" ":">",position)-2 - (position+1+attribute.count());
-    return (position == -1)?NULL:tag.mid(start,length);
+    (*isSet) = (*start) = tag.indexOf("=",position)+2;
+    (*length) = tag.indexOf((tag.indexOf(" ",position) != -1)?" ":">",position)-2 - (position+1+attribute.count());
+    return (position == -1)?NULL:tag.mid((*start),(*length));
   }
   else
-    return NULL; //Use isSet to check if it exist, don't rely on NULL
+    return NULL; //Use isSet pointer to check if it exist, don't rely on NULL
 }
 
-QString HtmlParser::getAttribute(QString tag, QString attribute) {
-  int start,length,isSet;
-  return HtmlParser::getAttribute(tag, attribute, start, length,isSet);
+HtmlData HtmlParser::getElementsByAttribute(HtmlData pageData, QString attribute, QString value, uint occurence) {
+  int curOccurence(0),levelCount(0),depth(0),isIn(false);
+  HtmlData toReturn;
+  QString tagName;
+  for (int i =0; i < pageData.tagList.size(); i++) {
+    if (isIn) {
+      toReturn.append(pageData.tagList[i], pageData.levelList[i]);
+      if (HtmlParser::getTag(pageData.tagList[i]) == HtmlParser::getTag(tagName))
+        depth += 1*(pageData.tagList[i].left(2) == "</")?-1:1;
+      if ((!depth) || (htmlInfo.orphelinTags.indexOf(HtmlParser::getTag(tagName)) != -1))
+        break;
+    }
+    else if (HtmlParser::getAttribute(tagName = pageData.tagList[i], attribute) == value )
+      ((curOccurence == occurence)?isIn:curOccurence)++;
+  }
+  return toReturn;
 }

@@ -25,6 +25,7 @@
 */
 #ifndef HTML_PARSER
 #define HTML_PARSER
+#define UNSET  4000000000
 #include <QStringList>
 #include <QTreeWidgetItem>
 #include <QVector>
@@ -33,6 +34,10 @@
 struct HtmlData {
   QVector<QString> tagList;
   QVector<uint> levelList;
+  void append(QString tag, int level) {
+    tagList.push_back(tag);
+    levelList.push_back(level);
+  }
 };
 
 struct W3Cinfo {
@@ -61,10 +66,12 @@ class HtmlParser{
     static W3Cinfo htmlInfo;
     static QString setAttribute(QString tag, QString attribute, QString value);
     static void setAttribute(HtmlData &pageData, QString tag, uint index, QString attribute, QString value);
-    static QString getAttribute(QString tag, QString attribute, int &start, int &length, int &isSet);
-    static QString getAttribute(QString tag, QString attribute);
+    static QString getAttribute(QString tag, QString attribute, int* start = (int*)UNSET, int* length = (int*)UNSET, int* isSet = (int*)UNSET);
+    //static QString getAttribute(QString tag, QString attribute, uint *start = NOT_SET, uint *length =NOT_SET, uint *isSet = NOT_SET);
+    //static QString getAttribute(QString tag, QString attribute);
     static QString removeAttribute(QString tag, QString attribute);
     static void split(QVector<QString> &tagList, QString &inputFile, uint index);
+    static HtmlData getElementsByAttribute(HtmlData pageData, QString attribute, QString value, uint occurence);
   private:
     static QVector<uint> levelParser(QVector<QString> tagList);
     static QVector<QString> listTag(QString inputFile);

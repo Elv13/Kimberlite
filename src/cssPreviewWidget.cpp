@@ -1,4 +1,5 @@
 #include "cssPreviewWidget.h"
+#include "htmlParser.h"
 
 CssPreviewWidget::CssPreviewWidget(QWidget* parent) : QWidget(parent) {
   QVBoxLayout* mainLayout = new QVBoxLayout(this);
@@ -24,7 +25,9 @@ void CssPreviewWidget::diaplayObject(QString name) {
     type = "class";
   else
     type = "tag";
-    
+  
+  //HtmlData someData = HtmlParser::getHtmlData();
+  
   webPreview->setHtml("\
     <html>\
       <head>\
@@ -34,7 +37,8 @@ void CssPreviewWidget::diaplayObject(QString name) {
 	  "+type+"\
 	  <br>\
 	  "+name+"\
+          <pre>test</pre>\
       </body>\
     </html>\
-  ");
+  ");/*HtmlParser::getElementsByAttribute()*/
 }

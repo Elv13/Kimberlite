@@ -18,6 +18,7 @@
 QT_BEGIN_NAMESPACE
 
 class NewTable : public KDialog {
+  Q_OBJECT
   public:
     NewTable(QWidget* parent);
     QGroupBox *grbNewTable;
@@ -29,6 +30,10 @@ class NewTable : public KDialog {
     QLabel *lblBorder;
     QComboBox *cbbBorder;
     QCheckBox *ckbAddHeader;
+  private slots:
+    void okClicked2();
+  signals:
+    void addTable(QString html);
 };
 
 QT_END_NAMESPACE

@@ -8,6 +8,8 @@
 #include <QByteArray>
 #include "miniClasses.h"
 
+class TreeItem;
+
 QT_BEGIN_NAMESPACE
 class ProjectManager2 : public QTreeWidget {
     Q_OBJECT
@@ -24,6 +26,13 @@ class ProjectManager2 : public QTreeWidget {
     QString projectTitle;
     void exportProject(QString path,QTreeWidgetItem* parent =0);
     QString getProjectName();
+    static ProjectManager2* aProject;
+    static ProjectManager2* getProject() {
+      return aProject;
+    }
+    static void setProject(ProjectManager2* project) {
+      aProject = project;
+    }
 
   public slots:
     void updateDomElement(QTreeWidgetItem *item, QString html);
