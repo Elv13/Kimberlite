@@ -365,6 +365,7 @@ QTreeWidgetItem* ProjectManager2::getFolder(QString title) {
       }
     }
   }
+  return NULL;
 }
 
 void ProjectManager2::setProjectName(QString name) {

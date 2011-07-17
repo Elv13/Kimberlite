@@ -2036,6 +2036,8 @@ QTextEdit* MainWindow::getCurrentEditor() {
     return rtfScriptEditor;
   else if(KIMBERLITE_MODE == MODE_CSS)
     return rtfCSSEditor;
+  
+  return NULL;
 }
 
 void MainWindow::print() {
